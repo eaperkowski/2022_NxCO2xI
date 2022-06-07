@@ -39,7 +39,7 @@ library(ggpubr)
 ###############################################################################
 ## Load licor and chamber files
 ###############################################################################
-licor <- licorData("../chamber1_1000ppm_licor") %>%
+licor <- licorData("../calib_initial_files/chamber1_1000ppm_licor") %>%
   mutate(date = ymd(str_match(string = date, 
                               pattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}"))) %>%
   unite(col = "date", date:hhmmss..5, sep = " ") %>%
@@ -49,7 +49,7 @@ licor <- licorData("../chamber1_1000ppm_licor") %>%
          Txchg, TleafEB, RHcham, Qamb_out) %>%
   filter(date > "2022-06-03 11:00:00")
 
-chamber1 <- read.csv("../chamber1_1000ppm.csv") %>%
+chamber1 <- read.csv("../calib_initial_files/chamber1_1000ppm.csv") %>%
   mutate(Day = str_pad(Day, width = 2, pad = "0"),
          Month = str_pad(Month, width = 2, pad = "0"),
          Hour = str_pad(Hour, width = 2, pad = "0"),
