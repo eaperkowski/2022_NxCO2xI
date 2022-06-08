@@ -17,7 +17,7 @@
 #   - Day temp point 3:       45.0        Day temp offset 3:        0.0
 #
 #   - Night temp point 1:     17.0        Night temp offset 1:      5.6
-#   - Night temp point 2:     35.0        Night temp offset 2:      5.0 
+#   - Night temp point 2:     35.0        Night temp offset 2:      0.0 
 #   - Night temp point 3:     45.0        Night temp offset 3:      0.0
 #
 #   - Day humidity offset:    -8.0        Night humidity offset:  -12.9
@@ -186,7 +186,7 @@ dayco2.summary <- li.dayco2.summary %>%
   data.frame()
 dayco2.summary
 
-# Chamber 1 day CO2 offset: 120.7 ppm CO2
+# Chamber 1 day CO2 offset: 120.8 ppm CO2
 
 
 ###############################################################################
@@ -232,11 +232,11 @@ ch1.nightco2.summary <- night.ch1 %>%
 nightco2.summary <- li.nightco2.summary %>%
   full_join(ch1.nightco2.summary) %>%
   mutate(co2.offset = (co2.mean[2] - co2.mean[1]),
-         co2.offset.actual = 88 + co2.offset) %>%
+         co2.offset.actual = 88 - co2.offset) %>%
   data.frame()
 nightco2.summary
 
-# Chamber 1 night CO2 offset: 106.8 ppm CO2
+# Chamber 1 night CO2 offset: 69.2 ppm CO2
 
 ###############################################################################
 # Day RH offsets
@@ -279,11 +279,11 @@ ch1.dayrh.summary <- day.ch1 %>%
 dayrh.summary <- li.dayrh.summary %>%
   full_join(ch1.dayrh.summary) %>%
   mutate(rh.offset = (rh.mean[2] - rh.mean[1]),
-         rh.offset.actual = rh.offset) %>%
+         rh.offset.actual = -8 - rh.offset) %>%
   data.frame()
 dayrh.summary
 
-# Chamber 1 day RH offset: -7.8 %. Chamber offsets allow overlap
+# Chamber 1 day RH offset: -9.2 %. Chamber offsets allow overlap
 # between licor and chamber sensor
 
 ###############################################################################
@@ -331,7 +331,7 @@ nightrh.summary <- li.nightrh.summary %>%
   data.frame()
 nightrh.summary
 
-# Chamber 1 night RH offset: -12.9 %
+# Chamber 1 night RH offset: -17.5 %
 
 ###############################################################################
 # 25 deg C day offsets
@@ -384,9 +384,7 @@ temp.25C.summary <- li.25C.summary %>%
   data.frame()
 temp.25C.summary
 
-ggplot(data = temp.25C.summary, aes(x = meas.type)) +
-  geom_point(aes(y = temp.mean)) +
-  geom_errorbar(aes(ymin = temp.lci, ymax = temp.uci))
+# Chamber 1 25 deg C offset: 2.9 deg C
 
 ###############################################################################
 # 17 deg C night offsets
@@ -404,7 +402,7 @@ dens.17C <- ggplot() +
                aes(x = as.numeric(Tair), fill = "licor"), 
                alpha = 0.75) +
   geom_vline(xintercept = 17, size = 0.5, linetype = "dashed") +
-  scale_x_continuous(limits = c(16, 19), breaks = seq(16, 19, 1)) +
+  scale_x_continuous(limits = c(16, 17.5), breaks = seq(16, 17.5, 0.5)) +
   scale_fill_brewer(palette = "Spectral", labels = c("Chamber w/o offset",
                                                      "Licor")) +
   labs(x = expression("Air temperature ("~degree~"C)"),
@@ -438,3 +436,23 @@ temp.17C.summary <- li.17C.summary %>%
          temp.offset.actual = 5.6 - temp.offset) %>%
   data.frame()
 temp.17C.summary
+
+# Chamber 1 25 deg C offset: 5.3 deg C
+
+###############################################################################
+## Optimized program offsets
+###############################################################################
+#   - Day temp point 1:       21.0        Day temp offset 1:        5.4 (did not test)
+#   - Day temp point 2:       25.0        Day temp offset 2:        2.9
+#   - Day temp point 3:       45.0        Day temp offset 3:        0.0
+#
+#   - Night temp point 1:     17.0        Night temp offset 1:      5.3
+#   - Night temp point 2:     35.0        Night temp offset 2:      0.0 
+#   - Night temp point 3:     45.0        Night temp offset 3:      0.0
+#
+#   - Day humidity offset:    -9.2        Night humidity offset:  -17.5
+#   - Day auxillary offset:  120.8        Night auxillary offset:  69.2
+
+
+
+

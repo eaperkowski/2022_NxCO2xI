@@ -11,7 +11,7 @@
 #   - 2 hours   17 deg C;    0 % light intensity
 #   - 2 hours   25 deg C;  100 % light intensity
 #
-# Program offsets (before correction in this script)
+# Program offsets
 #   - Day temp point 1:       21.0        Day temp offset 1:        5.4
 #   - Day temp point 2:       25.0        Day temp offset 2:        4.6
 #   - Day temp point 3:       45.0        Day temp offset 3:        0.0
@@ -190,7 +190,6 @@ dayco2.summary
 
 # Chamber 2 day CO2 offset: 154.8 ppm CO2
 
-
 ###############################################################################
 # Night CO2 offsets
 ###############################################################################
@@ -234,7 +233,7 @@ ch2.nightco2.summary <- night.ch2 %>%
 nightco2.summary <- li.nightco2.summary %>%
   full_join(ch2.nightco2.summary) %>%
   mutate(co2.offset = (co2.mean[2] - co2.mean[1]),
-         co2.offset.actual = 88 - co2.offset) %>%
+         co2.offset.actual = 88.4 - co2.offset) %>%
   data.frame()
 nightco2.summary
 
@@ -281,11 +280,11 @@ ch2.dayrh.summary <- day.ch2 %>%
 dayrh.summary <- li.dayrh.summary %>%
   full_join(ch2.dayrh.summary) %>%
   mutate(rh.offset = (rh.mean[2] - rh.mean[1]),
-         rh.offset.actual = -8 + rh.offset) %>%
+         rh.offset.actual = -8 - rh.offset) %>%
   data.frame()
 dayrh.summary
 
-# Chamber 1 day RH offset: -13.3 %.
+# Chamber 1 day RH offset: -2.7 %.
 
 ###############################################################################
 # Night RH offsets
@@ -328,11 +327,11 @@ ch2.nightrh.summary <- night.ch2 %>%
 nightrh.summary <- li.nightrh.summary %>%
   full_join(ch2.nightrh.summary) %>%
   mutate(rh.offset = (rh.mean[2] - rh.mean[1]),
-         rh.offset.actual = -13 + rh.offset) %>%
+         rh.offset.actual = -13 - rh.offset) %>%
   data.frame()
 nightrh.summary
 
-# Chamber 1 night RH offset: -16.4 %; although current offsets are within ci
+# Chamber 1 night RH offset: -9.6 %; although current offsets are within ci
 # range
 
 ###############################################################################
@@ -440,5 +439,22 @@ temp.17C.summary <- li.17C.summary %>%
   data.frame()
 temp.17C.summary
 
-# Chamber 2 25degC offset: 5.2 deg C; although current offsets are within ci
+# Chamber 2 17 degC offset: 5.2 deg C; although current offsets are within ci
 # range
+
+###############################################################################
+## Optimized program offsets
+###############################################################################
+#   - Day temp point 1:       21.0        Day temp offset 1:        5.4 (did not test)
+#   - Day temp point 2:       25.0        Day temp offset 2:        4.0
+#   - Day temp point 3:       45.0        Day temp offset 3:        0.0
+#
+#   - Night temp point 1:     17.0        Night temp offset 1:      5.2
+#   - Night temp point 2:     35.0        Night temp offset 2:      0.0 
+#   - Night temp point 3:     45.0        Night temp offset 3:      0.0
+#
+#   - Day humidity offset:    -2.7        Night humidity offset:   -9.6
+#   - Day auxillary offset:  154.8        Night auxillary offset: 125.7
+
+
+

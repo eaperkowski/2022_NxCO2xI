@@ -280,7 +280,7 @@ dayrh.summary <- li.dayrh.summary %>%
   data.frame()
 dayrh.summary
 
-# Chamber 6 day RH offset: -10.0 %.
+# Chamber 6 day RH offset: -9.9 %.
 
 ###############################################################################
 # Night RH offsets
@@ -327,7 +327,7 @@ nightrh.summary <- li.nightrh.summary %>%
   data.frame()
 nightrh.summary
 
-# Chamber 4 night RH offset: -17.8 %
+# Chamber 6 night RH offset: -17.8 %
 
 ###############################################################################
 # 25 deg C day offsets
@@ -434,5 +434,22 @@ temp.17C.summary <- li.17C.summary %>%
   data.frame()
 temp.17C.summary
 
-# Chamber 5 25degC offset: 5.4 deg C; although current offsets are within ci
+# Chamber 5 17 deg C offset: 5.4 deg C; although current offsets are within ci
 # range
+
+###############################################################################
+## Optimized program offsets
+###############################################################################
+#   - Day temp point 1:       21.0        Day temp offset 1:        4.6 (did not test)
+#   - Day temp point 2:       25.0        Day temp offset 2:        4.8
+#   - Day temp point 3:       45.0        Day temp offset 3:        0.0
+#
+#   - Night temp point 1:     17.0        Night temp offset 1:      5.4
+#   - Night temp point 2:     35.0        Night temp offset 2:      0.0 
+#   - Night temp point 3:     45.0        Night temp offset 3:      0.0
+#
+#   - Day humidity offset:    -9.9        Night humidity offset:  -17.8
+#   - Day auxillary offset:  118.5        Night auxillary offset:  80.2
+
+
+

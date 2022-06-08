@@ -280,7 +280,7 @@ dayrh.summary <- li.dayrh.summary %>%
   data.frame()
 dayrh.summary
 
-# Chamber 5 day RH offset: -12.0 %.
+# Chamber 5 day RH offset: -12.0 %
 
 ###############################################################################
 # Night RH offsets
@@ -323,11 +323,11 @@ ch5.nightrh.summary <- night.ch5 %>%
 nightrh.summary <- li.nightrh.summary %>%
   full_join(ch5.nightrh.summary) %>%
   mutate(rh.offset = (rh.mean[2] - rh.mean[1]),
-         rh.offset.actual = -15 - rh.offset) %>%
+         rh.offset.actual = -15.2 - rh.offset) %>%
   data.frame()
 nightrh.summary
 
-# Chamber 4 night RH offset: -20.3 %
+# Chamber 4 night RH offset: -20.5 %
 
 ###############################################################################
 # 25 deg C day offsets
@@ -380,7 +380,7 @@ temp.25C.summary <- li.25C.summary %>%
   data.frame()
 temp.25C.summary
 
-# Chamber 5 25degC offset: 3.6 deg C; although current offsets are within ci
+# Chamber 5 25 deg C offset: 3.6 deg C; although current offsets are within ci
 # range
 
 ###############################################################################
@@ -434,5 +434,22 @@ temp.17C.summary <- li.17C.summary %>%
   data.frame()
 temp.17C.summary
 
-# Chamber 5 25degC offset: 5.7 deg C; although current offsets are within ci
+# Chamber 5 17 deg C offset: 5.7 deg C; although current offsets are within ci
 # range
+
+###############################################################################
+## Optimized program offsets
+###############################################################################
+#   - Day temp point 1:       21.0        Day temp offset 1:         5.7 (did not test)
+#   - Day temp point 2:       25.0        Day temp offset 2:         3.6
+#   - Day temp point 3:       45.0        Day temp offset 3:         0.0
+#
+#   - Night temp point 1:     17.0        Night temp offset 1:       5.7
+#   - Night temp point 2:     35.0        Night temp offset 2:       0.0 
+#   - Night temp point 3:     45.0        Night temp offset 3:       0.0
+#
+#   - Day humidity offset:   -12.0        Night humidity offset:   -20.5
+#   - Day auxillary offset:  115.5        Night auxillary offset:   69.4
+
+
+

@@ -186,7 +186,6 @@ dayco2.summary
 
 # Chamber 2 day CO2 offset: 104.4 ppm CO2
 
-
 ###############################################################################
 # Night CO2 offsets
 ###############################################################################
@@ -277,11 +276,11 @@ ch3.dayrh.summary <- day.ch3 %>%
 dayrh.summary <- li.dayrh.summary %>%
   full_join(ch3.dayrh.summary) %>%
   mutate(rh.offset = (rh.mean[2] - rh.mean[1]),
-         rh.offset.actual = -8 + rh.offset) %>%
+         rh.offset.actual = -8 - rh.offset) %>%
   data.frame()
 dayrh.summary
 
-# Chamber 1 day RH offset: -4.4 %.
+# Chamber 1 day RH offset: -11.6 %.
 
 ###############################################################################
 # Night RH offsets
@@ -324,11 +323,11 @@ ch3.nightrh.summary <- night.ch3 %>%
 nightrh.summary <- li.nightrh.summary %>%
   full_join(ch3.nightrh.summary) %>%
   mutate(rh.offset = (rh.mean[2] - rh.mean[1]),
-         rh.offset.actual = -16 + rh.offset) %>%
+         rh.offset.actual = -16 - rh.offset) %>%
   data.frame()
 nightrh.summary
 
-# Chamber 1 night RH offset: -10.6 %
+# Chamber 1 night RH offset: -21.4 %
 
 ###############################################################################
 # 25 deg C day offsets
@@ -381,7 +380,7 @@ temp.25C.summary <- li.25C.summary %>%
   data.frame()
 temp.25C.summary
 
-# Chamber 3 25degC offset: 6.0 deg C; although current offsets are within ci
+# Chamber 3 25 deg C offset: 6.2 deg C; although current offsets are within ci
 # range
 
 ###############################################################################
@@ -435,5 +434,22 @@ temp.17C.summary <- li.17C.summary %>%
   data.frame()
 temp.17C.summary
 
-# Chamber 3 25degC offset: 5.9 deg C; although current offsets are within ci
+# Chamber 3 17 deg C offset: 5.9 deg C; although current offsets are within ci
 # range
+
+###############################################################################
+## Optimized program offsets
+###############################################################################
+#   - Day temp point 1:       21.0        Day temp offset 1:        5.7 (did not test)
+#   - Day temp point 2:       25.0        Day temp offset 2:        6.2
+#   - Day temp point 3:       45.0        Day temp offset 3:        0.0
+#
+#   - Night temp point 1:     17.0        Night temp offset 1:      5.9
+#   - Night temp point 2:     35.0        Night temp offset 2:      0.0 
+#   - Night temp point 3:     45.0        Night temp offset 3:      0.0
+#
+#   - Day humidity offset:   -11.6        Night humidity offset:  -21.4
+#   - Day auxillary offset:  104.4        Night auxillary offset:  53.4
+
+
+
