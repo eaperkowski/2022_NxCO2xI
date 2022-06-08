@@ -8,23 +8,20 @@
 #   - 1000 ppm CO2
 #
 # Program timestep
-#   - 10:00   25 deg C;  75 % light intensity
-#   - 10:45   21 deg C;  50 % light intensity
-#   - 11:30   21 deg C;  25 % light intensity
-#   - 12:15   17 deg C;   0 % light intensity
-#   - 13:30   25 deg C; 100 % light intensity
+#   - 2 hours   17 deg C;    0 % light intensity
+#   - 2 hours   25 deg C;  100 % light intensity
 #
 # Program offsets (before correction in this script)
-#   - Day temp point 1:       21.0        Day temp offset 1:        4.0
-#   - Day temp point 2:       25.0        Day temp offset 2:        4.0
+#   - Day temp point 1:       21.0        Day temp offset 1:        4.6
+#   - Day temp point 2:       25.0        Day temp offset 2:        4.4
 #   - Day temp point 3:       45.0        Day temp offset 3:        0.0
 #
-#   - Night temp point 1:     17.0        Night temp offset 1:      4.0
+#   - Night temp point 1:     17.0        Night temp offset 1:      4.6
 #   - Night temp point 2:     35.0        Night temp offset 2:      0.0 
 #   - Night temp point 3:     45.0        Night temp offset 3:      0.0
 #
-#   - Day humidity offset:     0.0        Night humidity offset:    0.0
-#   - Day auxillary offset:  235.0        Night auxillary offset: 215.0
+#   - Day humidity offset:    -5.0        Night humidity offset:   -7.0
+#   - Day auxillary offset:   91.2        Night auxillary offset:  58.1
 
 ###############################################################################
 ## Read libraries
@@ -39,17 +36,16 @@ library(ggpubr)
 ###############################################################################
 ## Load licor and chamber files
 ###############################################################################
-licor <- licorData("../calib_initial_files/chamber6_1000ppm_licor") %>%
+licor <- licorData("../calib_verif_files/c6_1000ppm_calib_verif_licor") %>%
   mutate(date = ymd(str_match(string = date, 
                               pattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}"))) %>%
   unite(col = "date", date:hhmmss..5, sep = " ") %>%
   mutate(date = strptime(as.POSIXct(date), format = "%Y-%m-%d %H:%M:%S", 
                          tz = "America/Chicago")) %>%
-  filter(date > "2022-06-03 16:30:00" & date < "2022-06-04 00:15:00") %>%
   select(date, id, machine, CO2_r, CO2_s, Tair, Tleaf, 
          Txchg, TleafEB, RHcham, Qamb_out)
 
-chamber6 <- read.csv("../calib_initial_files/chamber6_1000ppm.csv") %>%
+chamber6 <- read.csv("../calib_verif_files/c6_1000ppm_calib_verif.csv") %>%
   mutate(Day = str_pad(Day, width = 2, pad = "0"),
          Month = str_pad(Month, width = 2, pad = "0"),
          Hour = str_pad(Hour, width = 2, pad = "0"),
@@ -62,8 +58,7 @@ chamber6 <- read.csv("../calib_initial_files/chamber6_1000ppm.csv") %>%
                          tz = "America/Chicago")) %>%
   select(date, measured_temp = PV_1, prog_temp = SP_1, 
          measured_rh = PV_2, prog_rh = SP_2,
-         measured_co2 = PV_3, prog_co2 = SP_3) %>% 
-  filter(date > "2022-06-03 16:30:00" & date < "2022-06-04 00:15:00")
+         measured_co2 = PV_3, prog_co2 = SP_3)
 
 ###############################################################################
 # Visualize temperature differences between set program, sensor measurements,
@@ -75,10 +70,10 @@ temp <- ggplot() +
                                  y = measured_temp, 
                                  color = "measured"),
             size = 0.5) +
-   geom_line(data = chamber6, aes(x = as.POSIXct(date), 
-                                  y = prog_temp, 
-                                  color = "prog"),
-             size = 0.5) +
+  geom_line(data = chamber6, aes(x = as.POSIXct(date), 
+                                 y = prog_temp, 
+                                 color = "prog"),
+            size = 0.5) +
   geom_line(data = licor, aes(x = as.POSIXct(date), 
                               y = as.numeric(Tair), 
                               color = "licor"),
@@ -87,13 +82,15 @@ temp <- ggplot() +
                      labels = c("Licor",
                                 "Chamber sensor", 
                                 "Chamber set point")) +
-  scale_x_datetime(limits = c(as.POSIXct("2022-06-03 16:30"),
-                              as.POSIXct("2022-06-04 00:30")),
-                   breaks = c(as.POSIXct("2022-06-03 16:30"),
-                              as.POSIXct("2022-06-03 18:30"),
-                              as.POSIXct("2022-06-03 20:30"),
-                              as.POSIXct("2022-06-03 22:30"),
-                              as.POSIXct("2022-06-04 00:30")),
+  scale_x_datetime(limits = c(as.POSIXct("2022-06-07 16:00"),
+                              as.POSIXct("2022-06-07 22:00")),
+                   breaks = c(as.POSIXct("2022-06-07 16:00"),
+                              as.POSIXct("2022-06-07 17:00"),
+                              as.POSIXct("2022-06-07 18:00"),
+                              as.POSIXct("2022-06-07 19:00"),
+                              as.POSIXct("2022-06-07 20:00"),
+                              as.POSIXct("2022-06-07 21:00"),
+                              as.POSIXct("2022-06-07 22:00")),
                    date_labels = "%R") +
   labs(x = NULL, y = expression("Air temperature ("~degree~"C)"),
        color = "Measurement type") +
@@ -120,13 +117,15 @@ co2 <- ggplot() +
                      labels = c("Licor",
                                 "Chamber sensor", 
                                 "Chamber set point")) +
-  scale_x_datetime(limits = c(as.POSIXct("2022-06-03 16:30"),
-                              as.POSIXct("2022-06-04 00:30")),
-                   breaks = c(as.POSIXct("2022-06-03 16:30"),
-                              as.POSIXct("2022-06-03 18:30"),
-                              as.POSIXct("2022-06-03 20:30"),
-                              as.POSIXct("2022-06-03 22:30"),
-                              as.POSIXct("2022-06-04 00:30")),
+  scale_x_datetime(limits = c(as.POSIXct("2022-06-07 16:00"),
+                              as.POSIXct("2022-06-07 22:00")),
+                   breaks = c(as.POSIXct("2022-06-07 16:00"),
+                              as.POSIXct("2022-06-07 17:00"),
+                              as.POSIXct("2022-06-07 18:00"),
+                              as.POSIXct("2022-06-07 19:00"),
+                              as.POSIXct("2022-06-07 20:00"),
+                              as.POSIXct("2022-06-07 21:00"),
+                              as.POSIXct("2022-06-07 22:00")),
                    date_labels = "%R") +
   scale_y_continuous(limits = c(800, 1200), breaks = seq(800, 1200, 200)) +
   labs(x = "Date", y = expression("CO"[2]~ "(μmol mol"^-1~")"),
@@ -150,7 +149,7 @@ day.co2 <- ggplot() +
   geom_density(data = day.licor, 
                aes(x = as.numeric(CO2_r), fill = "licor"), alpha = 0.75) +
   geom_vline(xintercept = 1000, size = 0.5, linetype = "dashed") +
-  scale_x_continuous(limits = c(700, 1100), breaks = seq(700, 1100, 100)) +
+  scale_x_continuous(limits = c(800, 1200), breaks = seq(800, 1200, 100)) +
   scale_fill_brewer(palette = "Spectral", labels = c("Chamber w/o offset",
                                                      "Licor")) +
   labs(x = expression("CO"[2]~ "(μmol mol"^-1~"CO"[2]~")"),
@@ -181,11 +180,11 @@ ch6.dayco2.summary <- day.ch6 %>%
 dayco2.summary <- li.dayco2.summary %>%
   full_join(ch6.dayco2.summary) %>%
   mutate(co2.offset = (co2.mean[2] - co2.mean[1]),
-         co2.offset.actual = 235 - co2.offset) %>%
+         co2.offset.actual = 91.2 - co2.offset) %>%
   data.frame()
 dayco2.summary
 
-# Chamber 4 day CO2 offset: 91.2 ppm CO2
+# Chamber 6 day CO2 offset: 118.5 ppm CO2
 
 ###############################################################################
 # Night CO2 offsets
@@ -199,7 +198,7 @@ night.co2 <- ggplot() +
   geom_density(data = night.licor, 
                aes(x = as.numeric(CO2_r), fill = "licor"), alpha = 0.75) +
   geom_vline(xintercept = 1000, size = 0.5, linetype = "dashed") +
-  scale_x_continuous(limits = c(700, 1100), breaks = seq(700, 1100, 100)) +
+  scale_x_continuous(limits = c(800, 1200), breaks = seq(800, 1200, 100)) +
   scale_fill_brewer(palette = "Spectral", labels = c("Chamber w/o offset",
                                                      "Licor")) +
   labs(x = expression("CO"[2]~ "(μmol mol"^-1~"CO"[2]~")"),
@@ -230,11 +229,11 @@ ch6.nightco2.summary <- night.ch6 %>%
 nightco2.summary <- li.nightco2.summary %>%
   full_join(ch6.nightco2.summary) %>%
   mutate(co2.offset = (co2.mean[2] - co2.mean[1]),
-         co2.offset.actual = 215 - co2.offset) %>%
+         co2.offset.actual = 58.1 - co2.offset) %>%
   data.frame()
 nightco2.summary
 
-# Chamber 4 night CO2 offset: 58.0 ppm CO2
+# Chamber 6 night CO2 offset: 80.2 ppm CO2
 
 ###############################################################################
 # Day RH offsets
@@ -245,8 +244,8 @@ day.rh <- ggplot() +
   geom_density(data = day.licor, 
                aes(x = as.numeric(RHcham), fill = "licor"), alpha = 0.75) +
   geom_vline(xintercept = 50, size = 0.5, linetype = "dashed") +
-  scale_x_continuous(limits = c(30, 60), breaks = seq(30, 60, 10)) +
-  scale_fill_brewer(palette = "Spectral", labels = c("Chamber w/o offset",
+  scale_x_continuous(limits = c(30, 70), breaks = seq(30, 70, 10)) +
+  scale_fill_brewer(palette = "Spectral", labels = c("Chamber w/ offset",
                                                      "Licor")) +
   labs(x = "Relative humidity (%)",
        y = "Density", fill = "Measurement type") +
@@ -277,11 +276,11 @@ ch6.dayrh.summary <- day.ch6 %>%
 dayrh.summary <- li.dayrh.summary %>%
   full_join(ch6.dayrh.summary) %>%
   mutate(rh.offset = (rh.mean[2] - rh.mean[1]),
-         rh.offset.actual = rh.offset) %>%
+         rh.offset.actual = -5 - rh.offset) %>%
   data.frame()
 dayrh.summary
 
-# Chamber 4 day RH offset: -5.2 %
+# Chamber 6 day RH offset: -10.0 %.
 
 ###############################################################################
 # Night RH offsets
@@ -293,7 +292,7 @@ night.rh <- ggplot() +
                aes(x = as.numeric(RHcham), fill = "licor"), alpha = 0.75) +
   geom_vline(xintercept = 50, size = 0.5, linetype = "dashed") +
   scale_x_continuous(limits = c(30, 60), breaks = seq(30, 60, 10)) +
-  scale_fill_brewer(palette = "Spectral", labels = c("Chamber w/o offset",
+  scale_fill_brewer(palette = "Spectral", labels = c("Chamber w/ offset",
                                                      "Licor")) +
   labs(x = "Relative humidity (%)",
        y = "Density", fill = "Measurement type") +
@@ -324,29 +323,29 @@ ch6.nightrh.summary <- night.ch6 %>%
 nightrh.summary <- li.nightrh.summary %>%
   full_join(ch6.nightrh.summary) %>%
   mutate(rh.offset = (rh.mean[2] - rh.mean[1]),
-         rh.offset.actual = rh.offset) %>%
+         rh.offset.actual = -7 - rh.offset) %>%
   data.frame()
 nightrh.summary
 
-# Chamber 4 night RH offset: -7.4 %
+# Chamber 4 night RH offset: -17.8 %
 
 ###############################################################################
 # 25 deg C day offsets
 ###############################################################################
 # Subset Licor and chamber measurements that were set at 25degC
-li.25C <- subset(licor, date > "2022-06-03 22:30:00")
-ch6.25C <- subset(chamber6, date > "2022-06-03 22:30:00")
+li.25C <- subset(licor, date > "2022-06-07 20:30:00")
+ch6.25C <- subset(chamber6, date > "2022-06-07 20:30:00")
 
 # Visualize density plots of chamber sensor temperature and licor Tair
 dens.25C <- ggplot() +
   geom_density(data = ch6.25C, 
-               aes(x = measured_temp, 
+               aes(x = as.numeric(measured_temp), 
                    fill = "chamber"), alpha = 0.75) +
   geom_density(data = li.25C, 
                aes(x = as.numeric(Tair), fill = "licor"), 
                alpha = 0.75) +
   geom_vline(xintercept = 25, size = 0.5, linetype = "dashed") +
-  scale_x_continuous(limits = c(24.5, 26), breaks = seq(24.5,26,0.5)) +
+  scale_x_continuous(limits = c(23, 27), breaks = seq(23, 27, 1)) +
   scale_fill_brewer(palette = "Spectral", labels = c("Chamber w/o offset",
                                                      "Licor")) +
   labs(x = expression("Air temperature ("~degree~"C)"),
@@ -372,73 +371,24 @@ ch6.25C.summary <- ch6.25C %>%
   mutate(meas.type = "chamber.sensor") %>%
   select(meas.type, everything())
 
-
 # Merge licor and sensor dataframes. Add offsets and correct
 # from original offsets before program set (see top of code)
 temp.25C.summary <- li.25C.summary %>%
   full_join(ch6.25C.summary) %>%
   mutate(temp.offset = temp.mean[2] - temp.mean[1],
-         temp.offset.actual = 4 - temp.offset) %>%
+         temp.offset.actual = 4.4 - temp.offset) %>%
   data.frame()
 temp.25C.summary
 
-###############################################################################
-# 21 deg C day offsets
-###############################################################################
-# Subset Licor and chamber measurements that were set at 25degC
-li.21C <- subset(licor, date > "2022-06-03 18:30:00" & date < "2022-06-03 19:15:00")
-ch6.21C <- subset(chamber6, date > "2022-06-03 18:30:00" & date < "2022-06-03 19:15:00")
-
-# Visualize density plots of chamber sensor temperature and licor Tair
-dens.21C <- ggplot() +
-  geom_density(data = ch6.21C, 
-               aes(x = as.numeric(measured_temp), 
-                   fill = "chamber"), alpha = 0.75) +
-  geom_density(data = li.21C, 
-               aes(x = as.numeric(Tair), fill = "licor"), 
-               alpha = 0.75) +
-  geom_vline(xintercept = 21, size = 0.5, linetype = "dashed") +
-  scale_x_continuous(limits = c(20, 23), breaks = seq(20, 23, 1)) +
-  scale_fill_brewer(palette = "Spectral", labels = c("Chamber w/o offset",
-                                                     "Licor")) +
-  labs(x = expression("Air temperature ("~degree~"C)"),
-       y = "Density", fill = "Measurement type") +
-  theme_bw(base_size = 18)
-dens.21C
-
-# Calculate mean, ci, uci, and lci of licor measurements at 25degC
-li.21C.summary <- li.21C %>%
-  summarize(temp.mean = mean(as.numeric(Tair)),
-            temp.ci = 1.96 + (sd(Tair)/sqrt(length(Tair))),
-            temp.uci = temp.mean + temp.ci,
-            temp.lci = temp.mean - temp.ci) %>%
-  mutate(meas.type = "licor") %>%
-  select(meas.type, everything())
-
-# Calculate mean, ci, uci, and lci of chamber sensor measurements at 25degC
-ch6.21C.summary <- ch6.21C %>%
-  summarize(temp.mean = mean(as.numeric(measured_temp)),
-            temp.ci = 1.96 + (sd(measured_temp)/sqrt(length(measured_temp))),
-            temp.uci = temp.mean + temp.ci,
-            temp.lci = temp.mean - temp.ci) %>%
-  mutate(meas.type = "chamber.sensor") %>%
-  select(meas.type, everything())
-
-# Merge licor and sensor dataframes. Add offsets and correct
-# from original offsets before program set (see top of code)
-temp.21C.summary <- li.21C.summary %>%
-  full_join(ch6.21C.summary) %>%
-  mutate(temp.offset = temp.mean[2] - temp.mean[1],
-         temp.offset.actual = 4 - temp.offset) %>%
-  data.frame()
-temp.21C.summary
+# Chamber 5 25degC offset: 4.8 deg C; although current offsets are within ci
+# range
 
 ###############################################################################
 # 17 deg C night offsets
 ###############################################################################
 # Subset Licor and chamber measurements that were set at 25degC
-li.17C <- subset(licor, date > "2022-06-03 20:15:00" & date < "2022-06-03 21:00:00")
-ch6.17C <- subset(chamber6, date > "2022-06-03 20:15:00" & date < "2022-06-03 21:00:00")
+li.17C <- subset(licor, date > "2022-06-07 18:00:00" & date < "2022-06-07 19:00:00")
+ch6.17C <- subset(chamber6, date > "2022-06-07 18:00:00" & date < "2022-06-07 19:00:00")
 
 # Visualize density plots of chamber sensor temperature and licor Tair
 dens.17C <- ggplot() +
@@ -480,6 +430,9 @@ ch6.17C.summary <- ch6.17C %>%
 temp.17C.summary <- li.17C.summary %>%
   full_join(ch6.17C.summary) %>%
   mutate(temp.offset = temp.mean[2] - temp.mean[1],
-         temp.offset.actual = 4 - temp.offset) %>%
+         temp.offset.actual = 4.6 - temp.offset) %>%
   data.frame()
 temp.17C.summary
+
+# Chamber 5 25degC offset: 5.4 deg C; although current offsets are within ci
+# range
