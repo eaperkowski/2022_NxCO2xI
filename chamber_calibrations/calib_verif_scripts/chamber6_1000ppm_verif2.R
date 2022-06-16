@@ -36,7 +36,7 @@ library(ggpubr)
 ###############################################################################
 ## Load licor and chamber files
 ###############################################################################
-licor <- licorData("../calib_verif_files/c6_1000ppm_calib_verif_licor") %>%
+licor <- licorData("../calib_verif_files/c6_1000ppm_calib_verif_licor2") %>%
   mutate(date = ymd(str_match(string = date, 
                               pattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}"))) %>%
   unite(col = "date", date:hhmmss..5, sep = " ") %>%
@@ -45,7 +45,7 @@ licor <- licorData("../calib_verif_files/c6_1000ppm_calib_verif_licor") %>%
   select(date, id, machine, CO2_r, CO2_s, Tair, Tleaf, 
          Txchg, TleafEB, RHcham, Qamb_out)
 
-chamber6 <- read.csv("../calib_verif_files/c6_1000ppm_calib_verif.csv") %>%
+chamber6 <- read.csv("../calib_verif_files/c6_1000ppm_calib_verif2.csv") %>%
   mutate(Day = str_pad(Day, width = 2, pad = "0"),
          Month = str_pad(Month, width = 2, pad = "0"),
          Hour = str_pad(Hour, width = 2, pad = "0"),
@@ -82,15 +82,14 @@ temp <- ggplot() +
                      labels = c("Licor",
                                 "Chamber sensor", 
                                 "Chamber set point")) +
-  scale_x_datetime(limits = c(as.POSIXct("2022-06-07 16:00"),
-                              as.POSIXct("2022-06-07 22:00")),
-                   breaks = c(as.POSIXct("2022-06-07 16:00"),
-                              as.POSIXct("2022-06-07 17:00"),
-                              as.POSIXct("2022-06-07 18:00"),
-                              as.POSIXct("2022-06-07 19:00"),
-                              as.POSIXct("2022-06-07 20:00"),
-                              as.POSIXct("2022-06-07 21:00"),
-                              as.POSIXct("2022-06-07 22:00")),
+  scale_x_datetime(limits = c(as.POSIXct("2022-06-09 10:00"),
+                              as.POSIXct("2022-06-09 15:00")),
+                   breaks = c(as.POSIXct("2022-06-09 10:00"),
+                              as.POSIXct("2022-06-09 11:00"),
+                              as.POSIXct("2022-06-09 12:00"),
+                              as.POSIXct("2022-06-09 13:00"),
+                              as.POSIXct("2022-06-09 14:00"),
+                              as.POSIXct("2022-06-09 15:00")),
                    date_labels = "%R") +
   labs(x = NULL, y = expression("Air temperature ("~degree~"C)"),
        color = "Measurement type") +
@@ -117,15 +116,14 @@ co2 <- ggplot() +
                      labels = c("Licor",
                                 "Chamber sensor", 
                                 "Chamber set point")) +
-  scale_x_datetime(limits = c(as.POSIXct("2022-06-07 16:00"),
-                              as.POSIXct("2022-06-07 22:00")),
-                   breaks = c(as.POSIXct("2022-06-07 16:00"),
-                              as.POSIXct("2022-06-07 17:00"),
-                              as.POSIXct("2022-06-07 18:00"),
-                              as.POSIXct("2022-06-07 19:00"),
-                              as.POSIXct("2022-06-07 20:00"),
-                              as.POSIXct("2022-06-07 21:00"),
-                              as.POSIXct("2022-06-07 22:00")),
+  scale_x_datetime(limits = c(as.POSIXct("2022-06-09 10:00"),
+                              as.POSIXct("2022-06-09 15:00")),
+                   breaks = c(as.POSIXct("2022-06-09 10:00"),
+                              as.POSIXct("2022-06-09 11:00"),
+                              as.POSIXct("2022-06-09 12:00"),
+                              as.POSIXct("2022-06-09 13:00"),
+                              as.POSIXct("2022-06-09 14:00"),
+                              as.POSIXct("2022-06-09 15:00")),
                    date_labels = "%R") +
   scale_y_continuous(limits = c(800, 1200), breaks = seq(800, 1200, 200)) +
   labs(x = "Date", y = expression("CO"[2]~ "(μmol mol"^-1~")"),
@@ -333,8 +331,8 @@ nightrh.summary
 # 25 deg C day offsets
 ###############################################################################
 # Subset Licor and chamber measurements that were set at 25degC
-li.25C <- subset(licor, date > "2022-06-07 20:30:00")
-ch6.25C <- subset(chamber6, date > "2022-06-07 20:30:00")
+li.25C <- subset(licor, date > "2022-06-09 14:00:00")
+ch6.25C <- subset(chamber6, date > "2022-06-09 14:00:00")
 
 # Visualize density plots of chamber sensor temperature and licor Tair
 dens.25C <- ggplot() +
@@ -387,8 +385,8 @@ temp.25C.summary
 # 17 deg C night offsets
 ###############################################################################
 # Subset Licor and chamber measurements that were set at 25degC
-li.17C <- subset(licor, date > "2022-06-07 18:00:00" & date < "2022-06-07 19:00:00")
-ch6.17C <- subset(chamber6, date > "2022-06-07 18:00:00" & date < "2022-06-07 19:00:00")
+li.17C <- subset(licor, date > "2022-06-09 12:15:00" & date < "2022-06-09 13:00:00")
+ch6.17C <- subset(chamber6, date > "2022-06-09 12:15:00" & date < "2022-06-09 13:00:00")
 
 # Visualize density plots of chamber sensor temperature and licor Tair
 dens.17C <- ggplot() +
