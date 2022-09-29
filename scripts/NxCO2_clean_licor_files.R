@@ -11,85 +11,228 @@ library(readLicorData)
 library(dplyr)
 
 ###############################################################################
-## Set working directory to Brad flash drive ("BP") and Dinah licor folder
-###############################################################################
-setwd("")
-
-###############################################################################
-## Load pre heatwave measurements. Adding column to indicate whether
-## curves were done before or after heat stress event
-###############################################################################
-# NOTE: All files from first week of measurements were concatenated,
-#       ("appended" on the machine). Object (e.g., "preHeat_alb") should
-#       therefore contain data from both Sept. 7 and 8
-
-# Albert
-preHeat_alb <- licorData(location = "Albert/dinah_potato/2022-09-07_dinah_potato_n") %>%
-  mutate(meas.type = "pre_heatwave") %>%
-  slice(-(952:1016)) ## Remove appended file header from Sept. 8
-# write.csv(preHeat_alb, "cleaned_files/Dinah_potato_preHeat_alb.csv")
-
-# Stan
-preHeat_stan <- licorData(location = "Stan/dinah_potato/2022-09-07_dinah_potato_n") %>%
-  mutate(meas.type = "pre_heatwave") %>%
-  slice(-(858:922)) ## Remove appended file header from Sept. 8
-# write.csv(preHeat_stan, "cleaned_files/Dinah_potato_preHeat_stan.csv")
-
-# Gibson
-preHeat_gib <- licorData(location = "Gibson/2022-09-07-Dinah-potato/2022-09-07-Dinah Nitrogen") %>%
-  mutate(meas.type = "pre_heatwave") %>%
-  slice(-(714:778)) ## Remove appended file header from Sept. 8
-# NOTE: Gibson experienced flow leaks on day 2 and stopped taking measurements 
-#       early, which is why there are fewer observations in file
-# write.csv(preHeat_gib, "cleaned_files/Dinah_potato_preHeat_gib.csv")
-
-# Ozzie
-preHeat_ozz <- licorData(location = "Ozzie/2022-09-07-Dinah-Potato/2022-09-07-0945_potato_N") %>%
-  mutate(meas.type = "pre_heatwave") %>%
-  slice(-(1233:1297)) ## Remove appended file header from Sept. 8
-# write.csv(preHeat_ozz, "cleaned_files/Dinah_potato_preHeat_ozz.csv")
-
-###############################################################################
-## Load post heatwave measurements. Adding column to indicate whether
-## curves were done before or after heat stress event
+## Load co2 response curve data files for week 6. Adding column to indicate whether
+## curves were done on week 6 or week 7 of growth
 ###############################################################################
 
 # Albert
-postHeat_alb_d1 <- licorData(location = "Albert/2022-09-15-dinah-potato-heatday1/2022-09-15-0854_dinah-potato-heatd1") %>%
-  mutate(meas.type = "post_heatwave")
-# write.csv(postHeat_alb_d1, "cleaned_files/Dinah_potato_postHeat_alb_d1.csv")
+eco2_co2Resp_w6d1_alb <- licorData(location = "../licor_raw/week6/eco2_co2Resp_W6D1_alb") %>%
+  mutate(week = 6)
+# write.csv(eco2_co2Resp_w6d1_alb, "../licor_cleaned/co2_resp/eco2_co2Resp_w6d1_alb.csv", row.names = FALSE)
 
-postHeat_alb_d2 <- licorData(location = "Albert/dinah_potato/2022-09-16_temperature_day2") %>%
-  mutate(meas.type = "post_heatwave")
-# write.csv(postHeat_alb_d2, "cleaned_files/Dinah_potato_postHeat_alb_d2.csv")
+eco2_co2Resp_w6d2_alb <- licorData(location = "../licor_raw/week6/eco2_co2Resp_W6D2_alb") %>%
+  mutate(week = 6)
+# write.csv(eco2_co2Resp_w6d2_alb, "../licor_cleaned/co2_resp/eco2_co2Resp_w6d2_alb.csv", row.names = FALSE)
+
+aco2_co2Resp_w6d1_alb <- licorData(location = "../licor_raw/week6/aco2_co2Resp_W6D1_alb") %>%
+  mutate(week = 6)
+# write.csv(aco2_co2Resp_w6d1_alb, "../licor_cleaned/co2_resp/aco2_co2Resp_w6d1_alb.csv", row.names = FALSE)
+
+aco2_co2Resp_w6d2_alb <- licorData(location = "../licor_raw/week6/aco2_co2Resp_W6D2_alb") %>%
+  mutate(week = 6)
+# write.csv(aco2_co2Resp_w6d2_alb, "../licor_cleaned/co2_resp/aco2_co2Resp_w6d2_alb.csv", row.names = FALSE)
 
 # Stan
-postHeat_stan_d1 <- licorData(location = "Stan/2022-09-15-dinah-potato-heatday1/2022-09-15-0855_dinah-potato-heatday1") %>%
-  mutate(meas.type = "post_heatwave")
-# write.csv(postHeat_stan_d1, "cleaned_files/Dinah_potato_postHeat_stan_d1.csv")
+eco2_co2Resp_w6d1_stan <- licorData(location = "../licor_raw/week6/eco2_co2Resp_W6D1_stan") %>%
+  mutate(week = 6)
+# write.csv(eco2_co2Resp_w6d1_stan, "../licor_cleaned/co2_resp/eco2_co2Resp_w6d1_stan.csv", row.names = FALSE)
 
-postHeat_stan_d2 <- licorData(location = "Stan/dinah_potato/2022-09-16-0852_dinah_potato_heatday2") %>%
-  mutate(meas.type = "post_heatwave")
-# write.csv(postHeat_stan_d2, "cleaned_files/Dinah_potato_postHeat_stan_d2.csv")
+eco2_co2Resp_w6d2_stan <- licorData(location = "../licor_raw/week6/eco2_co2Resp_W6D2_stan") %>%
+  mutate(week = 6)
+# write.csv(eco2_co2Resp_w6d2_stan, "../licor_cleaned/co2_resp/eco2_co2Resp_w6d2_stan.csv", row.names = FALSE)
 
-# Gibson
-postHeat_gib_d1 <- licorData(location = "Gibson/2022-09-07-Dinah-potato/2022-09-15-dinah-potato-heatday1/2022-09-15-0939_dinah-potato-heatday1") %>%
-  mutate(meas.type = "post_heatwave")
-# write.csv(postHeat_gib_d1, "cleaned_files/Dinah_potato_postHeat_gib_d1.csv")
+aco2_co2Resp_w6d1_stan <- licorData(location = "../licor_raw/week6/aco2_co2Resp_W6D1_stan") %>%
+  mutate(week = 6)
+# write.csv(aco2_co2Resp_w6d1_stan, "../licor_cleaned/co2_resp/aco2_co2Resp_w6d1_stan.csv", row.names = FALSE)
 
-postHeat_gib_d2 <- licorData(location = "Gibson/2022-09-07-Dinah-potato/2022-09-16-temperature_day2") %>%
-  mutate(meas.type = "post_heatwave")
-# write.csv(postHeat_gib_d2, "cleaned_files/Dinah_potato_postHeat_gib_d2.csv")
+aco2_co2Resp_w6d2_stan <- licorData(location = "../licor_raw/week6/aco2_co2Resp_W6D2_stan") %>%
+  mutate(week = 6)
+# write.csv(aco2_co2Resp_w6d2_stan, "../licor_cleaned/co2_resp/aco2_co2Resp_w6d2_stan.csv", row.names = FALSE)
 
 # Ozzie
-postHeat_ozz_d1 <- licorData(location = "Ozzie/2022-09-15-Dinah-potato-heatday1/2022-09-15-0852_dinah_heat_d1") %>%
-  mutate(meas.type = "post_heatwave")
-# write.csv(postHeat_ozz_d1, "cleaned_files/Dinah_potato_postHeat_ozz_d1.csv")
+eco2_co2Resp_w6d1_ozz <- licorData(location = "../licor_raw/week6/eco2_co2Resp_W6D1_ozz") %>%
+  mutate(week = 6)
+# write.csv(eco2_co2Resp_w6d1_ozz, "../licor_cleaned/co2_resp/eco2_co2Resp_w6d1_ozz.csv", row.names = FALSE)
 
-postHeat_ozz_d2 <- licorData(location = "Ozzie/2022-09-07-Dinah-Potato/2022-09-16-0851_dinah_potato_heatday2") %>%
-  mutate(meas.type = "post_heatwave")
-# write.csv(postHeat_ozz_d2, "cleaned_files/Dinah_potato_postHeat_ozz_d2.csv")
+eco2_co2Resp_w6d2_ozz <- licorData(location = "../licor_raw/week6/eco2_co2Resp_W6D2_ozz") %>%
+  mutate(week = 6)
+# write.csv(eco2_co2Resp_w6d2_ozz, "../licor_cleaned/co2_resp/eco2_co2Resp_w6d2_ozz.csv", row.names = FALSE)
 
+aco2_co2Resp_w6d1_ozz <- licorData(location = "../licor_raw/week6/aco2_co2Resp_W6D1_ozz") %>%
+  mutate(week = 6)
+# write.csv(aco2_co2Resp_w6d1_ozz, "../licor_cleaned/co2_resp/aco2_co2Resp_w6d1_ozz.csv", row.names = FALSE)
+
+aco2_co2Resp_w6d2_ozz <- licorData(location = "../licor_raw/week6/aco2_co2Resp_W6D2_ozz") %>%
+  mutate(week = 6)
+# write.csv(aco2_co2Resp_w6d2_ozz, "../licor_cleaned/co2_resp/aco2_co2Resp_w6d2_ozz.csv", row.names = FALSE)
+
+###############################################################################
+## Load co2 response curve data files for week 7. Adding column to indicate 
+## whether curves were done on week 6 or week 7 of growth
+###############################################################################
+
+# Albert
+eco2_co2Resp_w7d1_alb <- licorData(location = "../licor_raw/week7/eco2_co2Resp_W7D1_alb") %>%
+  mutate(week = 7)
+# write.csv(eco2_co2Resp_w7d1_alb, "../licor_cleaned/co2_resp/eco2_co2Resp_w7d1_alb.csv", row.names = FALSE)
+
+eco2_co2Resp_w7d2_alb <- licorData(location = "../licor_raw/week7/eco2_co2Resp_W7D2_alb") %>%
+  mutate(week = 7)
+# write.csv(eco2_co2Resp_w7d2_alb, "../licor_cleaned/co2_resp/eco2_co2Resp_w7d2_alb.csv", row.names = FALSE)
+
+aco2_co2Resp_w7d1_alb <- licorData(location = "../licor_raw/week7/aco2_co2Resp_W7D1_alb") %>%
+  mutate(week = 7)
+# write.csv(aco2_co2Resp_w7d1_alb, "../licor_cleaned/co2_resp/aco2_co2Resp_w7d1_alb.csv", row.names = FALSE)
+
+aco2_co2Resp_w7d2_alb <- licorData(location = "../licor_raw/week7/aco2_co2Resp_W7D2_alb") %>%
+  mutate(week = 7)
+# write.csv(aco2_co2Resp_w7d2_alb, "../licor_cleaned/co2_resp/aco2_co2Resp_w7d2_alb.csv", row.names = FALSE)
+
+# Stan
+eco2_co2Resp_w7d1_stan <- licorData(location = "../licor_raw/week7/eco2_co2Resp_W7D1_stan") %>%
+  mutate(week = 7)
+# write.csv(eco2_co2Resp_w7d1_stan, "../licor_cleaned/co2_resp/eco2_co2Resp_w7d1_stan.csv", row.names = FALSE)
+
+eco2_co2Resp_w7d2_stan <- licorData(location = "../licor_raw/week7/eco2_co2Resp_W7D2_stan") %>%
+  mutate(week = 7)
+# write.csv(eco2_co2Resp_w7d2_stan, "../licor_cleaned/co2_resp/eco2_co2Resp_w7d2_stan.csv", row.names = FALSE)
+
+aco2_co2Resp_w7d1_stan <- licorData(location = "../licor_raw/week7/aco2_co2Resp_W7D1_stan") %>%
+  mutate(week = 7)
+# write.csv(aco2_co2Resp_w7d1_stan, "../licor_cleaned/co2_resp/aco2_co2Resp_w7d1_stan.csv", row.names = FALSE)
+
+aco2_co2Resp_w7d2_stan <- licorData(location = "../licor_raw/week7/aco2_co2Resp_W7D2_stan") %>%
+  mutate(week = 7)
+# write.csv(aco2_co2Resp_w7d2_stan, "../licor_cleaned/co2_resp/aco2_co2Resp_w7d2_stan.csv", row.names = FALSE)
+
+# Ozzie
+eco2_co2Resp_w7d1_ozz <- licorData(location = "../licor_raw/week7/eco2_co2Resp_W7D1_ozz") %>%
+  mutate(week = 7)
+# write.csv(eco2_co2Resp_w7d1_ozz, "../licor_cleaned/co2_resp/eco2_co2Resp_w7d1_ozz.csv", row.names = FALSE)
+
+eco2_co2Resp_w7d2_ozz <- licorData(location = "../licor_raw/week7/eco2_co2Resp_W7D2_ozz") %>%
+  mutate(week = 7)
+# write.csv(eco2_co2Resp_w7d2_ozz, "../licor_cleaned/co2_resp/eco2_co2Resp_w7d2_ozz.csv", row.names = FALSE)
+
+aco2_co2Resp_w7d1_ozz <- licorData(location = "../licor_raw/week7/aco2_co2Resp_W7D1_ozz") %>%
+  mutate(week = 7)
+# write.csv(aco2_co2Resp_w7d1_ozz, "../licor_cleaned/co2_resp/aco2_co2Resp_w7d1_ozz.csv", row.names = FALSE)
+
+aco2_co2Resp_w7d2_ozz <- licorData(location = "../licor_raw/week7/aco2_co2Resp_W7D2_ozz") %>%
+  mutate(week = 7)
+# write.csv(aco2_co2Resp_w7d2_ozz, "../licor_cleaned/co2_resp/aco2_co2Resp_w7d2_ozz.csv", row.names = FALSE)
+
+###############################################################################
+## Load dark respiration data files for week 6. Adding column to indicate 
+## whether curves were done on week 6 or week 7 of growth
+###############################################################################
+
+# Albert
+eco2_rd_w6d1_alb <- licorData(location = "../licor_raw/week6/eco2_rd_W6D1_alb") %>%
+  mutate(week = 6)
+write.csv(eco2_rd_w6d1_alb, "../licor_cleaned/rd/eco2_rd_w6d1_alb.csv", row.names = FALSE)
+
+eco2_rd_w6d2_alb <- licorData(location = "../licor_raw/week6/eco2_rd_W6D2_alb") %>%
+  mutate(week = 6)
+write.csv(eco2_rd_w6d2_alb, "../licor_cleaned/rd/eco2_rd_w6d2_alb.csv", row.names = FALSE)
+
+aco2_rd_w6d1_alb <- licorData(location = "../licor_raw/week6/aco2_rd_W6D1_alb") %>%
+  mutate(week = 6)
+write.csv(aco2_rd_w6d1_alb, "../licor_cleaned/rd/aco2_rd_w6d1_alb.csv", row.names = FALSE)
+
+aco2_rd_w6d2_alb <- licorData(location = "../licor_raw/week6/aco2_rd_W6D2_alb") %>%
+  mutate(week = 6)
+write.csv(aco2_rd_w6d2_alb, "../licor_cleaned/rd/aco2_rd_w6d2_alb.csv", row.names = FALSE)
+
+# Stan
+eco2_rd_w6d1_stan <- licorData(location = "../licor_raw/week6/eco2_rd_W6D1_stan") %>%
+  mutate(week = 6)
+write.csv(eco2_rd_w6d1_stan, "../licor_cleaned/rd/eco2_rd_w6d1_stan.csv", row.names = FALSE)
+
+eco2_rd_w6d2_stan <- licorData(location = "../licor_raw/week6/eco2_rd_W6D2_stan") %>%
+  mutate(week = 6)
+write.csv(eco2_rd_w6d2_stan, "../licor_cleaned/rd/eco2_rd_w6d2_stan.csv", row.names = FALSE)
+
+aco2_rd_w6d1_stan <- licorData(location = "../licor_raw/week6/aco2_rd_W6D1_stan") %>%
+  mutate(week = 6)
+write.csv(aco2_rd_w6d1_stan, "../licor_cleaned/rd/aco2_rd_w6d1_stan.csv", row.names = FALSE)
+
+aco2_rd_w6d2_stan <- licorData(location = "../licor_raw/week6/aco2_rd_W6D2_stan") %>%
+  mutate(week = 6)
+write.csv(aco2_rd_w6d2_stan, "../licor_cleaned/rd/aco2_rd_w6d2_stan.csv", row.names = FALSE)
+
+# Ozzie
+eco2_rd_w6d1_ozz <- licorData(location = "../licor_raw/week6/eco2_rd_W6D1_ozz") %>%
+  mutate(week = 6)
+write.csv(eco2_rd_w6d1_ozz, "../licor_cleaned/rd/eco2_rd_w6d1_ozz.csv", row.names = FALSE)
+
+eco2_rd_w6d2_ozz <- licorData(location = "../licor_raw/week6/eco2_rd_W6D2_ozz") %>%
+  mutate(week = 6)
+write.csv(eco2_rd_w6d2_ozz, "../licor_cleaned/rd/eco2_rd_w6d2_ozz.csv", row.names = FALSE)
+
+aco2_rd_w6d1_ozz <- licorData(location = "../licor_raw/week6/aco2_rd_W6D1_ozz") %>%
+  mutate(week = 6)
+write.csv(aco2_rd_w6d1_ozz, "../licor_cleaned/rd/aco2_rd_w6d1_ozz.csv", row.names = FALSE)
+
+aco2_rd_w6d2_ozz <- licorData(location = "../licor_raw/week6/aco2_rd_W6D2_ozzie") %>%
+  mutate(week = 6)
+write.csv(aco2_rd_w6d2_ozz, "../licor_cleaned/rd/aco2_rd_w6d2_ozz.csv", row.names = FALSE)
+
+###############################################################################
+## Load dark respiration data files for week 7. Adding column to indicate 
+## whether curves were done on week 6 or week 7 of growth
+###############################################################################
+
+# Albert
+eco2_rd_w7d1_alb <- licorData(location = "../licor_raw/week7/eco2_rd_W7D1_alb") %>%
+  mutate(week = 7)
+write.csv(eco2_rd_w7d1_alb, "../licor_cleaned/rd/eco2_rd_w7d1_alb.csv", row.names = FALSE)
+
+eco2_rd_w7d2_alb <- licorData(location = "../licor_raw/week7/eco2_rd_W7D2_alb") %>%
+  mutate(week = 7)
+write.csv(eco2_rd_w7d2_alb, "../licor_cleaned/rd/eco2_rd_w7d2_alb.csv", row.names = FALSE)
+
+aco2_rd_w7d1_alb <- licorData(location = "../licor_raw/week7/aco2_rd_W7D1_alb") %>%
+  mutate(week = 7)
+write.csv(aco2_rd_w7d1_alb, "../licor_cleaned/rd/aco2_rd_w7d1_alb.csv", row.names = FALSE)
+
+aco2_rd_w7d2_alb <- licorData(location = "../licor_raw/week7/aco2_rd_W7D2_alb") %>%
+  mutate(week = 7)
+write.csv(aco2_rd_w7d2_alb, "../licor_cleaned/rd/aco2_rd_w7d2_alb.csv", row.names = FALSE)
+
+# Stan
+eco2_rd_w7d1_stan <- licorData(location = "../licor_raw/week7/eco2_rd_W7D1_stan") %>%
+  mutate(week = 7)
+write.csv(eco2_rd_w7d1_stan, "../licor_cleaned/rd/eco2_rd_w7d1_stan.csv", row.names = FALSE)
+
+eco2_rd_w7d2_stan <- licorData(location = "../licor_raw/week7/eco2_rd_W7D2_stan") %>%
+  mutate(week = 7)
+write.csv(eco2_rd_w7d2_stan, "../licor_cleaned/rd/eco2_rd_w7d2_stan.csv", row.names = FALSE)
+
+aco2_rd_w7d1_stan <- licorData(location = "../licor_raw/week7/aco2_rd_W7D1_stan") %>%
+  mutate(week = 7)
+write.csv(aco2_rd_w7d1_stan, "../licor_cleaned/rd/aco2_rd_w7d1_stan.csv", row.names = FALSE)
+
+aco2_rd_w7d2_stan <- licorData(location = "../licor_raw/week7/aco2_rd_W7D2_stan") %>%
+  mutate(week = 7)
+write.csv(aco2_rd_w7d2_stan, "../licor_cleaned/rd/aco2_rd_w7d2_stan.csv", row.names = FALSE)
+
+# Ozzie
+eco2_rd_w7d1_ozz <- licorData(location = "../licor_raw/week7/eco2_rd_W7D1_ozz") %>%
+  mutate(week = 7)
+write.csv(eco2_rd_w7d1_ozz, "../licor_cleaned/rd/eco2_rd_w7d1_ozz.csv", row.names = FALSE)
+
+eco2_rd_w7d2_ozz <- licorData(location = "../licor_raw/week7/eco2_rd_W7D2_ozz") %>%
+  mutate(week = 7)
+write.csv(eco2_rd_w7d2_ozz, "../licor_cleaned/rd/eco2_rd_w7d2_ozz.csv", row.names = FALSE)
+
+aco2_rd_w7d1_ozz <- licorData(location = "../licor_raw/week7/aco2_rd_W7D1_ozz") %>%
+  mutate(week = 7)
+write.csv(aco2_rd_w7d1_ozz, "../licor_cleaned/rd/aco2_rd_w7d1_ozz.csv", row.names = FALSE)
+
+aco2_rd_w7d2_ozz <- licorData(location = "../licor_raw/week7/aco2_rd_W7D2_ozz") %>%
+  mutate(week = 7)
+write.csv(aco2_rd_w7d2_ozz, "../licor_cleaned/rd/aco2_rd_w7d2_ozz.csv", row.names = FALSE)
 
 ###############################################################################
 ## Merge files into central file. Useful for 'fitacis' when fitting multiple
@@ -102,7 +245,7 @@ postHeat_ozz_d2 <- licorData(location = "Ozzie/2022-09-07-Dinah-Potato/2022-09-1
 # reshape::merge_all() seems to do the trick.
 
 # List files
-file.list <- list.files("cleaned_files",
+file.list <- list.files("../licor_cleaned/co2_resp",
                         recursive = TRUE,
                         pattern = "\\.csv$",
                         full.names = TRUE)
