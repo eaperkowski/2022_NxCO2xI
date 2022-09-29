@@ -1,4 +1,4 @@
-# 2022 NxCO2 growth chamber experiment
+# NxCO2xI growth chamber experiment (Summer/Fall 2022)
 Repository for a growth chamber experiment investigating effects of soil nutrient availability and symbiotic nitrogen fixation on leaf and whole plant acclimation responses to elevated CO<sub>2</sub>. Repository contains data and working analyses. Folder contents are as follow:
 
  - `chamber_calibrations` = contains files and scripts for calibrating Percival growth chamber temperature, relative humidity, and CO2 readouts
