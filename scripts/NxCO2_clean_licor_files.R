@@ -235,13 +235,13 @@ aco2_rd_w7d2_ozz <- licorData(location = "../licor_raw/week7/aco2_rd_W7D2_ozz") 
 # write.csv(aco2_rd_w7d2_ozz, "../licor_cleaned/rd/aco2_rd_w7d2_ozz.csv", row.names = FALSE)
 
 ###############################################################################
-## Merge files into central file. Useful for 'fitacis' when fitting multiple
-## curves
+## Merge co2 response curves into single file. Useful for 'fitacis' when 
+## fitting multiple curves
 ###############################################################################
 # NOTE: Using list.files notation to avoid common merge conflict with 
 # readLicorData package. Cols seem to be assigned different classes when
 # cleaned through 'licorData', which makes merging files difficult/unnecessarily
-# time consuming. Reloading files into list of data frames, them merging through
+# time consuming. Reloading files into list of data frames, then merging through
 # reshape::merge_all() seems to do the trick.
 
 # List files
@@ -255,7 +255,31 @@ file.list <- setNames(file.list, stringr::str_extract(basename(file.list),
 # Merge list of data frames, arrange by marchine, measurement type, id, and time elapsed
 merged_curves <- lapply(file.list, read.csv) %>%
   reshape::merge_all() %>%
-  arrange(machine, meas.type, id, elapsed)
-#write.csv(merged_curves, "./Dinah_potato_curves_fullyMerged.csv")
+  arrange(machine, week, id, elapsed)
+write.csv(merged_curves, "../data_sheets/NxCO2_co2response.csv", row.names = FALSE)
+
+###############################################################################
+## Merge rd files into single file. Useful for 'fitacis' when fitting multiple
+## curves
+###############################################################################
+# NOTE: Using list.files notation to avoid common merge conflict with 
+# readLicorData package. Cols seem to be assigned different classes when
+# cleaned through 'licorData', which makes merging files difficult/unnecessarily
+# time consuming. Reloading files into list of data frames, then merging through
+# reshape::merge_all() seems to do the trick.
+
+# List files
+file.list.rd <- list.files("../licor_cleaned/rd",
+                        recursive = TRUE,
+                        pattern = "\\.csv$",
+                        full.names = TRUE)
+file.list.rd <- setNames(file.list.rd, stringr::str_extract(basename(file.list.rd), 
+                                                      '.*(?=\\.csv)'))
+
+# Merge list of data frames, arrange by marchine, measurement type, id, and time elapsed
+merged_rd <- lapply(file.list.rd, read.csv) %>%
+  reshape::merge_all() %>%
+  arrange(machine, week, id, elapsed)
+# write.csv(merged_rd, "../data_sheets/NxCO2_rd.csv", row.names = FALSE)
 
 ## End of data cleaning, ready for curve fitting ##
