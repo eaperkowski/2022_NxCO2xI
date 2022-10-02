@@ -256,7 +256,14 @@ file.list <- setNames(file.list, stringr::str_extract(basename(file.list),
 merged_curves <- lapply(file.list, read.csv) %>%
   reshape::merge_all() %>%
   arrange(machine, week, id, elapsed)
-write.csv(merged_curves, "../data_sheets/NxCO2_co2response.csv", row.names = FALSE)
+
+co2_resp_wk6 <- merged_curves %>%
+  filter(week == 6)
+# write.csv(co2_resp_wk6, "../data_sheets/NxCO2_co2_resp_wk6.csv", row.names = FALSE)
+
+co2_resp_wk7 <- merged_curves %>%
+  filter(week == 7)
+write.csv(co2_resp_wk7, "../data_sheets/NxCO2_co2_resp_wk7.csv", row.names = FALSE)
 
 ###############################################################################
 ## Merge rd files into single file. Useful for 'fitacis' when fitting multiple
@@ -276,10 +283,28 @@ file.list.rd <- list.files("../licor_cleaned/rd",
 file.list.rd <- setNames(file.list.rd, stringr::str_extract(basename(file.list.rd), 
                                                       '.*(?=\\.csv)'))
 
-# Merge list of data frames, arrange by marchine, measurement type, id, and time elapsed
-merged_rd <- lapply(file.list.rd, read.csv) %>%
-  reshape::merge_all() %>%
-  arrange(machine, week, id, elapsed)
-# write.csv(merged_rd, "../data_sheets/NxCO2_rd.csv", row.names = FALSE)
+# Merge list of data frames, arrange by machine, measurement type, id, and time elapsed
+rd <- lapply(file.list.rd, read.csv) %>%
+  reshape::merge_all()
+
+rd.wk6 <- rd %>%
+  filter(week == 6) %>%
+  group_by(id, week) %>%
+  mutate(A = ifelse(A > 0, NA, A),
+         rd = abs(A)) %>%
+  summarize(rd = mean(rd, na.rm = TRUE)) %>%
+  arrange(id)
+write.csv(rd.wk6, "../data_sheets/NxCO2_rd_wk6.csv", row.names = FALSE)
+
+rd.wk7 <- rd %>%
+  filter(week == 7) %>%
+  group_by(id, week) %>%
+  mutate(A = ifelse(A > 0, NA, A),
+         rd = abs(A)) %>%
+  summarize(rd = mean(rd, na.rm = TRUE)) %>%
+  filter(id != "a_y_280_133") # Remove first iteration of rd; co2 cylinder ran out
+rd.wk7$id[rd.wk7$id == "a_y_280_133_b"] <- "a_y_280_133"
+
+write.csv(rd.wk7, "../data_sheets/NxCO2_rd_wk7.csv", row.names = FALSE)
 
 ## End of data cleaning, ready for curve fitting ##
