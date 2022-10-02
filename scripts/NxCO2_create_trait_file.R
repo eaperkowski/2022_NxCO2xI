@@ -1,10 +1,49 @@
+###############################################################################
 ## Libraries
+###############################################################################
 library(dplyr)
 library(tidyverse)
 library(LeafArea)
+library(plantecophys)
 
+###############################################################################
 ## Import files
+###############################################################################
 chlorophyll <- read.csv("../data_sheets/NxCO2_chlorophyllExtractions.csv")
+co2.response.wk7 <- read.csv("../data_sheets/NxCO2_co2_resp_wk7.csv")
+rd.wk7 <- read.csv("../data_sheets/NxCO2_rd_wk7.csv")
+
+###############################################################################
+## Load custom fxns
+###############################################################################
+source("/Users/eaperkowski/git/r_functions/temp_standardize.R")
+source("/Users/eaperkowski/git/r_functions/calc_chi.R")
+source("/Users/eaperkowski/git/r_functions/stomatal_limitation.R")
+
+###############################################################################
+## Fit curves
+###############################################################################
+aci.prep <- co2.response.wk7 %>%
+  group_by(id) %>%
+  dplyr::select(id, machine, A, Ci, Ca, gsw, 
+                CO2_s,	CO2_r,	H2O_s,	H2O_r,
+                Qin, VPDleaf, Flow,	Tair,	Tleaf) %>%
+  arrange(id) %>%
+  left_join(rd.wk7, by = "id") %>%
+  dplyr::select(-week) %>%
+  separate(col = "id",
+           sep = "(_*)[_]_*",
+           into = c("co2.trt", "inco", "n.trt", "rep"),
+           remove = FALSE) %>%
+  group_by(id) %>%
+  mutate(rd25 = temp_standardize(rd,
+                                 estimate.type = "Rd",
+                                 pft = "C3H",
+                                 standard.to = 25,
+                                 tLeaf = Tleaf,
+                                 tGrow = 22.5)) %>%
+  data.frame()
+
 
 ## Calculate leaf disk area
 ij.path <- "/Applications/ImageJ.app"
