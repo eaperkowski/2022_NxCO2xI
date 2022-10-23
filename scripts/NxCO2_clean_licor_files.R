@@ -275,6 +275,10 @@ write.csv(co2_resp_wk7, "../data_sheets/NxCO2_co2_resp_wk7.csv", row.names = FAL
 # time consuming. Reloading files into list of data frames, then merging through
 # reshape::merge_all() seems to do the trick.
 
+## Load temp_standardize fxn
+source("/Users/eaperkowski/git/r_functions/temp_standardize.R")
+
+
 # List files
 file.list.rd <- list.files("../licor_cleaned/rd",
                         recursive = TRUE,
@@ -292,7 +296,14 @@ rd.wk6 <- rd %>%
   group_by(id, week) %>%
   mutate(A = ifelse(A > 0, NA, A),
          rd = abs(A)) %>%
-  summarize(rd = mean(rd, na.rm = TRUE)) %>%
+  summarize(rd = mean(rd, na.rm = TRUE),
+            tLeaf = mean(Tleaf, na.rm = TRUE),
+            rd25 = temp_standardize(rd,
+                                    estimate.type = "Rd",
+                                    standard.to = 25,
+                                    tLeaf = tLeaf,
+                                    tGrow = 22.5,
+                                    pft = "C3H")) %>%
   arrange(id)
 write.csv(rd.wk6, "../data_sheets/NxCO2_rd_wk6.csv", row.names = FALSE)
 
@@ -301,7 +312,14 @@ rd.wk7 <- rd %>%
   group_by(id, week) %>%
   mutate(A = ifelse(A > 0, NA, A),
          rd = abs(A)) %>%
-  summarize(rd = mean(rd, na.rm = TRUE)) %>%
+  summarize(rd = mean(rd, na.rm = TRUE),
+            tLeaf = mean(Tleaf, na.rm = TRUE),
+            rd25 = temp_standardize(rd,
+                                    estimate.type = "Rd",
+                                    standard.to = 25,
+                                    tLeaf = tLeaf,
+                                    tGrow = 22.5,
+                                    pft = "C3H")) %>%
   filter(id != "a_y_280_133") # Remove first iteration of rd; co2 cylinder ran out
 rd.wk7$id[rd.wk7$id == "a_y_280_133_b"] <- "a_y_280_133"
 
