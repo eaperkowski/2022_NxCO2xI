@@ -259,7 +259,7 @@ merged_curves <- lapply(file.list, read.csv) %>%
 
 co2_resp_wk6 <- merged_curves %>%
   filter(week == 6)
-# write.csv(co2_resp_wk6, "../data_sheets/NxCO2_co2_resp_wk6.csv", row.names = FALSE)
+write.csv(co2_resp_wk6, "../data_sheets/NxCO2_co2_resp_wk6.csv", row.names = FALSE)
 
 co2_resp_wk7 <- merged_curves %>%
   filter(week == 7)
