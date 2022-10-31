@@ -63,7 +63,7 @@ chlor.disk.area <- run.ij(path.imagej = ij.path,
 chlor.leaf.area <- run.ij(path.imagej = ij.path,
                           set.directory = imagepath.chlLeaf,
                           distance.pixel = 117.9034,
-                          known.distance = 1, low.size = 0.05)
+                          known.distance = 1, low.size = 0.01)
 
 ## Rename area column, merge into central file
 names(chlor.disk.area)[1:2] <- c("id", "disk.area")
@@ -79,26 +79,26 @@ chl.leaf.area <- chlor.disk.area %>%
 chlorophyll <- chlor.df %>% 
   full_join(chl.leaf.area, by = "id") %>%
   full_join(biomass_area) %>%
-  select(id, abs.649, abs.665, chl.biomass = chlor_biomass, disk.area, chl.leaf.area) %>%
-  mutate(chlA_ugml = (12.19 * abs.665) - (3.56 * abs.649),
-         chlB_ugml = (21.99 * abs.649) - (5.32 * abs.665),
-         chlA_ugml = ifelse(chlA_ugml < 0, 0, chlA_ugml),
-         chlB_ugml = ifelse(chlB_ugml < 0, 0 , chlB_ugml),
-         chlA_gml = chlA_ugml / 1000000,
-         chlB_gml = chlB_ugml / 1000000,
-         chlA_g = chlA_gml * 10, # extracted in 10mL DMSO
-         chlB_g = chlB_gml * 10, # extracted in 10mL DMSO
-         chlA_gm2 = chlA_g / (disk.area / 10000),
-         chlB_gm2 = chlB_g / (disk.area / 10000),
-         chlA_mmolm2 = chlA_gm2 / 893.51 * 1000,
-         chlB_mmolm2 = chlB_gm2 / 907.47 * 1000,
-         chl_marea = chl.biomass / (chl.leaf.area / 10000),
-         chlA_mmolg = chlA_mmolm2 / chl_marea,
-         chlB_mmolg = chlB_mmolm2 / chl_marea,
-         chl_mmolg = chlA_mmolg + chlB_mmolg,
-         chl_mmolm2 = chlA_mmolm2 + chlB_mmolm2,
-         chlA.chlB = chlA_g / chlB_g) %>%
-  select(id, chlA_ugml:chlA.chlB)
+  select(id, abs.649, abs.665, chl.biomass = chlor.biomass, disk.area, chl.leaf.area) %>%
+  mutate(chlA.ugml = (12.19 * abs.665) - (3.56 * abs.649),
+         chlB.ugml = (21.99 * abs.649) - (5.32 * abs.665),
+         chlA.ugml = ifelse(chlA.ugml < 0, 0, chlA.ugml),
+         chlB.ugml = ifelse(chlB.ugml < 0, 0 , chlB.ugml),
+         chlA.gml = chlA.ugml / 1000000,
+         chlB.gml = chlB.ugml / 1000000,
+         chlA.g = chlA.gml * 10, # extracted in 10mL DMSO
+         chlB.g = chlB.gml * 10, # extracted in 10mL DMSO
+         chlA.gm2 = chlA.g / (disk.area / 10000),
+         chlB.gm2 = chlB.g / (disk.area / 10000),
+         chlA.mmolm2 = chlA.gm2 / 893.51 * 1000,
+         chlB.mmolm2 = chlB.gm2 / 907.47 * 1000,
+         chl.marea = chl.biomass / (chl.leaf.area / 10000),
+         chlA.mmolg = chlA.mmolm2 / chl.marea,
+         chlB.mmolg = chlB.mmolm2 / chl.marea,
+         chl.mmolg = chlA.mmolg + chlB.mmolg,
+         chl.mmolm2 = chlA.mmolm2 + chlB.mmolm2,
+         chlA.chlB = chlA.g / chlB.g) %>%
+  select(id, chlA.ugml:chlA.chlB)
 
 ###############################################################################
 ## Focal leaf area, leaf nitrogen content
@@ -116,8 +116,7 @@ cn.data <- lapply(cn.files, read.csv) %>% reshape::merge_all() %>%
   select(id, nmass, cmass) %>%
   separate(id, into = c("co2", "inoc", "n.trt", "rep", "organ"), sep = "_") %>%
   unite("id", co2:rep, sep = "_") %>%
-  pivot_wider(names_from = organ, values_from = nmass:cmass)
-
+  pivot_wider(names_from = organ, values_from = nmass:cmass, names_sep = ".")
 
 ## Calculate leaf disk area
 imagepath.focal <- "/Users/eaperkowski/git/2022_NxCO2xI/leaf_area/focal_scans/"
@@ -128,7 +127,7 @@ focal.area <- run.ij(path.imagej = ij.path,
                      known.distance = 1, low.size = 0.05,
                      set.memory = 30)
 
-names(focal.area)[1:2] <- c("id", "focal_area")
+names(focal.area)[1:2] <- c("id", "focal.area")
 focal.area$id <- gsub("_focal", "", focal.area$id)
 
 ## Compile data frame, calculate leaf N traits
@@ -136,16 +135,43 @@ compile_df <- focal.area %>%
   full_join(biomass_area) %>%
   full_join(cn.data) %>%
   full_join(chlorophyll) %>%
+  full_join(chl.leaf.area) %>%
   full_join(curve.fits) %>%
   separate(id, into = c("co2", "inoc", "n.trt", "rep"), remove = FALSE) %>%
   mutate(rep = str_pad(rep, width = 3, side = "left", pad = "0"),
-         marea = focal_biomass / (focal_area / 10000),
-         narea = nmass_focal * marea,
-         p_rubisco = p_rubisco(vcmax25, narea),
-         p_bioe = p_bioenergetics(jmax25, narea),
-         p_lightharv = p_lightharvesting(chl_mmolm2, nmass_focal) / narea,
-         p_photo = p_rubisco + p_bioe + p_lightharv) %>%
+         
+         ## Leaf N content
+         marea = focal.biomass / (focal.area / 10000),
+         narea = nmass.focal * marea,
+         
+         ## Proportion of N calculations
+         p.rubisco = p_rubisco(vcmax25, narea),
+         p.bioe = p_bioenergetics(jmax25, narea),
+         p.lightharv = p_lightharvesting(chl.mmolg, nmass.focal),
+         p.photo = p.rubisco + p.bioe + p.lightharv,
+         p.structure = p_structure(lma = marea, narea = narea, useEq = FALSE),
+         
+         ## Tissue C and N biomasses
+         leaf.totaln = nmass.tl * leaf.biomass,
+         stem.totaln = nmass.ts * stem.biomass,
+         root.totaln = nmass.tr * root.biomass,
+         root.totalc = cmass.tr * root.biomass,
+         nod.totaln = nmass.nod * nodule.biomass,
+         nod.totalc = cmass.nod * nodule.biomass,
+         
+         ## Ncost calcs
+         wpn = leaf.totaln + stem.totaln + root.totaln + nod.totaln,
+         cbg = root.totalc + nod.totalc,
+         ncost = cbg / wpn,
+         
+         ## Whole plant growth
+         tla = tla + focal.area + chl.leaf.area + disk.area,
+         nodule.biomass = ifelse(inoc == "n" & is.na(nodule.biomass),
+                                 0, nodule.biomass)) %>%
   arrange(rep)
+
+write.csv(compile_df,
+          "../data_sheets/NxCO2xI_compiled_datasheet.csv", row.names = FALSE)
 
 ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
                               y = narea, fill = co2)) +
@@ -166,19 +192,19 @@ ggplot(data = compile_df, aes(x = as.numeric(n.trt),
   facet_grid(~inoc)
 
 ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
-                              y = p_rubisco, fill = co2)) +
+                              y = p.photo, fill = co2)) +
   geom_point(shape = 21, size = 4) +
   geom_smooth(method = 'lm') +
   facet_grid(~inoc)
 
 ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
-                              y = p_bioe, fill = co2)) +
+                              y = p.bioe, fill = co2)) +
   geom_point(shape = 21, size = 4) +
   geom_smooth(method = 'lm') +
   facet_grid(~inoc)
 
 ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
-                              y = p_lightharv, fill = co2)) +
+                              y = p.lightharv, fill = co2)) +
   geom_point(shape = 21, size = 4) +
   geom_smooth(method = 'lm') +
   facet_grid(~inoc)
@@ -190,25 +216,31 @@ ggplot(data = compile_df, aes(x = as.numeric(n.trt),
   facet_grid(~inoc)
 
 ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
-                              y = nmass_focal, fill = co2)) +
+                              y = nmass.focal, fill = co2)) +
   geom_point(shape = 21, size = 4) +
   geom_smooth(method = 'lm') +
   facet_grid(~inoc)
 
 ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
-                              y = nodule_biomass, fill = co2)) +
+                              y = nodule.biomass, fill = co2)) +
+  geom_point(shape = 21, size = 4, alpha = 0.5) +
+  geom_smooth(method = 'lm') +
+  facet_grid(~inoc)
+
+ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
+                              y = nodule.biomass / root.biomass, fill = co2)) +
   geom_point(shape = 21, size = 4) +
   geom_smooth(method = 'lm') +
   facet_grid(~inoc)
 
 ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
-                              y = nodule_biomass / root_biomass, fill = co2)) +
+                              y = total.biomass, fill = co2)) +
   geom_point(shape = 21, size = 4) +
   geom_smooth(method = 'lm') +
   facet_grid(~inoc)
 
 ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
-                              y = total_biomass, fill = co2)) +
+                              y = tla, fill = co2)) +
   geom_point(shape = 21, size = 4) +
   geom_smooth(method = 'lm') +
   facet_grid(~inoc)
