@@ -111,8 +111,8 @@ cn.files <- setNames(cn.files, cn.files)
 
 cn.data <- lapply(cn.files, read.csv) %>% reshape::merge_all() %>%
   filter(type == "unknown") %>%
-  mutate(nmass = n.weight.percent / 100,
-         cmass = c.weight.percent / 100) %>%
+  mutate(nmass = as.numeric(n.weight.percent) / 100,
+         cmass = as.numeric(c.weight.percent) / 100) %>%
   select(id, nmass, cmass) %>%
   separate(id, into = c("co2", "inoc", "n.trt", "rep", "organ"), sep = "_") %>%
   unite("id", co2:rep, sep = "_") %>%
@@ -149,15 +149,17 @@ compile_df <- focal.area %>%
          p.bioe = p_bioenergetics(jmax25, narea),
          p.lightharv = p_lightharvesting(chl.mmolg, nmass.focal),
          p.photo = p.rubisco + p.bioe + p.lightharv,
-         p.structure = p_structure(lma = marea, narea = narea, useEq = FALSE),
+         #p.structure = p_structure(lma = marea, narea = narea, useEq = FALSE),
          
          ## Tissue C and N biomasses
          leaf.totaln = nmass.tl * leaf.biomass,
          stem.totaln = nmass.ts * stem.biomass,
          root.totaln = nmass.tr * root.biomass,
          root.totalc = cmass.tr * root.biomass,
-         nod.totaln = nmass.nod * nodule.biomass,
-         nod.totalc = cmass.nod * nodule.biomass,
+         nod.totaln = ifelse(nodule.biomass == 0 | is.na(nmass.nod),
+                             0, nmass.nod * nodule.biomass),
+         nod.totalc = ifelse(nodule.biomass == 0 | is.na(cmass.nod),
+                             0, cmass.nod * nodule.biomass),
          
          ## Ncost calcs
          wpn = leaf.totaln + stem.totaln + root.totaln + nod.totaln,
@@ -172,6 +174,20 @@ compile_df <- focal.area %>%
 
 write.csv(compile_df,
           "../data_sheets/NxCO2xI_compiled_datasheet.csv", row.names = FALSE)
+
+
+ggplot(data = subset(compile_df, co2 == "e"), 
+       aes(x = as.numeric(n.trt), y = ncost, fill = inoc)) +
+  geom_point(shape = 21, size = 4, alpha = 0.75) +
+  scale_fill_discrete(labels = c("no", "yes")) +
+  geom_smooth(method = 'lm', formula = y ~ poly(x, 2)) +
+  labs(x = "Soil nitrogen fertilization (ppm)",
+       y = expression("Carbon cost to acquire nitrogen (gC gN"^-1*")"),
+       fill = "Inoculation status") +
+  theme_bw(base_size = 18)
+
+
+
 
 ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
                               y = narea, fill = co2)) +
