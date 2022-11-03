@@ -130,7 +130,7 @@ focal.area <- run.ij(path.imagej = ij.path,
 names(focal.area)[1:2] <- c("id", "focal.area")
 focal.area$id <- gsub("_focal", "", focal.area$id)
 
-## Compile data frame, calculate leaf N traits
+## Compile data file into single file (to be used for stats/figs)
 compile_df <- focal.area %>% 
   full_join(biomass_area) %>%
   full_join(cn.data) %>%
@@ -142,17 +142,20 @@ compile_df <- focal.area %>%
          
          ## Leaf N content
          marea = focal.biomass / (focal.area / 10000),
+         marea.chl = chlor.biomass / (chl.leaf.area / 10000),
          narea = nmass.focal * marea,
+         #narea.chl = nmass.chl * marea.chl,
+         
          
          ## Proportion of N calculations
          p.rubisco = p_rubisco(vcmax25, narea),
          p.bioe = p_bioenergetics(jmax25, narea),
-         p.lightharv = p_lightharvesting(chl.mmolg, nmass.focal),
+         p.lightharv = p_lightharvesting(chl.mmolg, nmass.focal), ## swap with nmass.chl once data are in
          p.photo = p.rubisco + p.bioe + p.lightharv,
          #p.structure = p_structure(lma = marea, narea = narea, useEq = FALSE),
          
          ## Tissue C and N biomasses
-         leaf.totaln = nmass.tl * leaf.biomass,
+         leaf.totaln = nmass.tl * leaf.biomass, #+ nmass.nod * chor.biomass,
          stem.totaln = nmass.ts * stem.biomass,
          root.totaln = nmass.tr * root.biomass,
          root.totalc = cmass.tr * root.biomass,
@@ -174,6 +177,18 @@ compile_df <- focal.area %>%
 
 write.csv(compile_df,
           "../data_sheets/NxCO2xI_compiled_datasheet.csv", row.names = FALSE)
+
+
+ggplot(data = subset(compile_df, marea.chl < 100), 
+       aes(x = marea, y = marea.chl)) +
+  geom_point(size = 2) +
+  geom_smooth(method = 'lm', size = 1) +
+  geom_abline(slope = 1, intercept = 0, size = 1) +
+  scale_x_continuous(limits = c(25, 100), breaks = seq(25, 100, 25)) +
+  scale_y_continuous(limits = c(25, 100), breaks = seq(25, 100, 25)) +
+  labs(x = expression("M"["area"]*" (g m"^"-2"*")"),
+       y = expression("M"["area_chl"]*" (g m"^"-2"*")")) +
+  theme_bw(base_size = 18)
 
 
 ggplot(data = subset(compile_df, co2 == "e"), 
