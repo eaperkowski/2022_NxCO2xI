@@ -152,16 +152,16 @@ compile_df <- focal.area %>%
          p.bioe = p_bioenergetics(jmax25, narea),
          p.lightharv = p_lightharvesting(chl.mmolg, nmass.focal), ## swap with nmass.chl once data are in
          p.photo = p.rubisco + p.bioe + p.lightharv,
-         #p.structure = p_structure(lma = marea, narea = narea, useEq = FALSE),
+         p.structure = p_structure(lma = marea, narea = narea, useEq = FALSE),
          
          ## Tissue C and N biomasses
          leaf.totaln = nmass.tl * leaf.biomass, #+ nmass.nod * chor.biomass,
          stem.totaln = nmass.ts * stem.biomass,
          root.totaln = nmass.tr * root.biomass,
          root.totalc = cmass.tr * root.biomass,
-         nod.totaln = ifelse(nodule.biomass == 0 | is.na(nmass.nod),
+         nod.totaln = ifelse(is.na(nmass.nod),
                              0, nmass.nod * nodule.biomass),
-         nod.totalc = ifelse(nodule.biomass == 0 | is.na(cmass.nod),
+         nod.totalc = ifelse(is.na(cmass.nod),
                              0, cmass.nod * nodule.biomass),
          
          ## Ncost calcs
