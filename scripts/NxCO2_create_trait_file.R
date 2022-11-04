@@ -35,7 +35,7 @@ chlor.files <- setNames(chlor.files, chlor.files)
 chlor.df <- lapply(chlor.files, read.delim) %>% 
   reshape::merge_all() %>%
   filter(id != "blank") %>%
-  select(rep = id, everything()) %>%
+  dplyr::select(rep = id, everything()) %>%
   group_by(rep) %>%
   summarize(abs.649 = mean(abs_649_corrected, na.rm = TRUE),
             cv.649 = (sd(abs_649_corrected, na.rm = TRUE) / abs.649) * 100,
@@ -49,7 +49,7 @@ chlor.df$rep[chlor.df$rep == "12_real"] <- "12"
 # Replace rep number with full plant ID
 chlor.df <- chlor.df %>%
   full_join(ids) %>%
-  select(id, abs.649:cv.665)
+  dplyr::select(id, abs.649:cv.665)
 
 ## Calculate leaf disk area
 ij.path <- "/Applications/ImageJ.app"
@@ -79,7 +79,7 @@ chl.leaf.area <- chlor.disk.area %>%
 chlorophyll <- chlor.df %>% 
   full_join(chl.leaf.area, by = "id") %>%
   full_join(biomass_area) %>%
-  select(id, abs.649, abs.665, chl.biomass = chlor.biomass, disk.area, chl.leaf.area) %>%
+  dplyr::select(id, abs.649, abs.665, chl.biomass = chlor.biomass, disk.area, chl.leaf.area) %>%
   mutate(chlA.ugml = (12.19 * abs.665) - (3.56 * abs.649),
          chlB.ugml = (21.99 * abs.649) - (5.32 * abs.665),
          chlA.ugml = ifelse(chlA.ugml < 0, 0, chlA.ugml),
@@ -98,7 +98,7 @@ chlorophyll <- chlor.df %>%
          chl.mmolg = chlA.mmolg + chlB.mmolg,
          chl.mmolm2 = chlA.mmolm2 + chlB.mmolm2,
          chlA.chlB = chlA.g / chlB.g) %>%
-  select(id, chlA.ugml:chlA.chlB)
+  dplyr::select(id, chlA.ugml:chlA.chlB)
 
 ###############################################################################
 ## Focal leaf area, leaf nitrogen content
@@ -113,7 +113,7 @@ cn.data <- lapply(cn.files, read.csv) %>% reshape::merge_all() %>%
   filter(type == "unknown") %>%
   mutate(nmass = as.numeric(n.weight.percent) / 100,
          cmass = as.numeric(c.weight.percent) / 100) %>%
-  select(id, nmass, cmass) %>%
+  dplyr::select(id, nmass, cmass) %>%
   separate(id, into = c("co2", "inoc", "n.trt", "rep", "organ"), sep = "_") %>%
   unite("id", co2:rep, sep = "_") %>%
   pivot_wider(names_from = organ, values_from = nmass:cmass, names_sep = ".")
@@ -152,7 +152,7 @@ compile_df <- focal.area %>%
          p.bioe = p_bioenergetics(jmax25, narea),
          p.lightharv = p_lightharvesting(chl.mmolg, nmass.focal), ## swap with nmass.chl once data are in
          p.photo = p.rubisco + p.bioe + p.lightharv,
-         p.structure = p_structure(lma = marea, narea = narea, useEq = FALSE),
+         p.structure = p_structure(lma = marea, narea = narea),
          
          ## Tissue C and N biomasses
          leaf.totaln = nmass.tl * leaf.biomass, #+ nmass.nod * chor.biomass,
@@ -201,9 +201,6 @@ ggplot(data = subset(compile_df, co2 == "e"),
        fill = "Inoculation status") +
   theme_bw(base_size = 18)
 
-
-
-
 ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
                               y = narea, fill = co2)) +
   geom_point(shape = 21, size = 4) +
@@ -229,10 +226,11 @@ ggplot(data = compile_df, aes(x = as.numeric(n.trt),
   facet_grid(~inoc)
 
 ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
-                              y = p.bioe, fill = co2)) +
+                              y = p.structure, fill = co2)) +
   geom_point(shape = 21, size = 4) +
   geom_smooth(method = 'lm') +
   facet_grid(~inoc)
+
 
 ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
                               y = p.lightharv, fill = co2)) +
