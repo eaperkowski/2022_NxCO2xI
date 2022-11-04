@@ -91,3 +91,7 @@ a_y_105_85_tr,unknown,1.382,1.896,27.272,A,0.018,1.295,Ordnr,Nitrogen,3.097,2663
 a_n_35_115_tr,unknown,2.453,1.909,36.85,A,0.024,0.981,Ordnr,Nitrogen,3.063,3695.532,A,0.861,35.096,Ordnr,Carbon
 a_n_350_140_tr,unknown,2.708,1.905,78.474,A,0.051,1.877,Ordnr,Nitrogen,3.032,4804.539,A,1.132,41.792,Ordnr,Carbon
 a_n_70_117_tr,unknown,2.122,1.9,39.271,A,0.026,1.208,Ordnr,Nitrogen,3.056,3885.713,A,0.907,42.738,Ordnr,Carbon
+a_y_35_78_tr,unknown,2.635,1.905,60.91,A,0.04,1.501,Ordnr,Nitrogen,3.039,4669.141,A,1.098,41.682,Ordnr,Carbon
+a_y_105_87_tr,unknown,1.667,1.901,43.118,A,0.028,1.686,Ordnr,Nitrogen,3.095,3216.627,A,0.746,44.738,Ordnr,Carbon
+a_n_350_139_tr,unknown,1.893,1.907,66.057,A,0.043,2.265,Ordnr,Nitrogen,3.095,3418.72,A,0.794,41.956,Ordnr,Carbon
+QC,quality_control,0.898,1.889,145.048,A,0.093,10.4,Ordnr,Nitrogen,3.1,2802.471,A,0.647,72.061,Ordnr,Carbon
