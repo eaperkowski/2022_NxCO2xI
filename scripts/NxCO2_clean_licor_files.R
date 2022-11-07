@@ -114,6 +114,11 @@ eco2_co2Resp_w7d2_ozz <- licorData(location = "../licor_raw/week7/eco2_co2Resp_W
   mutate(week = 7)
 # write.csv(eco2_co2Resp_w7d2_ozz, "../licor_cleaned/co2_resp/eco2_co2Resp_w7d2_ozz.csv", row.names = FALSE)
 
+eco2_co2Resp_w7d3_ozz <- licorData(location = "../licor_raw/week7/eco2_co2Resp_W7D3_ozz") %>%
+  mutate(week = 7)
+write.csv(eco2_co2Resp_w7d3_ozz, "../licor_cleaned/co2_resp/eco2_co2Resp_w7d3_ozz.csv", row.names = FALSE)
+
+
 aco2_co2Resp_w7d1_ozz <- licorData(location = "../licor_raw/week7/aco2_co2Resp_W7D1_ozz") %>%
   mutate(week = 7)
 # write.csv(aco2_co2Resp_w7d1_ozz, "../licor_cleaned/co2_resp/aco2_co2Resp_w7d1_ozz.csv", row.names = FALSE)
