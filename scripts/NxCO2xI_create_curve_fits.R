@@ -446,8 +446,26 @@ aci.coefs[36,] <- c(id = "e_y_630_36", t(coef(e_y_630_36)))
 #######################################
 # Elevated CO2 non-inoculated
 #######################################
-aci.coefs[37,] <- c(id = "e_n_0_37", NA, NA, NA, NA) # No phys
-aci.coefs[38,] <- c(id = "e_n_0_38", NA, NA, NA, NA) # No phys
+e_n_0_37 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_0_37") %>%
+  fitaci(varnames = list(ALEAF = "A",
+                         Tleaf = "Tleaf",
+                         Ci = "Ci",
+                         PPFD = "Qin",
+                         Rd = "rd25"),
+         fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
+plot(e_n_0_37)
+aci.coefs[37,] <- c(id = "e_n_0_37", t(coef(e_n_0_37)))
+
+
+e_n_0_38 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_0_38") %>%
+  fitaci(varnames = list(ALEAF = "A",
+                         Tleaf = "Tleaf",
+                         Ci = "Ci",
+                         PPFD = "Qin",
+                         Rd = "rd25"),
+         fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
+plot(e_n_0_38)
+aci.coefs[38,] <- c(id = "e_n_0_38", t(coef(e_n_0_38)))
 
 
 e_n_0_39 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_0_39") %>%
@@ -480,7 +498,7 @@ e_n_35_41 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_35_41") %>%
 plot(e_n_35_41)
 aci.coefs[41,] <- c(id = "e_n_35_41", t(coef(e_n_35_41)))
 
-e_n_35_42 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_35_42_b") %>%
+e_n_35_42 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_35_42") %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
@@ -885,7 +903,7 @@ a_y_35_79 <- aci.prep %>% filter(keep.row == "yes" & id == "a_y_35_79") %>%
                          Rd = "rd25"),
          fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
 plot(a_y_35_79)
-aci.coefs[79,] <- c(id = "a_y_35_79", NA, NA, NA, NA)
+aci.coefs[79,] <- c(id = "a_y_35_79", t(coef(a_y_35_78)))
 
 
 a_y_35_80 <- aci.prep %>% filter(keep.row == "yes" & id == "a_y_35_80") %>%
@@ -957,7 +975,7 @@ a_y_105_86 <- aci.prep %>% filter(keep.row == "yes" & id == "a_y_105_86") %>%
                          Ci = "Ci",
                          PPFD = "Qin", 
                          Rd = "rd25"),
-         fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
+         fitTPU = TRUE, Tcorrect = FALSE)
 plot(a_y_105_86)
 aci.coefs[86,] <- c(id = "a_y_105_86", t(coef(a_y_105_86)))
 aci.coefs[86,3] <- NA
@@ -1089,7 +1107,7 @@ a_y_280_98 <- aci.prep %>% filter(keep.row == "yes" & id == "a_y_280_98") %>%
                          Rd = "rd25"),
          fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
 plot(a_y_280_98)
-aci.coefs[98,] <- c(id = "a_y_280_97", t(coef(a_y_280_98)))
+aci.coefs[98,] <- c(id = "a_y_280_98", t(coef(a_y_280_98)))
 
 
 a_y_280_99 <- aci.prep %>% filter(keep.row == "yes" & id == "a_y_280_99") %>%
@@ -1620,7 +1638,23 @@ aci.fits <- aci.coefs %>% left_join(aci.temps) %>%
   select(id, tleaf = Tleaf, vcmax25, jmax25, jmax25.vcmax25, rd25 = Rd, tpu = TPU) %>%
   mutate_if(is.numeric, round, 3)
 
-write.csv(aci.fits, "../data_sheets/NxCO2_curve_results.csv", row.names = FALSE)
+anet <- aci.prep %>%
+  filter(CO2_r > 419.5 & CO2_r < 420.5) %>%
+  group_by(id) %>%
+  summarize(anet = mean(A),
+            gsw = mean(gsw),
+            ci.ca = mean(Ci) / mean(Ca)) %>%
+  filter(id != "a_n_630_141" & id != "a_y_280_100" & id != "a_y_350_101") %>%
+  mutate(id = ifelse(id == "a_n_630_141_b", "a_n_630_141", id),
+         id = ifelse(id == "a_y_280_100_b", "a_y_280_100", id),
+         id = ifelse(id == "a_y_350_101_b", "a_y_350_101", id))
+
+
+photo.data <- anet %>% full_join(aci.fits) %>% 
+  mutate_if(is.numeric, round, 3) %>%
+  select(id, tleaf, anet,  gsw, ci.ca, vcmax25, jmax25, jmax25.vcmax25, rd25, tpu)
+
+write.csv(photo.data, "../data_sheets/NxCO2_photo_data.csv", row.names = FALSE)
 
 
 
