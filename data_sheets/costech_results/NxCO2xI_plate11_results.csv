@@ -1,0 +1,49 @@
+﻿id,type,sample.weight,n.retention.time,n.response,n.rb,n.weight.mg,n.weight.percent,n.peaktype,n.element.name,c.retention.time,c.response,c.rb,c.weight.mg,c.weight.percent,c.peak.type,c.element.name
+bypass,bypass,0,2.001,65.474,A,0.039,11.959,Ordnr,Nitrogen,3.413,1406.787,A,0.284,88.041,Ordnr,Carbon
+bypass,bypass,0,2.013,43.17,A,0.025,9.383,Ordnr,Nitrogen,3.459,1218.406,A,0.245,90.617,Ordnr,Carbon
+blank,blank,0,,,,,,,,3.548,12.311,A,N/A,N/A,Error,Carbon
+blank,blank,0,,,,,,,,3.544,11.871,A,N/A,N/A,Error,Carbon
+std - 0.1,standard,0.106,1.999,19.213,A,0.011,10.452,Ordnr,Nitrogen,3.475,406.416,A,0.078,73.462,Ordnr,Carbon
+std - 0.25,standard,0.242,1.997,50.99,A,0.03,12.391,Ordnr,Nitrogen,3.432,1138.87,A,0.228,94.368,Ordnr,Carbon
+std - 0.5,standard,0.486,1.989,85.663,A,0.05,10.375,Ordnr,Nitrogen,3.403,1732.491,A,0.351,72.308,Ordnr,Carbon
+std - 1.0,standard,1.008,1.992,180.43,A,0.105,10.446,Ordnr,Nitrogen,3.335,3491.867,A,0.722,71.626,Ordnr,Carbon
+std - 1.5,standard,1.545,2,277.444,A,0.16,10.36,Ordnr,Nitrogen,3.273,5233.5,A,1.098,71.068,Ordnr,Carbon
+std - 2.0,standard,1.977,2.013,356.998,A,0.204,10.317,Ordnr,Nitrogen,3.251,6584.315,A,1.396,70.631,Ordnr,Carbon
+std - 3.0,standard,3.084,2.003,574.185,A,0.32,10.368,Ordnr,Nitrogen,3.156,10066.801,A,2.196,71.195,Ordnr,Carbon
+QC,quality_control,1.639,2.024,298.354,A,0.172,10.475,Ordnr,Nitrogen,3.309,5589.015,A,1.176,71.747,Ordnr,Carbon
+a_y_0_73_chl,unknown,0.901,2.024,69.733,A,0.041,4.557,Ordnr,Nitrogen,3.453,2011.798,A,0.41,45.466,Ordnr,Carbon
+a_y_0_74_chl,unknown,0.921,2.028,50.949,A,0.03,3.253,Ordnr,Nitrogen,3.46,2078.352,A,0.424,45.989,Ordnr,Carbon
+a_y_0_75_chl,unknown,1.156,2.049,76.209,A,0.045,3.882,Ordnr,Nitrogen,3.46,2575.611,A,0.528,45.664,Ordnr,Carbon
+a_y_0_76_chl,unknown,0.887,2.036,43.562,A,0.026,2.884,Ordnr,Nitrogen,3.455,1928.91,A,0.392,44.233,Ordnr,Carbon
+a_y_35_77_chl,unknown,1.015,2.021,60.074,A,0.035,3.484,Ordnr,Nitrogen,3.416,2200.779,A,0.449,44.254,Ordnr,Carbon
+a_y_35_78_chl,unknown,1.236,2.02,120.989,A,0.071,5.748,Ordnr,Nitrogen,3.392,2753.623,A,0.565,45.744,Ordnr,Carbon
+a_y_35_79_chl,unknown,1.27,2.015,63.272,A,0.037,2.933,Ordnr,Nitrogen,3.38,2694.033,A,0.553,43.53,Ordnr,Carbon
+a_y_35_80_chl,unknown,1.11,1.991,68.788,A,0.041,3.649,Ordnr,Nitrogen,3.365,2411.758,A,0.493,44.453,Ordnr,Carbon
+a_y_70_81_chl,unknown,1.915,1.992,119.708,A,0.07,3.671,Ordnr,Nitrogen,3.297,3933.018,A,0.816,42.629,Ordnr,Carbon
+a_y_70_82_chl,unknown,1.415,1.987,82.779,A,0.049,3.444,Ordnr,Nitrogen,3.336,3027.535,A,0.623,44.05,Ordnr,Carbon
+a_y_70_83_chl,unknown,1.406,2.011,116.426,A,0.068,4.864,Ordnr,Nitrogen,3.368,3115.375,A,0.642,45.656,Ordnr,Carbon
+QC,quality_control,0.987,1.988,174.343,A,0.102,10.315,Ordnr,Nitrogen,3.34,3385.944,A,0.699,70.863,Ordnr,Carbon
+a_y_70_84_chl,unknown,1.095,2.005,73.687,A,0.043,3.962,Ordnr,Nitrogen,3.401,2420.491,A,0.495,45.229,Ordnr,Carbon
+a_y_105_85_chl,unknown,1.7,2.02,90.742,A,0.053,3.141,Ordnr,Nitrogen,3.364,3699.349,A,0.766,45.076,Ordnr,Carbon
+a_y_105_86_chl,unknown,1.875,2.024,101.66,A,0.06,3.189,Ordnr,Nitrogen,3.348,3968.164,A,0.824,43.94,Ordnr,Carbon
+a_y_105_87_chl,unknown,1.707,2.011,128.548,A,0.075,4.419,Ordnr,Nitrogen,3.335,3747.265,A,0.777,45.491,Ordnr,Carbon
+a_y_105_88_chl,unknown,2.584,2.005,165.794,A,0.097,3.75,Ordnr,Nitrogen,3.261,5375.231,A,1.129,43.693,Ordnr,Carbon
+a_y_140_89_chl,unknown,0.83,1.985,51.198,A,0.03,3.628,Ordnr,Nitrogen,3.381,1828.363,A,0.371,44.745,Ordnr,Carbon
+a_y_140_90_chl,unknown,2.183,1.992,121.768,A,0.071,3.275,Ordnr,Nitrogen,3.28,4378.279,A,0.912,41.785,Ordnr,Carbon
+a_y_140_91_chl,unknown,1.405,1.975,95.067,A,0.056,3.981,Ordnr,Nitrogen,3.319,3011.765,A,0.62,44.126,Ordnr,Carbon
+a_y_140_92_chl,unknown,1.267,2.004,91.098,A,0.054,4.231,Ordnr,Nitrogen,3.375,2787.339,A,0.573,45.187,Ordnr,Carbon
+a_y_210_93_chl,unknown,1.736,2.015,132.649,A,0.078,4.482,Ordnr,Nitrogen,3.352,3824.401,A,0.793,45.683,Ordnr,Carbon
+a_y_210_94_chl,unknown,2.225,2.035,128.796,A,0.076,3.397,Ordnr,Nitrogen,3.352,4626.839,A,0.966,43.413,Ordnr,Carbon
+QC,quality_control,1.74,2.005,321.119,A,0.184,10.591,Ordnr,Nitrogen,3.271,5918.501,A,1.249,71.755,Ordnr,Carbon
+a_y_210_95_chl,unknown,2.715,2.025,172.667,A,0.101,3.715,Ordnr,Nitrogen,3.319,5597.488,A,1.178,43.381,Ordnr,Carbon
+a_y_210_96_chl,unknown,2.2,2.027,152.107,A,0.089,4.047,Ordnr,Nitrogen,3.328,4781.457,A,0.999,45.431,Ordnr,Carbon
+a_y_280_97_chl,unknown,1.794,2.015,145.484,A,0.085,4.75,Ordnr,Nitrogen,3.335,3967.664,A,0.824,45.918,Ordnr,Carbon
+a_y_280_98_chl,unknown,0.976,2.015,75.991,A,0.045,4.584,Ordnr,Nitrogen,3.405,2221.08,A,0.453,46.458,Ordnr,Carbon
+a_y_280_99_chl,unknown,1.894,2.016,136.861,A,0.08,4.237,Ordnr,Nitrogen,3.335,4169.565,A,0.867,45.785,Ordnr,Carbon
+a_y_280_100_chl,unknown,1.228,1.997,70.095,A,0.041,3.361,Ordnr,Nitrogen,3.363,2700.13,A,0.554,45.123,Ordnr,Carbon
+a_y_350_101_chl,unknown,2.188,2.008,144.931,A,0.085,3.88,Ordnr,Nitrogen,3.304,4677.886,A,0.977,44.653,Ordnr,Carbon
+a_y_350_102_chl,unknown,1.802,2.003,137.859,A,0.081,4.485,Ordnr,Nitrogen,3.339,3981.779,A,0.827,45.883,Ordnr,Carbon
+a_y_350_103_chl,unknown,1.367,2.004,131.988,A,0.077,5.664,Ordnr,Nitrogen,3.375,3025.284,A,0.623,45.562,Ordnr,Carbon
+a_y_350_104_chl,unknown,2.405,2.003,145.996,A,0.086,3.556,Ordnr,Nitrogen,3.296,5103.625,A,1.07,44.475,Ordnr,Carbon
+a_y_630_105_chl,unknown,1.272,2.008,105.749,A,0.062,4.888,Ordnr,Nitrogen,3.387,2870.151,A,0.59,46.384,Ordnr,Carbon
+QC,quality_control,0.87,1.999,155.252,A,0.091,10.443,Ordnr,Nitrogen,3.373,3064.851,A,0.631,72.554,Ordnr,Carbon
