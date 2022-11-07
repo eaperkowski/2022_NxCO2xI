@@ -144,8 +144,7 @@ compile_df <- focal.area %>%
          marea = focal.biomass / (focal.area / 10000),
          marea.chl = chlor.biomass / (chl.leaf.area / 10000),
          narea = nmass.focal * marea,
-         #narea.chl = nmass.chl * marea.chl,
-         
+         narea.chl = nmass.chl * marea.chl,
          
          ## Proportion of N calculations
          p.rubisco = p_rubisco(vcmax25, narea),
@@ -155,7 +154,8 @@ compile_df <- focal.area %>%
          p.structure = p_structure(lma = marea, narea = narea),
          
          ## Tissue C and N biomasses
-         leaf.totaln = nmass.tl * leaf.biomass, #+ nmass.nod * chor.biomass,
+         leaf.totaln = (nmass.tl * leaf.biomass) + 
+           (nmass.focal * focal.biomass) + (nmass.chl * chlor.biomass),
          stem.totaln = nmass.ts * stem.biomass,
          root.totaln = nmass.tr * root.biomass,
          root.totalc = cmass.tr * root.biomass,
@@ -178,6 +178,15 @@ compile_df <- focal.area %>%
 write.csv(compile_df,
           "../data_sheets/NxCO2xI_compiled_datasheet.csv", row.names = FALSE)
 
+ggplot(data = compile_df, aes(x = narea, y = narea.chl)) +
+  geom_point(size = 4) +
+  geom_abline(slope = 1, intercept = 0) +
+  scale_x_continuous(limits = c(0,3), breaks = seq(0, 3, 1)) +
+  scale_y_continuous(limits = c(0,3), breaks = seq(0, 3, 1)) +
+  geom_smooth(method = 'lm') +
+  labs(x = expression("N"["area"]*" (gN m"^"-2"*")"),
+       y = expression("N"["area_chl"]*" (gN m"^"-2"*")")) +
+  theme_bw(base_size = 20)
 
 ggplot(data = subset(compile_df, marea.chl < 100), 
        aes(x = marea, y = marea.chl)) +
@@ -195,7 +204,7 @@ ggplot(data = subset(compile_df, co2 == "e"),
        aes(x = as.numeric(n.trt), y = ncost, fill = inoc)) +
   geom_point(shape = 21, size = 4, alpha = 0.75) +
   scale_fill_discrete(labels = c("no", "yes")) +
-  geom_smooth(method = 'lm', formula = y ~ poly(x, 2)) +
+  geom_smooth(method = 'lm') +
   labs(x = "Soil nitrogen fertilization (ppm)",
        y = expression("Carbon cost to acquire nitrogen (gC gN"^-1*")"),
        fill = "Inoculation status") +
@@ -216,7 +225,7 @@ ggplot(data = compile_df, aes(x = as.numeric(n.trt),
 ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
                               y = jmax25, fill = co2)) +
   geom_point(shape = 21, size = 4) +
-  geom_smooth(method = 'lm') +
+  geom_smooth(method = 'lm', formula = y ~ poly(x,2)) +
   facet_grid(~inoc)
 
 ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
@@ -259,7 +268,7 @@ ggplot(data = compile_df, aes(x = as.numeric(n.trt),
 ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
                               y = nodule.biomass / root.biomass, fill = co2)) +
   geom_point(shape = 21, size = 4) +
-  geom_smooth(method = 'lm') +
+  geom_smooth(method = 'lm', formula = y ~ poly(x,2)) +
   facet_grid(~inoc)
 
 ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
