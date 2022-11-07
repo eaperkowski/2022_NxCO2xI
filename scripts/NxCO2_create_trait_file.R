@@ -15,13 +15,13 @@ biomass_area <- read.csv("../data_sheets/NxCO2_tla_biomass_data.csv")
 ids <- data.frame(id = biomass_area$id)
 ids <- separate(ids, id, sep = "_", into = c("co2", "inoc", "n.trt", "rep"),
                 remove = FALSE)
-curve.fits <- read.csv("../data_sheets/NxCO2_curve_results.csv")
-curve.fits[98,1] <- "a_y_280_98"
+photo <- read.csv("../data_sheets/NxCO2_photo_data.csv")
 
 ###############################################################################
 ## Load propN functions
 ###############################################################################
 source("../../r_functions/propN_funcs.R")
+source("../../r_functions/stomatal_limitation.R")
 
 ###############################################################################
 ## Chlorophyll content
@@ -130,13 +130,15 @@ focal.area <- run.ij(path.imagej = ij.path,
 names(focal.area)[1:2] <- c("id", "focal.area")
 focal.area$id <- gsub("_focal", "", focal.area$id)
 
-## Compile data file into single file (to be used for stats/figs)
+###############################################################################
+## Compile data files into single file for analyses/figs
+###############################################################################
 compile_df <- focal.area %>% 
   full_join(biomass_area) %>%
   full_join(cn.data) %>%
   full_join(chlorophyll) %>%
   full_join(chl.leaf.area) %>%
-  full_join(curve.fits) %>%
+  full_join(photo) %>%
   separate(id, into = c("co2", "inoc", "n.trt", "rep"), remove = FALSE) %>%
   mutate(rep = str_pad(rep, width = 3, side = "left", pad = "0"),
          
@@ -153,9 +155,16 @@ compile_df <- focal.area %>%
          p.photo = p.rubisco + p.bioe + p.lightharv,
          p.structure = p_structure(lma = marea, narea = narea),
          
-         ## Tissue C and N biomasses
+         ## Nitrogen-water use tradeoffs
+         pnue = anet / narea,
+         iwue = anet / gsw,
+         narea.gs = narea / gsw,
+         vcmax.gs = vcmax25 / gsw,
+         
+         ## Tissue C and N biomass. Note that focal leaf is multiplied by 2
+         ## to account for chlorophyll focal leaf
          leaf.totaln = (nmass.tl * leaf.biomass) + 
-           (nmass.focal * focal.biomass) + (nmass.chl * chlor.biomass),
+           (nmass.focal * focal.biomass) + (nmass.focal * chlor.biomass),
          stem.totaln = nmass.ts * stem.biomass,
          root.totaln = nmass.tr * root.biomass,
          root.totalc = cmass.tr * root.biomass,
@@ -178,107 +187,6 @@ compile_df <- focal.area %>%
 write.csv(compile_df,
           "../data_sheets/NxCO2xI_compiled_datasheet.csv", row.names = FALSE)
 
-ggplot(data = compile_df, aes(x = narea, y = narea.chl)) +
-  geom_point(size = 4) +
-  geom_abline(slope = 1, intercept = 0) +
-  scale_x_continuous(limits = c(0,3), breaks = seq(0, 3, 1)) +
-  scale_y_continuous(limits = c(0,3), breaks = seq(0, 3, 1)) +
-  geom_smooth(method = 'lm') +
-  labs(x = expression("N"["area"]*" (gN m"^"-2"*")"),
-       y = expression("N"["area_chl"]*" (gN m"^"-2"*")")) +
-  theme_bw(base_size = 20)
-
-ggplot(data = subset(compile_df, marea.chl < 100), 
-       aes(x = marea, y = marea.chl)) +
-  geom_point(size = 2) +
-  geom_smooth(method = 'lm', size = 1) +
-  geom_abline(slope = 1, intercept = 0, size = 1) +
-  scale_x_continuous(limits = c(25, 100), breaks = seq(25, 100, 25)) +
-  scale_y_continuous(limits = c(25, 100), breaks = seq(25, 100, 25)) +
-  labs(x = expression("M"["area"]*" (g m"^"-2"*")"),
-       y = expression("M"["area_chl"]*" (g m"^"-2"*")")) +
-  theme_bw(base_size = 18)
 
 
-ggplot(data = subset(compile_df, co2 == "e"), 
-       aes(x = as.numeric(n.trt), y = ncost, fill = inoc)) +
-  geom_point(shape = 21, size = 4, alpha = 0.75) +
-  scale_fill_discrete(labels = c("no", "yes")) +
-  geom_smooth(method = 'lm') +
-  labs(x = "Soil nitrogen fertilization (ppm)",
-       y = expression("Carbon cost to acquire nitrogen (gC gN"^-1*")"),
-       fill = "Inoculation status") +
-  theme_bw(base_size = 18)
 
-ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
-                              y = narea, fill = co2)) +
-  geom_point(shape = 21, size = 4) +
-  geom_smooth(method = 'lm') +
-  facet_grid(~inoc)
-
-ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
-                              y = vcmax25, fill = co2)) +
-  geom_point(shape = 21, size = 4) +
-  geom_smooth(method = 'lm') +
-  facet_grid(~inoc)
-
-ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
-                              y = jmax25, fill = co2)) +
-  geom_point(shape = 21, size = 4) +
-  geom_smooth(method = 'lm', formula = y ~ poly(x,2)) +
-  facet_grid(~inoc)
-
-ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
-                              y = p.photo, fill = co2)) +
-  geom_point(shape = 21, size = 4) +
-  geom_smooth(method = 'lm') +
-  facet_grid(~inoc)
-
-ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
-                              y = p.structure, fill = co2)) +
-  geom_point(shape = 21, size = 4) +
-  geom_smooth(method = 'lm') +
-  facet_grid(~inoc)
-
-
-ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
-                              y = p.lightharv, fill = co2)) +
-  geom_point(shape = 21, size = 4) +
-  geom_smooth(method = 'lm') +
-  facet_grid(~inoc)
-
-ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
-                              y = marea, fill = co2)) +
-  geom_point(shape = 21, size = 4) +
-  geom_smooth(method = 'lm') +
-  facet_grid(~inoc)
-
-ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
-                              y = nmass.focal, fill = co2)) +
-  geom_point(shape = 21, size = 4) +
-  geom_smooth(method = 'lm') +
-  facet_grid(~inoc)
-
-ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
-                              y = nodule.biomass, fill = co2)) +
-  geom_point(shape = 21, size = 4, alpha = 0.5) +
-  geom_smooth(method = 'lm') +
-  facet_grid(~inoc)
-
-ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
-                              y = nodule.biomass / root.biomass, fill = co2)) +
-  geom_point(shape = 21, size = 4) +
-  geom_smooth(method = 'lm', formula = y ~ poly(x,2)) +
-  facet_grid(~inoc)
-
-ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
-                              y = total.biomass, fill = co2)) +
-  geom_point(shape = 21, size = 4) +
-  geom_smooth(method = 'lm') +
-  facet_grid(~inoc)
-
-ggplot(data = compile_df, aes(x = as.numeric(n.trt), 
-                              y = tla, fill = co2)) +
-  geom_point(shape = 21, size = 4) +
-  geom_smooth(method = 'lm') +
-  facet_grid(~inoc)

@@ -5,11 +5,67 @@ library(emmeans)
 library(ggpubr)
 
 ## Load file
-df <- read.csv("../data_sheets/NxCO2_datasheet.csv")
+df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv") %>%
+  mutate(n.trt = as.numeric(n.trt),
+         co2 = ifelse(co2 == "a", "amb", "elv"),
+         inoc = ifelse(inoc == "n", "no.inoc", "inoc"))
+  
+
+## Do I need to roll all chlorophyll leaves?
+narea.comp <- ggplot(data = df, aes(x = narea, y = narea.chl)) +
+  geom_point(size = 4, aes(fill = co2, shape =  inoc)) +
+  geom_abline(slope = 1, intercept = 0, size = 1) +
+  stat_cor(label.y = 2.9) +
+  stat_regline_equation(label.y = 2.8) +
+  scale_shape_manual(values = c(21, 22)) +
+  scale_x_continuous(limits = c(0,3), breaks = seq(0, 3, 1)) +
+  scale_y_continuous(limits = c(0,3), breaks = seq(0, 3, 1)) +
+  labs(x = expression("N"["area"]*" (gN m"^"-2"*")"),
+       y = expression("N"["area_chl"]*" (gN m"^"-2"*")")) +
+  theme_bw(base_size = 20)
+
+png("../working_drafts/figs/NxCO2xI_narea_chl_comp.png",
+    width = 8, height = 8, units = 'in', res = 600)
+narea.comp
+dev.off()
+
+marea.comp <- ggplot(data = subset(df, marea.chl < 100), 
+       aes(x = marea, y = marea.chl)) +
+  geom_point(size = 4, aes(fill = co2, shape =  inoc)) +
+  geom_abline(slope = 1, intercept = 0, size = 1) +
+  stat_cor(label.y = 100) +
+  stat_regline_equation(label.y = 97) +
+  scale_shape_manual(values = c(21, 22)) +
+  scale_x_continuous(limits = c(25, 100), breaks = seq(25, 100, 25)) +
+  scale_y_continuous(limits = c(25, 100), breaks = seq(25, 100, 25)) +
+  labs(x = expression("M"["area"]*" (g m"^"-2"*")"),
+       y = expression("M"["area_chl"]*" (g m"^"-2"*")")) +
+  theme_bw(base_size = 18)
+
+png("../working_drafts/figs/NxCO2xI_marea_chl_comp.png",
+    width = 8, height = 8, units = 'in', res = 600)
+marea.comp
+dev.off()
+
+
+nmass.comp <- ggplot(data = df, aes(x = nmass.focal, y = nmass.chl)) +
+  geom_point(size = 4, aes(fill = co2, shape =  inoc)) +
+  geom_abline(slope = 1, intercept = 0, size = 1) +
+  stat_cor(label.y = 0.075) +
+  stat_regline_equation(label.y = 0.069) +
+  scale_shape_manual(values = c(21, 22)) +
+  scale_x_continuous(limits = c(0, 0.075), breaks = seq(0, 0.075, 0.025)) +
+  scale_y_continuous(limits = c(0, 0.075), breaks = seq(0, 0.075, 0.025)) +
+  labs(x = expression("N"["mass"]*" (gN m"^"-2"*")"),
+       y = expression("N"["mass_chl"]*" (gN m"^"-2"*")")) +
+  theme_bw(base_size = 20)
+
+png("../working_drafts/NxCO2xI_nmass_chl_comp.png",
+    width = 8, height = 8, units = 'in', res = 600)
+nmass.comp
+dev.off()
 
 ## Preliminary models for LEMONTREE meeting
-df$vcmax25[91] <- NA
-
 vcmax25 <- lm(vcmax25 ~ as.factor(co2) * inoc * as.numeric(n.trt),
               data = df)
 summary(vcmax25)
