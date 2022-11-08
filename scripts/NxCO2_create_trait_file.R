@@ -190,7 +190,9 @@ compile_df <- id %>%
                                  0, nodule.biomass)) %>%
   arrange(rep) %>%
   select(-tla.full, -notes) %>%
-  mutate_if(is.numeric, round, 4)
+  mutate_if(is.numeric, round, 4) %>%
+  mutate(co2 = ifelse(co2 == "a", "amb", "elv"),
+         inoc = ifelse(inoc == "n", "no.inoc", "inoc"))
 
 write.csv(compile_df,
           "../data_sheets/NxCO2xI_compiled_datasheet.csv", row.names = FALSE)
