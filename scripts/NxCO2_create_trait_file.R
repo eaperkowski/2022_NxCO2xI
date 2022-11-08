@@ -160,6 +160,10 @@ compile_df <- id %>%
          narea.gs = narea / gsw,
          vcmax.gs = vcmax25 / gsw,
          
+         ## stomatal limitation
+         stomlim = stomatal_limitation(A_net = anet, Vcmax = vcmax25, leaf.temp = tleaf,
+                                       Rd.meas = TRUE, Rd = rd25, temp = "C")[[5]],
+         
          ## Tissue C and N biomass. Note that focal leaf is multiplied by 2
          ## to account for chlorophyll focal leaf
          leaf.totaln = (nmass.tl * leaf.biomass) + 
