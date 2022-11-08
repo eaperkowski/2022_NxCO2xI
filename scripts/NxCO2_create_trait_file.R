@@ -12,9 +12,7 @@ library(emmeans)
 ## Import files
 ###############################################################################
 biomass_area <- read.csv("../data_sheets/NxCO2_tla_biomass_data.csv")
-ids <- data.frame(id = biomass_area$id)
-ids <- separate(ids, id, sep = "_", into = c("co2", "inoc", "n.trt", "rep"),
-                remove = FALSE)
+id <- read.csv("../data_sheets/NxCO2_id_datasheet.csv")
 photo <- read.csv("../data_sheets/NxCO2_photo_data.csv")
 
 ###############################################################################
@@ -59,7 +57,7 @@ imagepath.chlLeaf <- "/Users/eaperkowski/git/2022_NxCO2xI/leaf_area/chl_leaf_sca
 chlor.disk.area <- run.ij(path.imagej = ij.path,
                          set.directory = imagepath.disk,
                          distance.pixel = 117.9034,
-                         known.distance = 1, low.size = 0.05)
+                         known.distance = 1, low.size = 0.01)
 chlor.leaf.area <- run.ij(path.imagej = ij.path,
                           set.directory = imagepath.chlLeaf,
                           distance.pixel = 117.9034,
@@ -133,7 +131,8 @@ focal.area$id <- gsub("_focal", "", focal.area$id)
 ###############################################################################
 ## Compile data files into single file for analyses/figs
 ###############################################################################
-compile_df <- focal.area %>% 
+compile_df <- id %>%
+  full_join(focal.area) %>% 
   full_join(biomass_area) %>%
   full_join(cn.data) %>%
   full_join(chlorophyll) %>%
@@ -179,10 +178,14 @@ compile_df <- focal.area %>%
          ncost = cbg / wpn,
          
          ## Whole plant growth
-         tla = tla + focal.area + chl.leaf.area + disk.area,
+         tla.full = tla + focal.area + chl.leaf.area + disk.area,
+         tla.full = ifelse(id == "e_y_70_10",
+                           tla + focal.area + focal.area, tla.full),
+         tla = tla.full,
          nodule.biomass = ifelse(inoc == "n" & is.na(nodule.biomass),
                                  0, nodule.biomass)) %>%
-  arrange(rep)
+  arrange(rep) %>%
+  select(-tla.full, -notes)
 
 write.csv(compile_df,
           "../data_sheets/NxCO2xI_compiled_datasheet.csv", row.names = FALSE)
