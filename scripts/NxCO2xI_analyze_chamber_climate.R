@@ -21,7 +21,9 @@ chamber.clim <- lapply(chamber.data, read.csv) %>%
   mutate(date = ymd_hms(date.time))
 
 
-## Read in HOBO sensor temp data
+############ 
+##Read in HOBO sensor temp data 
+############
 hobo.data <- list.files(path = "../hobo_data",
                            pattern = "\\.csv$", recursive = TRUE,
                            full.names = TRUE)
@@ -60,9 +62,10 @@ ggplot() +
             color = "blue") +
   facet_wrap(~chamber)
 
-
+#############
 ## Filter chamber.clim to dates of experiment, tack on 
 ## whether this was for elevated or ambient CO2 iteration
+#############
 eco2 <- chamber.clim %>%
   filter(date > "2022-06-18" & date < "2022-08-05") %>%
   mutate(co2.treat = "elevated")
@@ -83,6 +86,16 @@ trt.night.means <- eco2 %>% full_join(aco2) %>%
 
 trt.day.means <- eco2 %>% full_join(aco2) %>%
   filter(temp.set != 17) %>%
+  group_by(co2.treat, chamber) %>%
+  summarize(temp = mean(temp.meas),
+            rh = mean(humidity.meas)) %>%
+  ungroup(chamber) %>%
+  summarize(temp.mean = mean(temp),
+            temp.sd = sd(temp),
+            rh.mean = mean(rh),
+            rh.sd = sd(rh))
+
+trt.all.means <- eco2 %>% full_join(aco2) %>%
   group_by(co2.treat, chamber) %>%
   summarize(temp = mean(temp.meas),
             rh = mean(humidity.meas)) %>%
