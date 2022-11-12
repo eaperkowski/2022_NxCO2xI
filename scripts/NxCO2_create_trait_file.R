@@ -45,9 +45,10 @@ chlor.df <- filter(chlor.df, rep != "12")
 chlor.df$rep[chlor.df$rep == "12_real"] <- "12"
 
 # Replace rep number with full plant ID
-chlor.df <- chlor.df %>%
-  full_join(ids) %>%
-  dplyr::select(id, abs.649:cv.665)
+chlor.df <- id %>%
+  separate(id, c("co2", "inoc", "n.trt", "rep"), remove = FALSE) %>%
+  full_join(chlor.df) %>%
+  dplyr::select(id, abs.649, abs.665)
 
 ## Calculate leaf disk area
 ij.path <- "/Applications/ImageJ.app"
@@ -190,7 +191,9 @@ compile_df <- id %>%
                                  0, nodule.biomass)) %>%
   arrange(rep) %>%
   select(-tla.full, -notes) %>%
-  mutate_if(is.numeric, round, 4) %>%
+  mutate(across(.cols = c(nmass.focal:chlB.ugml,
+                          marea:ncost),
+         round, digits = 4)) %>%
   mutate(co2 = ifelse(co2 == "a", "amb", "elv"),
          inoc = ifelse(inoc == "n", "no.inoc", "inoc"))
 
