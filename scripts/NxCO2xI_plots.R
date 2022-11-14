@@ -14,6 +14,8 @@ emm_options(opt.digits = FALSE)
 df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv",
                na.strings = "NA") %>%
   mutate(n.trt = as.numeric(n.trt)) %>%
+  dplyr::filter(id != "a_n_0_109" & id != "a_n_0_112" & id != "e_n_70_47" &
+                  id != "a_n_70_118" & id != "a_n_105_122" & id != "a_n_280_135") %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
 ## Add colorblind friendly palette
@@ -23,7 +25,7 @@ cbbPalette3 <- c("#DDAA33", "#004488", "#BB5566", "#555555")
 ## Ncost regression line prep
 ##########################################################################
 ## Copy removed outliers and lmer fxn
-df$ncost[c(110,111)] <- NA
+df$ncost[c(108,109)] <- NA
 ncost <- lmer(log(ncost) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 shapiro.test(residuals(ncost))
 Anova(ncost)
@@ -76,7 +78,7 @@ ncost.regline <- ncost.ntrt.0 %>% full_join(ncost.ntrt.70) %>%
   full_join(ncost.ntrt.630) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(ncost.full) %>%
-  select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
   mutate(linetype = ifelse(co2.inoc == "elv_inoc", "dashed", "solid"))
 
 ##########################################################################
@@ -117,10 +119,7 @@ ncost.plot
 ##########################################################################
 ## Belowground C regression line prep
 ##########################################################################
-## Copy removed outliers and lmer fxn
-df$cbg[c(68, 70, 61)] <- NA
-
-cbg <- lmer(cbg ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+cbg <- lmer(log(cbg) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 shapiro.test(residuals(cbg))
 outlierTest(cbg)
 
@@ -172,7 +171,7 @@ cbg.regline <- cbg.ntrt.0 %>% full_join(cbg.ntrt.70) %>%
   full_join(cbg.ntrt.630) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(cbg.full) %>%
-  select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
 
 ##########################################################################
 ## Belowground C plot
@@ -181,10 +180,10 @@ bgc.plot <- ggplot(data = df, aes(x = n.trt, y = cbg)) +
   geom_jitter(aes(fill = co2.inoc),
               size = 3, shape = 21, alpha = 0.75) +
   geom_smooth(data = subset(cbg.regline, co2.inoc != "overall"),
-              aes(color = co2.inoc, y = emmean), 
+              aes(color = co2.inoc, y = response), 
               size = 2, se = FALSE) +
   geom_ribbon(data = subset(cbg.regline, co2.inoc != "overall"),
-              aes(fill = co2.inoc, y = emmean, 
+              aes(fill = co2.inoc, y = response, 
                   ymin = lower.CL, ymax = upper.CL), 
               size = 2, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
@@ -266,7 +265,7 @@ wpn.regline <- wpn.ntrt.0 %>% full_join(wpn.ntrt.70) %>%
   full_join(wpn.ntrt.630) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(wpn.full) %>%
-  select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
 
 ##########################################################################
 ## Whole plant N plot
@@ -358,7 +357,7 @@ tla.regline <- tla.ntrt.0 %>% full_join(tla.ntrt.70) %>%
   full_join(tla.ntrt.630) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(tla.full) %>%
-  select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
 
 ##########################################################################
 ## Total leaf area plot
@@ -451,7 +450,7 @@ tbio.regline <- tbio.ntrt.0 %>% full_join(tbio.ntrt.70) %>%
   full_join(tbio.ntrt.630) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(tbio.full) %>%
-  select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
 
 ##########################################################################
 ## Total biomass plot
@@ -1866,10 +1865,11 @@ vcmax.gs.plot
 ## Figure 1: whole plant plots
 ##########################################################################
 png("../working_drafts/figs/NxCO2xI_fig1_wholePlant.png",
-    height = 8, width = 12, units = "in", res = 600)
-ggarrange(ncost.plot, tla.plot, tbio.plot, ncol = 2, nrow = 2,
+    height = 12, width = 7.5, units = "in", res = 600)
+ggarrange(ncost.plot, tla.plot, tbio.plot, ncol = 1, nrow = 3,
           common.legend = TRUE, align = "hv",
-          legend = "right")
+          legend = "right", labels = "AUTO",
+          font.label = list(size = 20))
 dev.off()
 
 ##########################################################################

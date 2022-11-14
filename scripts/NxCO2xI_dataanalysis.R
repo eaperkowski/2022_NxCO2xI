@@ -40,8 +40,10 @@ Anova(ncost)
 r.squaredGLMM(ncost)
 
 # Pairwise comparisons
+test(emtrends(ncost, ~1, "n.trt", regrid = "response"))
+
 ## Two-way interaction between CO2 and soil N
-test(emtrends(ncost, pairwise~co2*inoc, "n.trt"))
+cld(emtrends(ncost, pairwise~co2*inoc, "n.trt"))
 ## Negative effect of increasing soil N is greater in ambient CO2
 
 ## Two-way interaction between inoc and soil N
@@ -66,6 +68,100 @@ emmeans(ncost, pairwise~inoc)
 ## Individual effect of soil N
 test(emtrends(ncost, ~1, "n.trt"))
 ## Increasing soil N decreases Ncost
+
+##########################################################################
+## Belowground carbon biomass
+##########################################################################
+cbg <- lmer(cbg ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(cbg)
+qqnorm(residuals(cbg))
+qqline(residuals(cbg))
+densityPlot(residuals(cbg))
+shapiro.test(residuals(cbg))
+outlierTest(cbg)
+
+# Model results
+summary(cbg)
+Anova(cbg)
+r.squaredGLMM(cbg)
+
+# Pairwise comparisons
+## Two-way interaction between CO2 and soil N
+test(emtrends(cbg, pairwise~inoc, "n.trt"))
+## Positive effect of increasing soil N is greater in uninoculated pots
+
+## Two-way interaction between inoc and soil N
+test(emtrends(cbg, pairwise~co2, "n.trt"))
+## Negativ effect of increasing soil N is marginally greater in elevated CO2
+
+## Two-way interaction between CO2 and inoc
+cld(emmeans(cbg, pairwise~inoc*co2, type = "response"))
+## There is a stronger %difference between inoculation status at ambient
+## CO2 than at elevated CO2.
+
+## Individual effect of CO2
+emmeans(cbg, pairwise~co2)
+## elevated co2 generally has higher values
+
+## Individual effect of inoc
+emmeans(cbg, pairwise~inoc)
+## Inoculated pots generally had higher values
+
+## Individual effect of soil N
+test(emtrends(cbg, ~1, "n.trt", regrid = "response"))
+emmeans(cbg, ~1, "n.trt", at = list(n.trt = 0), type = "response")
+## Increasing soil N increases cbg
+## Eq: 0.0023x + 0.469 
+
+##########################################################################
+## Whole plant nitrogen
+##########################################################################
+wpn <- lmer(sqrt(wpn) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(wpn)
+qqnorm(residuals(wpn))
+qqline(residuals(wpn))
+densityPlot(residuals(wpn))
+shapiro.test(residuals(wpn))
+outlierTest(wpn)
+
+# Model results
+summary(wpn)
+Anova(wpn)
+r.squaredGLMM(wpn)
+
+# Pairwise comparisons
+## Two-way interaction between CO2 and soil N
+test(emtrends(wpn, pairwise~inoc, "n.trt"))
+## Positive effect of increasing soil N is greater in uninoculated pots
+
+## Two-way interaction between inoc and soil N
+test(emtrends(wpn, pairwise~co2, "n.trt"))
+## Negativ effect of increasing soil N is greater in non-inoculated pots
+
+## Two-way interaction between CO2 and inoc
+cld(emmeans(wpn, pairwise~inoc*co2, type = "response"))
+## There is a stronger %difference between inoculation status at elevated
+## CO2 than at ambient CO2. ## Specifically, noninoculated pots grown under 
+## ambient CO2 had 9.5% higher Ncost, while noninoculated pots grown under
+## elevated CO2 had 27.6% higher Ncost. Perhaps due to higher Ndemand?
+
+## Individual effect of CO2
+emmeans(wpn, pairwise~co2)
+## elevated co2 generally has higher Ncost
+
+## Individual effect of inoc
+emmeans(wpn, pairwise~inoc)
+## Noninoculated pots generally had higher Ncost
+
+## Individual effect of soil N
+test(emtrends(wpn, ~1, "n.trt", regrid = "response"))
+emmeans(wpn, ~1, "n.trt", at = list(n.trt = 0), type = "response")
+## Increasing soil N decreases Ncost
+
 
 ##########################################################################
 ## Total leaf area
@@ -173,15 +269,15 @@ r.squaredGLMM(narea)
 # Post-hoc tests
 # Interaction between CO2 and n.trt
 test(emtrends(narea, pairwise~co2, "n.trt")) 
-# Stronger stimulation in Narea with increasing soil N under ambient CO2
+ # Stronger stimulation in Narea with increasing soil N under ambient CO2
 
 # Interaction between inoc and n.trt
 test(emtrends(narea, pairwise~inoc, "n.trt"))
 # Stronger stimulation in Narea with increasing soil N in non-inoculated pots
 
 # Interaction between CO2 and inoc
-emmeans(narea, pairwise~inoc*co2)
-# Stronger stimulation in Narea in inoculated pots grown under elevated CO2
+cld(emmeans(narea, pairwise~inoc*co2))
+ # Stronger stimulation in Narea in inoculated pots grown under elevated CO2
 
 # Individual effect of co2
 emmeans(narea, pairwise~co2)
@@ -889,7 +985,7 @@ test(emtrends(p.light, ~1, "n.trt"))
 ##########################################################################
 ncost.coefs <- data.frame(summary(ncost)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.ncost = round(Estimate, digits = 3),
+         coef.ncost = format(Estimate, scientific = TRUE, digits = 3),
          se.ncost = round(Std..Error, digits = 3),
          t.value.ncost = round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.ncost, se.ncost, t.value.ncost) %>%
@@ -906,18 +1002,68 @@ ncost.table <- data.frame(Anova(ncost)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.ncost:pval.ncost, round, digits = 3),
-         coef.ncost = ifelse(coef.ncost <0.001 & coef.ncost >= 0, 
-                             "<0.001", coef.ncost),
+         across(chisq.ncost:pval.ncost, round, digits = 3),
          chisq.ncost = ifelse(chisq.ncost <0.001 & chisq.ncost >= 0, 
                               "<0.001", chisq.ncost),
          pval.ncost = ifelse(pval.ncost <0.001 & pval.ncost >= 0, 
                              "<0.001", pval.ncost)) %>%
   arrange(treatment)
 
+cbg.coefs <- data.frame(summary(cbg)$coefficient) %>%
+  mutate(treatment = row.names(.),
+         coef.cbg = format(Estimate, scientific = TRUE, digits = 3),
+         se.cbg = round(Std..Error, digits = 3),
+         t.value.cbg = round(t.value, digits = 3)) %>%
+  dplyr::select(treatment, coef.cbg, se.cbg, t.value.cbg) %>%
+  mutate(treatment = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
+                       "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")) %>%
+  dplyr::select(treatment, coef.cbg) %>%
+  print(., row.names = FALSE)
+
+cbg.table <- data.frame(Anova(cbg)) %>%
+  mutate(treatment = row.names(.)) %>%
+  full_join(cbg.coefs) %>%
+  dplyr::select(treatment, df = Df, coef.cbg, 
+                chisq.cbg = Chisq, pval.cbg = Pr..Chisq.) %>%
+  mutate(treatment = factor(treatment, 
+                            levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
+                                       "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
+         across(chisq.cbg:pval.cbg, round, digits = 3),
+         chisq.cbg = ifelse(chisq.cbg <0.001 & chisq.cbg >= 0, 
+                              "<0.001", chisq.cbg),
+         pval.cbg = ifelse(pval.cbg <0.001 & pval.cbg >= 0, 
+                             "<0.001", pval.cbg)) %>%
+  arrange(treatment)
+
+wpn.coefs <- data.frame(summary(wpn)$coefficient) %>%
+  mutate(treatment = row.names(.),
+         coef.wpn = format(Estimate, scientific = TRUE, digits = 3),
+         se.wpn = round(Std..Error, digits = 3),
+         t.value.wpn = round(t.value, digits = 3)) %>%
+  dplyr::select(treatment, coef.wpn, se.wpn, t.value.wpn) %>%
+  mutate(treatment = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
+                       "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")) %>%
+  dplyr::select(treatment, coef.wpn) %>%
+  print(., row.names = FALSE)
+
+wpn.table <- data.frame(Anova(wpn)) %>%
+  mutate(treatment = row.names(.)) %>%
+  full_join(wpn.coefs) %>%
+  dplyr::select(treatment, df = Df, coef.wpn, 
+                chisq.wpn = Chisq, pval.wpn = Pr..Chisq.) %>%
+  mutate(treatment = factor(treatment, 
+                            levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
+                                       "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
+         across(chisq.wpn:pval.wpn, round, digits = 3),
+         chisq.wpn = ifelse(chisq.wpn <0.001 & chisq.wpn >= 0, 
+                            "<0.001", chisq.wpn),
+         pval.wpn = ifelse(pval.wpn <0.001 & pval.wpn >= 0, 
+                           "<0.001", pval.wpn)) %>%
+  arrange(treatment)
+
 tla.coefs <- data.frame(summary(tla)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.tla = round(Estimate, digits = 3),
+         coef.tla = format(Estimate, scientific = TRUE, digits = 3),
          se.tla = round(Std..Error, digits = 3),
          t.value.tla = round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.tla) %>%
@@ -933,9 +1079,7 @@ tla.table <- data.frame(Anova(tla)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.tla:pval.tla, round, digits = 3),
-         coef.tla = ifelse(coef.tla <0.001 & coef.tla >= 0, 
-                           "<0.001", coef.tla),
+         across(chisq.tla:pval.tla, round, digits = 3),
          chisq.tla = ifelse(chisq.tla <0.001 & chisq.tla >= 0, 
                             "<0.001", chisq.tla),
          pval.tla = ifelse(pval.tla <0.001 & pval.tla >= 0, 
@@ -944,7 +1088,7 @@ tla.table <- data.frame(Anova(tla)) %>%
 
 tbio.coefs <- data.frame(summary(tbio)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.tbio = round(Estimate, digits = 3),
+         coef.tbio = format(Estimate, scientific = TRUE, digits = 3),
          se.tbio = round(Std..Error, digits = 3),
          t.value.tbio = round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.tbio) %>%
@@ -960,16 +1104,15 @@ tbio.table <- data.frame(Anova(tbio)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.tbio:pval.tbio, round, digits = 3),
-         coef.tbio = ifelse(coef.tbio < 0.001 & coef.tbio >= 0, 
-                            "<0.001", coef.tbio),
+         across(chisq.tbio:pval.tbio, round, digits = 3),
          chisq.tbio = ifelse(chisq.tbio < 0.001 & chisq.tbio >= 0, 
                              "<0.001", chisq.tbio),
          pval.tbio = ifelse(pval.tbio < 0.001 & pval.tbio >= 0, 
                             "<0.001", pval.tbio)) %>%
   arrange(treatment)
 
-table1 <- ncost.table %>% full_join(tla.table) %>% full_join(tbio.table)
+table1 <- ncost.table %>% full_join(cbg.table) %>% full_join(wpn.table) %>%
+  full_join(tla.table) %>% full_join(tbio.table)
 write.csv(table1, file = "../working_drafts/tables/NxCO2xI_table1_WP.csv",
          row.names = FALSE)
 
