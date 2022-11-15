@@ -269,7 +269,7 @@ r.squaredGLMM(narea)
 # Post-hoc tests
 # Interaction between CO2 and n.trt
 test(emtrends(narea, pairwise~co2, "n.trt")) 
- # Stronger stimulation in Narea with increasing soil N under ambient CO2
+# Stronger stimulation in Narea with increasing soil N under ambient CO2
 
 # Interaction between inoc and n.trt
 test(emtrends(narea, pairwise~inoc, "n.trt"))
@@ -978,8 +978,6 @@ emmeans(p.light, pairwise~inoc)
 test(emtrends(p.light, ~1, "n.trt"))
 ## Increasing soil N fertilization decreases p.bioe
 
-
-
 ##########################################################################
 ## Table 1: Whole plant traits
 ##########################################################################
@@ -1121,7 +1119,7 @@ write.csv(table1, file = "../working_drafts/tables/NxCO2xI_table1_WP.csv",
 ##########################################################################
 narea.coefs <- data.frame(summary(narea)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.narea = round(Estimate, digits = 3),
+         coef.narea = format(Estimate, scientific = TRUE, digits = 3),
          se.narea = round(Std..Error, digits = 3),
          t.value.narea = round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.narea, se.narea, t.value.narea) %>%
@@ -1138,9 +1136,7 @@ narea.table <- data.frame(Anova(narea)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.narea:pval.narea, round, digits = 3),
-         coef.narea = ifelse(coef.narea <0.001 & coef.narea >= 0, 
-                             "<0.001", coef.narea),
+         across(chisq.narea:pval.narea, round, digits = 3),
          chisq.narea = ifelse(chisq.narea <0.001 & chisq.narea >= 0, 
                               "<0.001", chisq.narea),
          pval.narea = ifelse(pval.narea <0.001 & pval.narea >= 0, 
@@ -1149,7 +1145,7 @@ narea.table <- data.frame(Anova(narea)) %>%
 
 nmass.coefs <- data.frame(summary(nmass)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.nmass = round(Estimate, digits = 3),
+         coef.nmass = format(Estimate, scientific = TRUE, digits = 3),
          se.nmass = round(Std..Error, digits = 3),
          t.value.nmass = round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.nmass, se.nmass, t.value.nmass) %>%
@@ -1166,9 +1162,7 @@ nmass.table <- data.frame(Anova(nmass)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.nmass:pval.nmass, round, digits = 3),
-         coef.nmass = ifelse(coef.nmass <0.001 & coef.nmass >= 0, 
-                             "<0.001", coef.nmass),
+         across(chisq.nmass:pval.nmass, round, digits = 3),
          chisq.nmass = ifelse(chisq.nmass <0.001 & chisq.nmass >= 0, 
                               "<0.001", chisq.nmass),
          pval.nmass = ifelse(pval.nmass <0.001 & pval.nmass >= 0, 
@@ -1177,7 +1171,7 @@ nmass.table <- data.frame(Anova(nmass)) %>%
 
 marea.coefs <- data.frame(summary(marea)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.marea = round(Estimate, digits = 3),
+         coef.marea = format(Estimate, scientific = TRUE, digits = 3),
          se.marea = round(Std..Error, digits = 3),
          t.value.marea = round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.marea, se.marea, t.value.marea) %>%
@@ -1194,9 +1188,7 @@ marea.table <- data.frame(Anova(marea)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.marea:pval.marea, round, digits = 3),
-         coef.marea = ifelse(coef.marea <0.001 & coef.marea >= 0, 
-                             "<0.001", coef.marea),
+         across(chisq.marea:pval.marea, round, digits = 3),
          chisq.marea = ifelse(chisq.marea <0.001 & chisq.marea >= 0, 
                               "<0.001", chisq.marea),
          pval.marea = ifelse(pval.marea <0.001 & pval.marea >= 0, 
@@ -1204,7 +1196,7 @@ marea.table <- data.frame(Anova(marea)) %>%
   arrange(treatment)
 
 table2 <- narea.table %>% full_join(nmass.table) %>% full_join(marea.table)
-write.csv(table1, file = "../working_drafts/tables/NxCO2xI_table2_leafN.csv",
+write.csv(table2, file = "../working_drafts/tables/NxCO2xI_table2_leafN.csv",
           row.names = FALSE)
 
 ##########################################################################
@@ -1212,7 +1204,7 @@ write.csv(table1, file = "../working_drafts/tables/NxCO2xI_table2_leafN.csv",
 ##########################################################################
 vcmax.coefs <- data.frame(summary(vcmax)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.vcmax = round(Estimate, digits = 3),
+         coef.vcmax = format(Estimate, scientific = TRUE, digits = 3),
          se.vcmax = round(Std..Error, digits = 3),
          t.value.vcmax = round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.vcmax, se.vcmax, t.value.vcmax) %>%
@@ -1229,9 +1221,7 @@ vcmax.table <- data.frame(Anova(vcmax)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.vcmax:pval.vcmax, round, digits = 3),
-         coef.vcmax = ifelse(coef.vcmax < 0.001 & coef.vcmax >= 0, 
-                             "<0.001", coef.vcmax),
+         across(chisq.vcmax:pval.vcmax, round, digits = 3),
          chisq.vcmax = ifelse(chisq.vcmax < 0.001 & chisq.vcmax >= 0, 
                               "<0.001", chisq.vcmax),
          pval.vcmax = ifelse(pval.vcmax < 0.001 & pval.vcmax >= 0, 
@@ -1240,7 +1230,7 @@ vcmax.table <- data.frame(Anova(vcmax)) %>%
 
 jmax.coefs <- data.frame(summary(jmax)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.jmax = round(Estimate, digits = 3),
+         coef.jmax = format(Estimate, scientific = TRUE, digits = 3),
          se.jmax = round(Std..Error, digits = 3),
          t.value.jmax = round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.jmax, se.jmax, t.value.jmax) %>%
@@ -1257,9 +1247,7 @@ jmax.table <- data.frame(Anova(jmax)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.jmax:pval.jmax, round, digits = 3),
-         coef.jmax = ifelse(coef.jmax < 0.001 & coef.jmax >= 0, 
-                             "<0.001", coef.jmax),
+         across(chisq.jmax:pval.jmax, round, digits = 3),
          chisq.jmax = ifelse(chisq.jmax < 0.001 & chisq.jmax >= 0, 
                               "<0.001", chisq.jmax),
          pval.jmax = ifelse(pval.jmax < 0.001 & pval.jmax >= 0, 
@@ -1268,7 +1256,7 @@ jmax.table <- data.frame(Anova(jmax)) %>%
 
 jvmax.coefs <- data.frame(summary(jvmax)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.jvmax = round(Estimate, digits = 3),
+         coef.jvmax = format(Estimate, scientific = TRUE, digits = 3),
          se.jvmax = round(Std..Error, digits = 3),
          t.value.jvmax = round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.jvmax, se.jvmax, t.value.jvmax) %>%
@@ -1285,9 +1273,7 @@ jvmax.table <- data.frame(Anova(jvmax)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.jvmax:pval.jvmax, round, digits = 3),
-         coef.jvmax = ifelse(coef.jvmax < 0.001 & coef.jvmax >= 0, 
-                            "<0.001", coef.jvmax),
+         across(chisq.jvmax:pval.jvmax, round, digits = 3),
          chisq.jvmax = ifelse(chisq.jvmax < 0.001 & chisq.jvmax >= 0, 
                              "<0.001", chisq.jvmax),
          pval.jvmax = ifelse(pval.jvmax < 0.001 & pval.jvmax >= 0, 
@@ -1296,7 +1282,7 @@ jvmax.table <- data.frame(Anova(jvmax)) %>%
 
 gsw.coefs <- data.frame(summary(gsw)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.gsw = round(Estimate, digits = 3),
+         coef.gsw = format(Estimate, scientific = TRUE, digits = 3),
          se.gsw = round(Std..Error, digits = 3),
          t.value.gsw = round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.gsw, se.gsw, t.value.gsw) %>%
@@ -1313,9 +1299,7 @@ gsw.table <- data.frame(Anova(gsw)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.gsw:pval.gsw, round, digits = 3),
-         coef.gsw = ifelse(coef.gsw < 0.001 & coef.gsw >= 0, 
-                             "<0.001", coef.gsw),
+         across(chisq.gsw:pval.gsw, round, digits = 3),
          chisq.gsw = ifelse(chisq.gsw < 0.001 & chisq.gsw >= 0, 
                               "<0.001", chisq.gsw),
          pval.gsw = ifelse(pval.gsw < 0.001 & pval.gsw >= 0, 
@@ -1324,7 +1308,7 @@ gsw.table <- data.frame(Anova(gsw)) %>%
 
 cica.coefs <- data.frame(summary(cica)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.cica = round(Estimate, digits = 3),
+         coef.cica = format(Estimate, scientific = TRUE, digits = 3),
          se.cica = round(Std..Error, digits = 3),
          t.value.cica = round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.cica, se.cica, t.value.cica) %>%
@@ -1341,9 +1325,7 @@ cica.table <- data.frame(Anova(cica)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.cica:pval.cica, round, digits = 3),
-         coef.cica = ifelse(coef.cica < 0.001 & coef.cica >= 0, 
-                           "<0.001", coef.cica),
+         across(chisq.cica:pval.cica, round, digits = 3),
          chisq.cica = ifelse(chisq.cica < 0.001 & chisq.cica >= 0, 
                             "<0.001", chisq.cica),
          pval.cica = ifelse(pval.cica < 0.001 & pval.cica >= 0, 
@@ -1352,7 +1334,7 @@ cica.table <- data.frame(Anova(cica)) %>%
 
 l.coefs <- data.frame(summary(stomlim)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.l = round(Estimate, digits = 3),
+         coef.l = format(Estimate, scientific = TRUE, digits = 3),
          se.l = round(Std..Error, digits = 3),
          t.value.l = round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.l, se.l, t.value.l) %>%
@@ -1369,9 +1351,7 @@ l.table <- data.frame(Anova(stomlim)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.l:pval.l, round, digits = 3),
-         coef.l = ifelse(coef.l < 0.001 & coef.l >= 0, 
-                            "<0.001", coef.l),
+         across(chisq.l:pval.l, round, digits = 3),
          chisq.l = ifelse(chisq.l < 0.001 & chisq.l >= 0, 
                              "<0.001", chisq.l),
          pval.l = ifelse(pval.l < 0.001 & pval.l >= 0, 
@@ -1388,7 +1368,7 @@ write.csv(table3, file = "../working_drafts/tables/NxCO2xI_table3_gasEx.csv",
 ##########################################################################
 p.rub.coefs <- data.frame(summary(p.rub)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.p.rub = round(Estimate, digits = 3),
+         coef.p.rub = format(Estimate, scientific = TRUE, digits = 3),
          se.p.rub = round(Std..Error, digits = 3),
          t.value.p.rub = round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.p.rub, se.p.rub, t.value.p.rub) %>%
@@ -1405,9 +1385,7 @@ p.rub.table <- data.frame(Anova(p.rub)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.p.rub:pval.p.rub, round, digits = 3),
-         coef.p.rub = ifelse(coef.p.rub < 0.001 & coef.p.rub >= 0, 
-                            "<0.001", coef.p.rub),
+         across(chisq.p.rub:pval.p.rub, round, digits = 3),
          chisq.p.rub = ifelse(chisq.p.rub < 0.001 & chisq.p.rub >= 0, 
                              "<0.001", chisq.p.rub),
          pval.p.rub = ifelse(pval.p.rub < 0.001 & pval.p.rub >= 0, 
@@ -1416,7 +1394,7 @@ p.rub.table <- data.frame(Anova(p.rub)) %>%
 
 p.bioe.coefs <- data.frame(summary(p.bioe)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.p.bioe = round(Estimate, digits = 3),
+         coef.p.bioe = format(Estimate, scientific = TRUE, digits = 3),
          se.p.bioe = round(Std..Error, digits = 3),
          t.value.p.bioe = round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.p.bioe, se.p.bioe, t.value.p.bioe) %>%
@@ -1433,9 +1411,7 @@ p.bioe.table <- data.frame(Anova(p.bioe)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.p.bioe:pval.p.bioe, round, digits = 3),
-         coef.p.bioe = ifelse(coef.p.bioe < 0.001 & coef.p.bioe >= 0, 
-                             "<0.001", coef.p.bioe),
+         across(chisq.p.bioe:pval.p.bioe, round, digits = 3),
          chisq.p.bioe = ifelse(chisq.p.bioe < 0.001 & chisq.p.bioe >= 0, 
                               "<0.001", chisq.p.bioe),
          pval.p.bioe = ifelse(pval.p.bioe < 0.001 & pval.p.bioe >= 0, 
@@ -1444,7 +1420,7 @@ p.bioe.table <- data.frame(Anova(p.bioe)) %>%
 
 p.light.coefs <- data.frame(summary(p.light)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.p.light = round(Estimate, digits = 3),
+         coef.p.light = format(Estimate, scientific = TRUE, digits = 3),
          se.p.light = round(Std..Error, digits = 3),
          t.value.p.light= round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.p.light, se.p.light, t.value.p.light) %>%
@@ -1461,9 +1437,7 @@ p.light.table <- data.frame(Anova(p.light)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.p.light:pval.p.light, round, digits = 3),
-         coef.p.light = ifelse(coef.p.light < 0.001 & coef.p.light >= 0, 
-                              "<0.001", coef.p.light),
+         across(chisq.p.light:pval.p.light, round, digits = 3),
          chisq.p.light = ifelse(chisq.p.light < 0.001 & chisq.p.light >= 0, 
                                "<0.001", chisq.p.light),
          pval.p.light = ifelse(pval.p.light < 0.001 & pval.p.light >= 0, 
@@ -1472,7 +1446,7 @@ p.light.table <- data.frame(Anova(p.light)) %>%
 
 p.photo.coefs <- data.frame(summary(p.photo)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.p.photo = round(Estimate, digits = 3),
+         coef.p.photo = format(Estimate, scientific = TRUE, digits = 3),
          se.p.photo = round(Std..Error, digits = 3),
          t.value.p.photo = round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.p.photo, se.p.photo, t.value.p.photo) %>%
@@ -1489,9 +1463,7 @@ p.photo.table <- data.frame(Anova(p.photo)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.p.photo:pval.p.photo, round, digits = 3),
-         coef.p.photo = ifelse(coef.p.photo < 0.001 & coef.p.photo >= 0, 
-                              "<0.001", coef.p.photo),
+         across(chisq.p.photo:pval.p.photo, round, digits = 3),
          chisq.p.photo = ifelse(chisq.p.photo < 0.001 & chisq.p.photo >= 0, 
                                "<0.001", chisq.p.photo),
          pval.p.photo = ifelse(pval.p.photo < 0.001 & pval.p.photo >= 0, 
@@ -1500,7 +1472,7 @@ p.photo.table <- data.frame(Anova(p.photo)) %>%
 
 p.str.coefs <- data.frame(summary(p.structure)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.p.str = round(Estimate, digits = 3),
+         coef.p.str = format(Estimate, scientific = TRUE, digits = 3),
          se.p.str = round(Std..Error, digits = 3),
          t.value.p.str = round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.p.str, se.p.str, t.value.p.str) %>%
@@ -1517,9 +1489,7 @@ p.str.table <- data.frame(Anova(p.structure)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.p.str:pval.p.str, round, digits = 3),
-         coef.p.str = ifelse(coef.p.str < 0.001 & coef.p.str >= 0, 
-                               "<0.001", coef.p.str),
+         across(chisq.p.str:pval.p.str, round, digits = 3),
          chisq.p.str = ifelse(chisq.p.str < 0.001 & chisq.p.str >= 0, 
                                 "<0.001", chisq.p.str),
          pval.p.str = ifelse(pval.p.str < 0.001 & pval.p.str >= 0, 
@@ -1538,7 +1508,7 @@ write.csv(table4, file = "../working_drafts/tables/NxCO2xI_table4_propN.csv",
 ##########################################################################
 pnue.coefs <- data.frame(summary(pnue)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.pnue = round(Estimate, digits = 3),
+         coef.pnue = format(Estimate, scientific = TRUE, digits = 3),
          se.pnue = round(Std..Error, digits = 3),
          t.value.pnue = round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.pnue, se.pnue, t.value.pnue) %>%
@@ -1555,9 +1525,7 @@ pnue.table <- data.frame(Anova(pnue)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.pnue:pval.pnue, round, digits = 3),
-         coef.pnue = ifelse(coef.pnue < 0.001 & coef.pnue >= 0, 
-                             "<0.001", coef.pnue),
+         across(chisq.pnue:pval.pnue, round, digits = 3),
          chisq.pnue = ifelse(chisq.pnue < 0.001 & chisq.pnue >= 0, 
                               "<0.001", chisq.pnue),
          pval.pnue = ifelse(pval.pnue < 0.001 & pval.pnue >= 0, 
@@ -1566,7 +1534,7 @@ pnue.table <- data.frame(Anova(pnue)) %>%
 
 iwue.coefs <- data.frame(summary(iwue)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.iwue = round(Estimate, digits = 3),
+         coef.iwue = format(Estimate, scientific = TRUE, digits = 3),
          se.iwue = round(Std..Error, digits = 3),
          t.value.iwue = round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.iwue, se.iwue, t.value.iwue) %>%
@@ -1583,9 +1551,7 @@ iwue.table <- data.frame(Anova(iwue)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.iwue:pval.iwue, round, digits = 3),
-         coef.iwue = ifelse(coef.iwue < 0.001 & coef.iwue >= 0, 
-                            "<0.001", coef.iwue),
+         across(chisq.iwue:pval.iwue, round, digits = 3),
          chisq.iwue = ifelse(chisq.iwue < 0.001 & chisq.iwue >= 0, 
                              "<0.001", chisq.iwue),
          pval.iwue = ifelse(pval.iwue < 0.001 & pval.iwue >= 0, 
@@ -1594,7 +1560,7 @@ iwue.table <- data.frame(Anova(iwue)) %>%
 
 narea.gs.coefs <- data.frame(summary(narea.gs)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.narea.gs = round(Estimate, digits = 3),
+         coef.narea.gs = format(Estimate, scientific = TRUE, digits = 3),
          se.narea.gs = round(Std..Error, digits = 3),
          t.value.narea.gs = round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.narea.gs, se.narea.gs, t.value.narea.gs) %>%
@@ -1611,9 +1577,7 @@ narea.gs.table <- data.frame(Anova(narea.gs)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.narea.gs:pval.narea.gs, round, digits = 3),
-         coef.narea.gs = ifelse(coef.narea.gs < 0.001 & coef.narea.gs >= 0, 
-                            "<0.001", coef.narea.gs),
+         across(chisq.narea.gs:pval.narea.gs, round, digits = 3),
          chisq.narea.gs = ifelse(chisq.narea.gs < 0.001 & chisq.narea.gs >= 0, 
                              "<0.001", chisq.narea.gs),
          pval.narea.gs = ifelse(pval.narea.gs < 0.001 & pval.narea.gs >= 0, 
@@ -1622,7 +1586,7 @@ narea.gs.table <- data.frame(Anova(narea.gs)) %>%
 
 vcmax.gs.coefs <- data.frame(summary(vcmax.gs)$coefficient) %>%
   mutate(treatment = row.names(.),
-         coef.vcmax.gs = round(Estimate, digits = 3),
+         coef.vcmax.gs = format(Estimate, scientific = TRUE, digits = 3),
          se.vcmax.gs = round(Std..Error, digits = 3),
          t.value.vcmax.gs = round(t.value, digits = 3)) %>%
   dplyr::select(treatment, coef.vcmax.gs, se.vcmax.gs, t.value.vcmax.gs) %>%
@@ -1639,9 +1603,7 @@ vcmax.gs.table <- data.frame(Anova(vcmax.gs)) %>%
   mutate(treatment = factor(treatment, 
                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
-         across(coef.vcmax.gs:pval.vcmax.gs, round, digits = 3),
-         coef.vcmax.gs = ifelse(coef.vcmax.gs < 0.001 & coef.vcmax.gs >= 0, 
-                                "<0.001", coef.vcmax.gs),
+         across(chisq.vcmax.gs:pval.vcmax.gs, round, digits = 3),
          chisq.vcmax.gs = ifelse(chisq.vcmax.gs < 0.001 & chisq.vcmax.gs >= 0, 
                                  "<0.001", chisq.vcmax.gs),
          pval.vcmax.gs = ifelse(pval.vcmax.gs < 0.001 & pval.vcmax.gs >= 0, 
