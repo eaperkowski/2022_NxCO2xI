@@ -24,58 +24,18 @@ cbbPalette3 <- c("#DDAA33", "#004488", "#BB5566", "#555555")
 ##########################################################################
 ## Ncost regression line prep
 ##########################################################################
-## Copy removed outliers and lmer fxn
 df$ncost[c(108,109)] <- NA
 ncost <- lmer(log(ncost) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-shapiro.test(residuals(ncost))
-Anova(ncost)
 
 ## Emmean fxns for regression lines + error ribbons
-ncost.full.0 <- data.frame(n.trt = 0, emmeans(ncost, ~inoc*co2, 
-                                              at = list(n.trt = 0), 
-                                              type = "response"))
-ncost.full.70 <- data.frame(n.trt = 70, emmeans(ncost, ~inoc*co2, 
-                                                at = list(n.trt = 70), 
-                                                type = "response"))
-ncost.full.140 <- data.frame(n.trt = 140, emmeans(ncost, ~inoc*co2, 
-                                                  at = list(n.trt = 140), 
-                                                  type = "response")) 
-ncost.full.210 <- data.frame(n.trt = 210, emmeans(ncost, ~inoc*co2, 
-                                                  at = list(n.trt = 210), 
-                                                  type = "response"))
-ncost.full.280 <- data.frame(n.trt = 280, emmeans(ncost, ~inoc*co2, 
-                                                  at = list(n.trt = 280), 
-                                                  type = "response")) 
-ncost.full.350 <- data.frame(n.trt = 350, emmeans(ncost, ~inoc*co2, 
-                                                  at = list(n.trt = 350), 
-                                                  type = "response")) 
-ncost.full.630 <- data.frame(n.trt = 630, emmeans(ncost, ~inoc*co2, 
-                                                  at = list(n.trt = 630),
-                                                  type = "response")) 
-ncost.full <- ncost.full.0 %>% full_join(ncost.full.70) %>% 
-  full_join(ncost.full.140) %>% full_join(ncost.full.210) %>% 
-  full_join(ncost.full.280) %>% full_join(ncost.full.350) %>% 
-  full_join(ncost.full.630) %>% 
+ncost.full <- data.frame(emmeans(ncost, ~inoc*co2, "n.trt",
+                                 at = list(n.trt = seq(0, 630, 5)),
+                                 type = "response")) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
-ncost.ntrt.0 <- data.frame(n.trt = 0, emmeans(ncost, ~1, 
-                                              at = list(n.trt = 0), type = "response"))
-ncost.ntrt.70 <- data.frame(n.trt = 70, emmeans(ncost, ~1, 
-                                               at = list(n.trt = 70), type = "response"))
-ncost.ntrt.140 <- data.frame(n.trt = 140, emmeans(ncost, ~1, 
-                                                at = list(n.trt = 140), type = "response"))
-ncost.ntrt.210 <- data.frame(n.trt = 210, emmeans(ncost, ~1, 
-                                                at = list(n.trt = 210), type = "response"))
-ncost.ntrt.280 <- data.frame(n.trt = 280, emmeans(ncost, ~1, 
-                                                at = list(n.trt = 280), type = "response"))
-ncost.ntrt.350 <- data.frame(n.trt = 350, emmeans(ncost, ~1, 
-                                                at = list(n.trt = 350), type = "response"))
-ncost.ntrt.630 <- data.frame(n.trt = 630, emmeans(ncost, ~1, 
-                                                at = list(n.trt = 630), type = "response"))
-ncost.regline <- ncost.ntrt.0 %>% full_join(ncost.ntrt.70) %>%
-  full_join(ncost.ntrt.140) %>% full_join(ncost.ntrt.210) %>%
-  full_join(ncost.ntrt.280) %>% full_join(ncost.ntrt.350) %>%
-  full_join(ncost.ntrt.630) %>%
+ncost.regline <- data.frame(emmeans(ncost, ~1, "n.trt",
+                                    at = list(n.trt = seq(0, 630, 5)),
+                                    type = "response")) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(ncost.full) %>%
   dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
@@ -119,56 +79,17 @@ ncost.plot
 ##########################################################################
 ## Belowground C regression line prep
 ##########################################################################
-cbg <- lmer(log(cbg) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-shapiro.test(residuals(cbg))
-outlierTest(cbg)
+cbg <- lmer(cbg ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 ## Emmean fxns for regression lines + error ribbons
-cbg.full.0 <- data.frame(n.trt = 0, emmeans(cbg, ~inoc*co2, 
-                                            at = list(n.trt = 0), 
-                                            type = "response"))
-cbg.full.70 <- data.frame(n.trt = 70, emmeans(cbg, ~inoc*co2, 
-                                              at = list(n.trt = 70), 
-                                              type = "response"))
-cbg.full.140 <- data.frame(n.trt = 140, emmeans(cbg, ~inoc*co2, 
-                                                at = list(n.trt = 140), 
-                                                type = "response")) 
-cbg.full.210 <- data.frame(n.trt = 210, emmeans(cbg, ~inoc*co2, 
-                                                at = list(n.trt = 210), 
-                                                type = "response"))
-cbg.full.280 <- data.frame(n.trt = 280, emmeans(cbg, ~inoc*co2, 
-                                                at = list(n.trt = 280), 
-                                                type = "response")) 
-cbg.full.350 <- data.frame(n.trt = 350, emmeans(cbg, ~inoc*co2, 
-                                                at = list(n.trt = 350), 
-                                                type = "response")) 
-cbg.full.630 <- data.frame(n.trt = 630, emmeans(cbg, ~inoc*co2, 
-                                                at = list(n.trt = 630),
-                                                type = "response")) 
-cbg.full <- cbg.full.0 %>% full_join(cbg.full.70) %>% 
-  full_join(cbg.full.140) %>% full_join(cbg.full.210) %>% 
-  full_join(cbg.full.280) %>% full_join(cbg.full.350) %>% 
-  full_join(cbg.full.630) %>% 
+cbg.full <- data.frame(emmeans(cbg, ~inoc*co2, "n.trt",
+                                 at = list(n.trt = seq(0, 630, 5)),
+                                 type = "response")) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
-cbg.ntrt.0 <- data.frame(n.trt = 0, emmeans(cbg, ~1, 
-                                            at = list(n.trt = 0), type = "response"))
-cbg.ntrt.70 <- data.frame(n.trt = 70, emmeans(cbg, ~1, 
-                                              at = list(n.trt = 70), type = "response"))
-cbg.ntrt.140 <- data.frame(n.trt = 140, emmeans(cbg, ~1, 
-                                                at = list(n.trt = 140), type = "response"))
-cbg.ntrt.210 <- data.frame(n.trt = 210, emmeans(cbg, ~1, 
-                                                at = list(n.trt = 210), type = "response"))
-cbg.ntrt.280 <- data.frame(n.trt = 280, emmeans(cbg, ~1, 
-                                                at = list(n.trt = 280), type = "response"))
-cbg.ntrt.350 <- data.frame(n.trt = 350, emmeans(cbg, ~1, 
-                                                at = list(n.trt = 350), type = "response"))
-cbg.ntrt.630 <- data.frame(n.trt = 630, emmeans(cbg, ~1, 
-                                                at = list(n.trt = 630), type = "response"))
-cbg.regline <- cbg.ntrt.0 %>% full_join(cbg.ntrt.70) %>%
-  full_join(cbg.ntrt.140) %>% full_join(cbg.ntrt.210) %>%
-  full_join(cbg.ntrt.280) %>% full_join(cbg.ntrt.350) %>%
-  full_join(cbg.ntrt.630) %>%
+cbg.regline <- data.frame(emmeans(cbg, ~1, "n.trt",
+                                    at = list(n.trt = seq(0, 630, 5)),
+                                    type = "response")) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(cbg.full) %>%
   dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
@@ -180,10 +101,10 @@ bgc.plot <- ggplot(data = df, aes(x = n.trt, y = cbg)) +
   geom_jitter(aes(fill = co2.inoc),
               size = 3, shape = 21, alpha = 0.75) +
   geom_smooth(data = subset(cbg.regline, co2.inoc != "overall"),
-              aes(color = co2.inoc, y = response), 
+              aes(color = co2.inoc, y = emmean), 
               size = 2, se = FALSE) +
   geom_ribbon(data = subset(cbg.regline, co2.inoc != "overall"),
-              aes(fill = co2.inoc, y = response, 
+              aes(fill = co2.inoc, y = emmean, 
                   ymin = lower.CL, ymax = upper.CL), 
               size = 2, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
@@ -211,58 +132,17 @@ bgc.plot
 ##########################################################################
 ## Whole plant N regression line prep
 ##########################################################################
-## Copy removed outliers and lmer fxn
 wpn <- lmer(sqrt(wpn) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-Anova(wpn)
-test(emtrends(wpn, ~co2*inoc, "n.trt"))
-
 
 ## Emmean fxns for regression lines + error ribbons
-wpn.full.0 <- data.frame(n.trt = 0, emmeans(wpn, ~inoc*co2, 
-                                              at = list(n.trt = 0), 
-                                              type = "response"))
-wpn.full.70 <- data.frame(n.trt = 70, emmeans(wpn, ~inoc*co2, 
-                                                at = list(n.trt = 70), 
-                                                type = "response"))
-wpn.full.140 <- data.frame(n.trt = 140, emmeans(wpn, ~inoc*co2, 
-                                                  at = list(n.trt = 140), 
-                                                  type = "response")) 
-wpn.full.210 <- data.frame(n.trt = 210, emmeans(wpn, ~inoc*co2, 
-                                                  at = list(n.trt = 210), 
-                                                  type = "response"))
-wpn.full.280 <- data.frame(n.trt = 280, emmeans(wpn, ~inoc*co2, 
-                                                  at = list(n.trt = 280), 
-                                                  type = "response")) 
-wpn.full.350 <- data.frame(n.trt = 350, emmeans(wpn, ~inoc*co2, 
-                                                  at = list(n.trt = 350), 
-                                                  type = "response")) 
-wpn.full.630 <- data.frame(n.trt = 630, emmeans(wpn, ~inoc*co2, 
-                                                  at = list(n.trt = 630),
-                                                  type = "response")) 
-wpn.full <- wpn.full.0 %>% full_join(wpn.full.70) %>% 
-  full_join(wpn.full.140) %>% full_join(wpn.full.210) %>% 
-  full_join(wpn.full.280) %>% full_join(wpn.full.350) %>% 
-  full_join(wpn.full.630) %>% 
+wpn.full <- data.frame(emmeans(wpn, ~inoc*co2, "n.trt",
+                               at = list(n.trt = seq(0, 630, 5)),
+                               type = "response")) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
-wpn.ntrt.0 <- data.frame(n.trt = 0, emmeans(wpn, ~1, 
-                                              at = list(n.trt = 0), type = "response"))
-wpn.ntrt.70 <- data.frame(n.trt = 70, emmeans(wpn, ~1, 
-                                                at = list(n.trt = 70), type = "response"))
-wpn.ntrt.140 <- data.frame(n.trt = 140, emmeans(wpn, ~1, 
-                                                  at = list(n.trt = 140), type = "response"))
-wpn.ntrt.210 <- data.frame(n.trt = 210, emmeans(wpn, ~1, 
-                                                  at = list(n.trt = 210), type = "response"))
-wpn.ntrt.280 <- data.frame(n.trt = 280, emmeans(wpn, ~1, 
-                                                  at = list(n.trt = 280), type = "response"))
-wpn.ntrt.350 <- data.frame(n.trt = 350, emmeans(wpn, ~1, 
-                                                  at = list(n.trt = 350), type = "response"))
-wpn.ntrt.630 <- data.frame(n.trt = 630, emmeans(wpn, ~1, 
-                                                  at = list(n.trt = 630), type = "response"))
-wpn.regline <- wpn.ntrt.0 %>% full_join(wpn.ntrt.70) %>%
-  full_join(wpn.ntrt.140) %>% full_join(wpn.ntrt.210) %>%
-  full_join(wpn.ntrt.280) %>% full_join(wpn.ntrt.350) %>%
-  full_join(wpn.ntrt.630) %>%
+wpn.regline <- data.frame(emmeans(wpn, ~1, "n.trt",
+                                  at = list(n.trt = seq(0, 630, 5)),
+                                  type = "response")) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(wpn.full) %>%
   dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
@@ -292,7 +172,7 @@ wpn.plot <- ggplot(data = df, aes(x = n.trt, y = wpn)) +
                                 "Elevated, uninoculated")) +
   scale_y_continuous(limits = c(0, 0.48), breaks = seq(0, 0.48, 0.12)) +
   labs(x = "Soil N fertilization (ppm twice per week)",
-       y = expression(bold("Carbon cost to acquire nitrogen (gC gN"^"-1"*")")),
+       y = "Whole plant nitrogen biomass (gN)",
        fill = "Treatment", color = "Treatment") +
   theme_bw(base_size = 20) +
   theme(axis.title = element_text(face = "bold"),
@@ -302,59 +182,17 @@ wpn.plot
 ##########################################################################
 ## Total leaf area regression line prep
 ##########################################################################
-## Copy removed outliers and lmer fxn
 tla <- lmer(tla ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-Anova(tla)
-shapiro.test(residuals(tla))
-test(emtrends(tla, ~co2*inoc, "n.trt"))
-
 
 ## Emmean fxns for regression lines + error ribbons
-tla.full.0 <- data.frame(n.trt = 0, emmeans(tla, ~inoc*co2, 
-                                            at = list(n.trt = 0), 
-                                            type = "response"))
-tla.full.70 <- data.frame(n.trt = 70, emmeans(tla, ~inoc*co2, 
-                                              at = list(n.trt = 70), 
-                                              type = "response"))
-tla.full.140 <- data.frame(n.trt = 140, emmeans(tla, ~inoc*co2, 
-                                                at = list(n.trt = 140), 
-                                                type = "response")) 
-tla.full.210 <- data.frame(n.trt = 210, emmeans(tla, ~inoc*co2, 
-                                                at = list(n.trt = 210), 
-                                                type = "response"))
-tla.full.280 <- data.frame(n.trt = 280, emmeans(tla, ~inoc*co2, 
-                                                at = list(n.trt = 280), 
-                                                type = "response")) 
-tla.full.350 <- data.frame(n.trt = 350, emmeans(tla, ~inoc*co2, 
-                                                at = list(n.trt = 350), 
-                                                type = "response")) 
-tla.full.630 <- data.frame(n.trt = 630, emmeans(tla, ~inoc*co2, 
-                                                at = list(n.trt = 630),
-                                                type = "response")) 
-tla.full <- tla.full.0 %>% full_join(tla.full.70) %>% 
-  full_join(tla.full.140) %>% full_join(tla.full.210) %>% 
-  full_join(tla.full.280) %>% full_join(tla.full.350) %>% 
-  full_join(tla.full.630) %>% 
+tla.full <- data.frame(emmeans(tla, ~inoc*co2, "n.trt",
+                               at = list(n.trt = seq(0, 630, 5)),
+                               type = "response")) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
-tla.ntrt.0 <- data.frame(n.trt = 0, emmeans(tla, ~1, 
-                                            at = list(n.trt = 0), type = "response"))
-tla.ntrt.70 <- data.frame(n.trt = 70, emmeans(tla, ~1, 
-                                              at = list(n.trt = 70), type = "response"))
-tla.ntrt.140 <- data.frame(n.trt = 140, emmeans(tla, ~1, 
-                                                at = list(n.trt = 140), type = "response"))
-tla.ntrt.210 <- data.frame(n.trt = 210, emmeans(tla, ~1, 
-                                                at = list(n.trt = 210), type = "response"))
-tla.ntrt.280 <- data.frame(n.trt = 280, emmeans(tla, ~1, 
-                                                at = list(n.trt = 280), type = "response"))
-tla.ntrt.350 <- data.frame(n.trt = 350, emmeans(tla, ~1, 
-                                                at = list(n.trt = 350), type = "response"))
-tla.ntrt.630 <- data.frame(n.trt = 630, emmeans(tla, ~1, 
-                                                at = list(n.trt = 630), type = "response"))
-tla.regline <- tla.ntrt.0 %>% full_join(tla.ntrt.70) %>%
-  full_join(tla.ntrt.140) %>% full_join(tla.ntrt.210) %>%
-  full_join(tla.ntrt.280) %>% full_join(tla.ntrt.350) %>%
-  full_join(tla.ntrt.630) %>%
+tla.regline <- data.frame(emmeans(tla, ~1, "n.trt",
+                                  at = list(n.trt = seq(0, 630, 5)),
+                                  type = "response")) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(tla.full) %>%
   dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
@@ -389,65 +227,22 @@ tla.plot <- ggplot(data = df, aes(x = n.trt, y = tla)) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
         panel.border = element_rect(size = 1.25))
+tla.plot
 
 ##########################################################################
 ## Total biomass regression line prep
 ##########################################################################
-## Copy removed outliers and lmer fxn
 tbio <- lmer(total.biomass ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-Anova(tbio)
-shapiro.test(residuals(tbio))
-outlierTest(tbio)
-
-test(emtrends(tbio, ~co2*inoc, "n.trt"))
-
 
 ## Emmean fxns for regression lines + error ribbons
-tbio.full.0 <- data.frame(n.trt = 0, emmeans(tbio, ~inoc*co2, 
-                                            at = list(n.trt = 0), 
-                                            type = "response"))
-tbio.full.70 <- data.frame(n.trt = 70, emmeans(tbio, ~inoc*co2, 
-                                              at = list(n.trt = 70), 
-                                              type = "response"))
-tbio.full.140 <- data.frame(n.trt = 140, emmeans(tbio, ~inoc*co2, 
-                                                at = list(n.trt = 140), 
-                                                type = "response")) 
-tbio.full.210 <- data.frame(n.trt = 210, emmeans(tbio, ~inoc*co2, 
-                                                at = list(n.trt = 210), 
-                                                type = "response"))
-tbio.full.280 <- data.frame(n.trt = 280, emmeans(tbio, ~inoc*co2, 
-                                                at = list(n.trt = 280), 
-                                                type = "response")) 
-tbio.full.350 <- data.frame(n.trt = 350, emmeans(tbio, ~inoc*co2, 
-                                                at = list(n.trt = 350), 
-                                                type = "response")) 
-tbio.full.630 <- data.frame(n.trt = 630, emmeans(tbio, ~inoc*co2, 
-                                                at = list(n.trt = 630),
-                                                type = "response")) 
-tbio.full <- tbio.full.0 %>% full_join(tbio.full.70) %>% 
-  full_join(tbio.full.140) %>% full_join(tbio.full.210) %>% 
-  full_join(tbio.full.280) %>% full_join(tbio.full.350) %>% 
-  full_join(tbio.full.630) %>% 
+tbio.full <- data.frame(emmeans(tbio, ~inoc*co2, "n.trt",
+                               at = list(n.trt = seq(0, 630, 5)),
+                               type = "response")) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
-tbio.ntrt.0 <- data.frame(n.trt = 0, emmeans(tbio, ~1, 
-                                            at = list(n.trt = 0), type = "response"))
-tbio.ntrt.70 <- data.frame(n.trt = 70, emmeans(tbio, ~1, 
-                                              at = list(n.trt = 70), type = "response"))
-tbio.ntrt.140 <- data.frame(n.trt = 140, emmeans(tbio, ~1, 
-                                                at = list(n.trt = 140), type = "response"))
-tbio.ntrt.210 <- data.frame(n.trt = 210, emmeans(tbio, ~1, 
-                                                at = list(n.trt = 210), type = "response"))
-tbio.ntrt.280 <- data.frame(n.trt = 280, emmeans(tbio, ~1, 
-                                                at = list(n.trt = 280), type = "response"))
-tbio.ntrt.350 <- data.frame(n.trt = 350, emmeans(tbio, ~1, 
-                                                at = list(n.trt = 350), type = "response"))
-tbio.ntrt.630 <- data.frame(n.trt = 630, emmeans(tbio, ~1, 
-                                                at = list(n.trt = 630), type = "response"))
-tbio.regline <- tbio.ntrt.0 %>% full_join(tbio.ntrt.70) %>%
-  full_join(tbio.ntrt.140) %>% full_join(tbio.ntrt.210) %>%
-  full_join(tbio.ntrt.280) %>% full_join(tbio.ntrt.350) %>%
-  full_join(tbio.ntrt.630) %>%
+tbio.regline <- data.frame(emmeans(tbio, ~1, "n.trt",
+                                  at = list(n.trt = seq(0, 630, 5)),
+                                  type = "response")) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(tbio.full) %>%
   dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
@@ -487,64 +282,20 @@ tbio.plot
 ##########################################################################
 ## Narea regression line prep
 ##########################################################################
-## Copy removed outliers and lmer fxn
 narea <- lmer(narea ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-Anova(narea)
-shapiro.test(residuals(narea))
-outlierTest(narea)
-
-test(emtrends(narea, ~co2*inoc, "n.trt"))
-
 
 ## Emmean fxns for regression lines + error ribbons
-narea.full.0 <- data.frame(n.trt = 0, emmeans(narea, ~inoc*co2, 
-                                             at = list(n.trt = 0), 
-                                             type = "response"))
-narea.full.70 <- data.frame(n.trt = 70, emmeans(narea, ~inoc*co2, 
-                                               at = list(n.trt = 70), 
-                                               type = "response"))
-narea.full.140 <- data.frame(n.trt = 140, emmeans(narea, ~inoc*co2, 
-                                                 at = list(n.trt = 140), 
-                                                 type = "response")) 
-narea.full.210 <- data.frame(n.trt = 210, emmeans(narea, ~inoc*co2, 
-                                                 at = list(n.trt = 210), 
-                                                 type = "response"))
-narea.full.280 <- data.frame(n.trt = 280, emmeans(narea, ~inoc*co2, 
-                                                 at = list(n.trt = 280), 
-                                                 type = "response")) 
-narea.full.350 <- data.frame(n.trt = 350, emmeans(narea, ~inoc*co2, 
-                                                 at = list(n.trt = 350), 
-                                                 type = "response")) 
-narea.full.630 <- data.frame(n.trt = 630, emmeans(narea, ~inoc*co2, 
-                                                 at = list(n.trt = 630),
-                                                 type = "response")) 
-narea.full <- narea.full.0 %>% full_join(narea.full.70) %>% 
-  full_join(narea.full.140) %>% full_join(narea.full.210) %>% 
-  full_join(narea.full.280) %>% full_join(narea.full.350) %>% 
-  full_join(narea.full.630) %>% 
+narea.full <- data.frame(emmeans(narea, ~inoc*co2, "n.trt",
+                                at = list(n.trt = seq(0, 630, 5)),
+                                type = "response")) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
-narea.ntrt.0 <- data.frame(n.trt = 0, emmeans(narea, ~1, 
-                                             at = list(n.trt = 0), type = "response"))
-narea.ntrt.70 <- data.frame(n.trt = 70, emmeans(narea, ~1, 
-                                               at = list(n.trt = 70), type = "response"))
-narea.ntrt.140 <- data.frame(n.trt = 140, emmeans(narea, ~1, 
-                                                 at = list(n.trt = 140), type = "response"))
-narea.ntrt.210 <- data.frame(n.trt = 210, emmeans(narea, ~1, 
-                                                 at = list(n.trt = 210), type = "response"))
-narea.ntrt.280 <- data.frame(n.trt = 280, emmeans(narea, ~1, 
-                                                 at = list(n.trt = 280), type = "response"))
-narea.ntrt.350 <- data.frame(n.trt = 350, emmeans(narea, ~1, 
-                                                 at = list(n.trt = 350), type = "response"))
-narea.ntrt.630 <- data.frame(n.trt = 630, emmeans(narea, ~1, 
-                                                 at = list(n.trt = 630), type = "response"))
-narea.regline <- narea.ntrt.0 %>% full_join(narea.ntrt.70) %>%
-  full_join(narea.ntrt.140) %>% full_join(narea.ntrt.210) %>%
-  full_join(narea.ntrt.280) %>% full_join(narea.ntrt.350) %>%
-  full_join(narea.ntrt.630) %>%
+narea.regline <- data.frame(emmeans(narea, ~1, "n.trt",
+                                   at = list(n.trt = seq(0, 630, 5)),
+                                   type = "response")) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(narea.full) %>%
-  select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
 
 ##########################################################################
 ## Narea plot
@@ -581,66 +332,22 @@ narea.plot
 ##########################################################################
 ## Nmass regression line prep
 ##########################################################################
-## Copy removed outliers and lmer fxn
-df$nmass.focal[c(39, 50, 110, 111, 114)] <- NA
-nmass <- lmer(log(nmass.focal) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-Anova(nmass)
-shapiro.test(residuals(nmass))
-outlierTest(nmass)
-
+nmass <- lmer(nmass.focal ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 test(emtrends(nmass, ~co2*inoc, "n.trt"))
 
-
 ## Emmean fxns for regression lines + error ribbons
-nmass.full.0 <- data.frame(n.trt = 0, emmeans(nmass, ~inoc*co2, 
-                                              at = list(n.trt = 0), 
-                                              type = "response"))
-nmass.full.70 <- data.frame(n.trt = 70, emmeans(nmass, ~inoc*co2, 
-                                                at = list(n.trt = 70), 
-                                                type = "response"))
-nmass.full.140 <- data.frame(n.trt = 140, emmeans(nmass, ~inoc*co2, 
-                                                  at = list(n.trt = 140), 
-                                                  type = "response")) 
-nmass.full.210 <- data.frame(n.trt = 210, emmeans(nmass, ~inoc*co2, 
-                                                  at = list(n.trt = 210), 
-                                                  type = "response"))
-nmass.full.280 <- data.frame(n.trt = 280, emmeans(nmass, ~inoc*co2, 
-                                                  at = list(n.trt = 280), 
-                                                  type = "response")) 
-nmass.full.350 <- data.frame(n.trt = 350, emmeans(nmass, ~inoc*co2, 
-                                                  at = list(n.trt = 350), 
-                                                  type = "response")) 
-nmass.full.630 <- data.frame(n.trt = 630, emmeans(nmass, ~inoc*co2, 
-                                                  at = list(n.trt = 630),
-                                                  type = "response")) 
-nmass.full <- nmass.full.0 %>% full_join(nmass.full.70) %>% 
-  full_join(nmass.full.140) %>% full_join(nmass.full.210) %>% 
-  full_join(nmass.full.280) %>% full_join(nmass.full.350) %>% 
-  full_join(nmass.full.630) %>% 
+nmass.full <- data.frame(emmeans(nmass, ~inoc*co2, "n.trt",
+                                 at = list(n.trt = seq(0, 630, 5)),
+                                 type = "response")) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
-nmass.ntrt.0 <- data.frame(n.trt = 0, emmeans(nmass, ~1, 
-                                              at = list(n.trt = 0), type = "response"))
-nmass.ntrt.70 <- data.frame(n.trt = 70, emmeans(nmass, ~1, 
-                                                at = list(n.trt = 70), type = "response"))
-nmass.ntrt.140 <- data.frame(n.trt = 140, emmeans(nmass, ~1, 
-                                                  at = list(n.trt = 140), type = "response"))
-nmass.ntrt.210 <- data.frame(n.trt = 210, emmeans(nmass, ~1, 
-                                                  at = list(n.trt = 210), type = "response"))
-nmass.ntrt.280 <- data.frame(n.trt = 280, emmeans(nmass, ~1, 
-                                                  at = list(n.trt = 280), type = "response"))
-nmass.ntrt.350 <- data.frame(n.trt = 350, emmeans(nmass, ~1, 
-                                                  at = list(n.trt = 350), type = "response"))
-nmass.ntrt.630 <- data.frame(n.trt = 630, emmeans(nmass, ~1, 
-                                                  at = list(n.trt = 630), type = "response"))
-nmass.regline <- nmass.ntrt.0 %>% full_join(nmass.ntrt.70) %>%
-  full_join(nmass.ntrt.140) %>% full_join(nmass.ntrt.210) %>%
-  full_join(nmass.ntrt.280) %>% full_join(nmass.ntrt.350) %>%
-  full_join(nmass.ntrt.630) %>%
+nmass.regline <- data.frame(emmeans(nmass, ~1, "n.trt",
+                                    at = list(n.trt = seq(0, 630, 5)),
+                                    type = "response")) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(nmass.full) %>%
-  mutate(linetype = ifelse(co2.inoc == "elv_inoc", "dashed", "solid")) %>%
-  select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
+  mutate(linetype = ifelse(co2.inoc == "elv_inoc", "dashed", "solid"))
 
 ##########################################################################
 ## Nmass plot
@@ -649,10 +356,10 @@ nmass.plot <- ggplot(data = df, aes(x = n.trt, y = nmass.focal)) +
   geom_jitter(aes(fill = co2.inoc),
               size = 3, shape = 21, alpha = 0.75) +
   geom_smooth(data = subset(nmass.regline, co2.inoc != "overall"),
-              aes(color = co2.inoc, y = response, linetype = linetype), 
+              aes(color = co2.inoc, y = emmean, linetype = linetype), 
               size = 1.5, se = FALSE) +
   geom_ribbon(data = subset(nmass.regline, co2.inoc != "overall"),
-              aes(fill = co2.inoc, y = response, 
+              aes(fill = co2.inoc, y = emmean, 
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
@@ -680,64 +387,21 @@ nmass.plot
 ##########################################################################
 ## Marea regression line prep
 ##########################################################################
-## Copy removed outliers and lmer fxn
 marea <- lmer(log(marea) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-Anova(marea)
-shapiro.test(residuals(marea))
-outlierTest(marea)
-
 test(emtrends(marea, ~co2*inoc, "n.trt"))
 
-
 ## Emmean fxns for regression lines + error ribbons
-marea.full.0 <- data.frame(n.trt = 0, emmeans(marea, ~inoc*co2, 
-                                              at = list(n.trt = 0), 
-                                              type = "response"))
-marea.full.70 <- data.frame(n.trt = 70, emmeans(marea, ~inoc*co2, 
-                                                at = list(n.trt = 70), 
-                                                type = "response"))
-marea.full.140 <- data.frame(n.trt = 140, emmeans(marea, ~inoc*co2, 
-                                                  at = list(n.trt = 140), 
-                                                  type = "response")) 
-marea.full.210 <- data.frame(n.trt = 210, emmeans(marea, ~inoc*co2, 
-                                                  at = list(n.trt = 210), 
-                                                  type = "response"))
-marea.full.280 <- data.frame(n.trt = 280, emmeans(marea, ~inoc*co2, 
-                                                  at = list(n.trt = 280), 
-                                                  type = "response")) 
-marea.full.350 <- data.frame(n.trt = 350, emmeans(marea, ~inoc*co2, 
-                                                  at = list(n.trt = 350), 
-                                                  type = "response")) 
-marea.full.630 <- data.frame(n.trt = 630, emmeans(marea, ~inoc*co2, 
-                                                  at = list(n.trt = 630),
-                                                  type = "response")) 
-marea.full <- marea.full.0 %>% full_join(marea.full.70) %>% 
-  full_join(marea.full.140) %>% full_join(marea.full.210) %>% 
-  full_join(marea.full.280) %>% full_join(marea.full.350) %>% 
-  full_join(marea.full.630) %>% 
+marea.full <- data.frame(emmeans(marea, ~inoc*co2, "n.trt",
+                                 at = list(n.trt = seq(0, 630, 5)),
+                                 type = "response")) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
-marea.ntrt.0 <- data.frame(n.trt = 0, emmeans(marea, ~1, 
-                                              at = list(n.trt = 0), type = "response"))
-marea.ntrt.70 <- data.frame(n.trt = 70, emmeans(marea, ~1, 
-                                                at = list(n.trt = 70), type = "response"))
-marea.ntrt.140 <- data.frame(n.trt = 140, emmeans(marea, ~1, 
-                                                  at = list(n.trt = 140), type = "response"))
-marea.ntrt.210 <- data.frame(n.trt = 210, emmeans(marea, ~1, 
-                                                  at = list(n.trt = 210), type = "response"))
-marea.ntrt.280 <- data.frame(n.trt = 280, emmeans(marea, ~1, 
-                                                  at = list(n.trt = 280), type = "response"))
-marea.ntrt.350 <- data.frame(n.trt = 350, emmeans(marea, ~1, 
-                                                  at = list(n.trt = 350), type = "response"))
-marea.ntrt.630 <- data.frame(n.trt = 630, emmeans(marea, ~1, 
-                                                  at = list(n.trt = 630), type = "response"))
-marea.regline <- marea.ntrt.0 %>% full_join(marea.ntrt.70) %>%
-  full_join(marea.ntrt.140) %>% full_join(marea.ntrt.210) %>%
-  full_join(marea.ntrt.280) %>% full_join(marea.ntrt.350) %>%
-  full_join(marea.ntrt.630) %>%
+marea.regline <- data.frame(emmeans(marea, ~1, "n.trt",
+                                    at = list(n.trt = seq(0, 630, 5)),
+                                    type = "response")) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(marea.full) %>%
-  select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
   mutate(linetype = ifelse(co2.inoc == "amb_inoc", "dashed", "solid"))
 
 ##########################################################################
@@ -768,7 +432,7 @@ marea.plot <- ggplot(data = df, aes(x = n.trt, y = marea)) +
   labs(x = "Soil N fertilization (ppm)",
        y = expression(bold(italic("M")["area"]*" (g m"^"-2"*")")),
        fill = "Treatment", color = "Treatment") +
-  guides(linesize = "none") +
+  guides(linetype = "none") +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
@@ -778,68 +442,25 @@ marea.plot
 ##########################################################################
 ## Chlarea regression line prep
 ##########################################################################
-## Copy removed outliers and lmer fxn
-df$chl.mmolm2[c(111, 113, 114)] <- NA
-
+df$chl.mmolm2[25] <- NA
 chlarea <- lmer(chl.mmolm2 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-Anova(chlarea)
 shapiro.test(residuals(chlarea))
-outlierTest(chlarea)
+car::outlierTest(chlarea)
 
 test(emtrends(chlarea, ~co2*inoc, "n.trt"))
 
-
 ## Emmean fxns for regression lines + error ribbons
-chlarea.full.0 <- data.frame(n.trt = 0, emmeans(chlarea, ~inoc*co2, 
-                                              at = list(n.trt = 0), 
-                                              type = "response"))
-chlarea.full.70 <- data.frame(n.trt = 70, emmeans(chlarea, ~inoc*co2, 
-                                                at = list(n.trt = 70), 
-                                                type = "response"))
-chlarea.full.140 <- data.frame(n.trt = 140, emmeans(chlarea, ~inoc*co2, 
-                                                  at = list(n.trt = 140), 
-                                                  type = "response")) 
-chlarea.full.210 <- data.frame(n.trt = 210, emmeans(chlarea, ~inoc*co2, 
-                                                  at = list(n.trt = 210), 
-                                                  type = "response"))
-chlarea.full.280 <- data.frame(n.trt = 280, emmeans(chlarea, ~inoc*co2, 
-                                                  at = list(n.trt = 280), 
-                                                  type = "response")) 
-chlarea.full.350 <- data.frame(n.trt = 350, emmeans(chlarea, ~inoc*co2, 
-                                                  at = list(n.trt = 350), 
-                                                  type = "response")) 
-chlarea.full.630 <- data.frame(n.trt = 630, emmeans(chlarea, ~inoc*co2, 
-                                                  at = list(n.trt = 630),
-                                                  type = "response")) 
-chlarea.full <- chlarea.full.0 %>% full_join(chlarea.full.70) %>% 
-  full_join(chlarea.full.140) %>% full_join(chlarea.full.210) %>% 
-  full_join(chlarea.full.280) %>% full_join(chlarea.full.350) %>% 
-  full_join(chlarea.full.630) %>% 
+chlarea.full <- data.frame(emmeans(chlarea, ~inoc*co2, "n.trt",
+                                 at = list(n.trt = seq(0, 630, 5)),
+                                 type = "response")) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
-chlarea.ntrt.0 <- data.frame(n.trt = 0, emmeans(chlarea, ~1, 
-                                              at = list(n.trt = 0), type = "response"))
-chlarea.ntrt.70 <- data.frame(n.trt = 70, emmeans(chlarea, ~1, 
-                                                at = list(n.trt = 70), type = "response"))
-chlarea.ntrt.140 <- data.frame(n.trt = 140, emmeans(chlarea, ~1, 
-                                                  at = list(n.trt = 140), type = "response"))
-chlarea.ntrt.210 <- data.frame(n.trt = 210, emmeans(chlarea, ~1, 
-                                                  at = list(n.trt = 210), type = "response"))
-chlarea.ntrt.280 <- data.frame(n.trt = 280, emmeans(chlarea, ~1, 
-                                                  at = list(n.trt = 280), type = "response"))
-chlarea.ntrt.350 <- data.frame(n.trt = 350, emmeans(chlarea, ~1, 
-                                                  at = list(n.trt = 350), type = "response"))
-chlarea.ntrt.630 <- data.frame(n.trt = 630, emmeans(chlarea, ~1, 
-                                                  at = list(n.trt = 630), type = "response"))
-chlarea.regline <- chlarea.ntrt.0 %>% full_join(chlarea.ntrt.70) %>%
-  full_join(chlarea.ntrt.140) %>% full_join(chlarea.ntrt.210) %>%
-  full_join(chlarea.ntrt.280) %>% full_join(chlarea.ntrt.350) %>%
-  full_join(chlarea.ntrt.630) %>%
+chlarea.regline <- data.frame(emmeans(chlarea, ~1, "n.trt",
+                                    at = list(n.trt = seq(0, 630, 5)),
+                                    type = "response")) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(chlarea.full) %>%
-  select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
-  mutate(linetype = ifelse(co2.inoc == "amb_inoc" | co2.inoc == "elv_inoc", 
-                           "dashed", "solid"))
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
 
 ##########################################################################
 ## Chl area plot
@@ -848,7 +469,7 @@ chl.plot <- ggplot(data = df, aes(x = n.trt, y = chl.mmolm2)) +
   geom_jitter(aes(fill = co2.inoc),
               size = 3, shape = 21, alpha = 0.75) +
   geom_smooth(data = subset(chlarea.regline, co2.inoc != "overall"),
-              aes(color = co2.inoc, y = emmean, linetype = linetype), 
+              aes(color = co2.inoc, y = emmean), 
               size = 1.5, se = FALSE) +
   geom_ribbon(data = subset(chlarea.regline, co2.inoc != "overall"),
               aes(fill = co2.inoc, y = emmean, 
@@ -869,7 +490,6 @@ chl.plot <- ggplot(data = df, aes(x = n.trt, y = chl.mmolm2)) +
   labs(x = "Soil N fertilization (ppm)",
        y = expression(bold(italic("Chl")["area"]*" (mmol m"^"-2"*")")),
        fill = "Treatment", color = "Treatment") +
-  guides(linesize = "none") +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
@@ -882,64 +502,20 @@ chl.plot
 ##########################################################################
 ## Copy removed outliers and lmer fxn
 vcmax25 <- lmer(vcmax25 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-Anova(vcmax25)
-shapiro.test(residuals(vcmax25))
-outlierTest(vcmax25)
-
 test(emtrends(vcmax25, ~co2*inoc, "n.trt"))
 
-
 ## Emmean fxns for regression lines + error ribbons
-vcmax.full.0 <- data.frame(n.trt = 0, emmeans(vcmax25, ~inoc*co2, 
-                                              at = list(n.trt = 0), 
-                                              type = "response"))
-vcmax.full.70 <- data.frame(n.trt = 70, emmeans(vcmax25, ~inoc*co2, 
-                                                at = list(n.trt = 70), 
-                                                type = "response"))
-vcmax.full.140 <- data.frame(n.trt = 140, emmeans(vcmax25, ~inoc*co2, 
-                                                  at = list(n.trt = 140), 
-                                                  type = "response")) 
-vcmax.full.210 <- data.frame(n.trt = 210, emmeans(vcmax25, ~inoc*co2, 
-                                                  at = list(n.trt = 210), 
-                                                  type = "response"))
-vcmax.full.280 <- data.frame(n.trt = 280, emmeans(vcmax25, ~inoc*co2, 
-                                                  at = list(n.trt = 280), 
-                                                  type = "response")) 
-vcmax.full.350 <- data.frame(n.trt = 350, emmeans(vcmax25, ~inoc*co2, 
-                                                  at = list(n.trt = 350), 
-                                                  type = "response")) 
-vcmax.full.630 <- data.frame(n.trt = 630, emmeans(vcmax25, ~inoc*co2, 
-                                                  at = list(n.trt = 630),
-                                                  type = "response")) 
-vcmax.full <- vcmax.full.0 %>% full_join(vcmax.full.70) %>% 
-  full_join(vcmax.full.140) %>% full_join(vcmax.full.210) %>% 
-  full_join(vcmax.full.280) %>% full_join(vcmax.full.350) %>% 
-  full_join(vcmax.full.630) %>% 
+vcmax.full <- data.frame(emmeans(vcmax25, ~inoc*co2, "n.trt",
+                                   at = list(n.trt = seq(0, 630, 5)))) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
-vcmax.ntrt.0 <- data.frame(n.trt = 0, emmeans(vcmax25, ~1, 
-                                              at = list(n.trt = 0), type = "response"))
-vcmax.ntrt.70 <- data.frame(n.trt = 70, emmeans(vcmax25, ~1, 
-                                                at = list(n.trt = 70), type = "response"))
-vcmax.ntrt.140 <- data.frame(n.trt = 140, emmeans(vcmax25, ~1, 
-                                                  at = list(n.trt = 140), type = "response"))
-vcmax.ntrt.210 <- data.frame(n.trt = 210, emmeans(vcmax25, ~1, 
-                                                  at = list(n.trt = 210), type = "response"))
-vcmax.ntrt.280 <- data.frame(n.trt = 280, emmeans(vcmax25, ~1, 
-                                                  at = list(n.trt = 280), type = "response"))
-vcmax.ntrt.350 <- data.frame(n.trt = 350, emmeans(vcmax25, ~1, 
-                                                  at = list(n.trt = 350), type = "response"))
-vcmax.ntrt.630 <- data.frame(n.trt = 630, emmeans(vcmax25, ~1, 
-                                                  at = list(n.trt = 630), type = "response"))
-vcmax.regline <- vcmax.ntrt.0 %>% full_join(vcmax.ntrt.70) %>%
-  full_join(vcmax.ntrt.140) %>% full_join(vcmax.ntrt.210) %>%
-  full_join(vcmax.ntrt.280) %>% full_join(vcmax.ntrt.350) %>%
-  full_join(vcmax.ntrt.630) %>%
+vcmax.regline <- data.frame(emmeans(vcmax25, ~1, "n.trt",
+                                      at = list(n.trt = seq(0, 630, 5)))) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(vcmax.full) %>%
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
   mutate(linetype = ifelse(co2.inoc == "elv_inoc" | co2.inoc == "amb_inoc", 
-                           "dashed", "solid")) %>%
-  select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
+                           "dashed", "solid"))
 
 ##########################################################################
 ## Vcmax plot
@@ -981,64 +557,21 @@ vcmax.plot
 ##########################################################################
 ## Copy removed outliers and lmer fxn
 jmax25 <- lmer(jmax25 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-Anova(jmax25)
 shapiro.test(residuals(jmax25))
-outlierTest(jmax25)
-
 test(emtrends(jmax25, ~co2*inoc, "n.trt"))
 
-
 ## Emmean fxns for regression lines + error ribbons
-jmax.full.0 <- data.frame(n.trt = 0, emmeans(jmax25, ~inoc*co2, 
-                                              at = list(n.trt = 0), 
-                                              type = "response"))
-jmax.full.70 <- data.frame(n.trt = 70, emmeans(jmax25, ~inoc*co2, 
-                                                at = list(n.trt = 70), 
-                                                type = "response"))
-jmax.full.140 <- data.frame(n.trt = 140, emmeans(jmax25, ~inoc*co2, 
-                                                  at = list(n.trt = 140), 
-                                                  type = "response")) 
-jmax.full.210 <- data.frame(n.trt = 210, emmeans(jmax25, ~inoc*co2, 
-                                                  at = list(n.trt = 210), 
-                                                  type = "response"))
-jmax.full.280 <- data.frame(n.trt = 280, emmeans(jmax25, ~inoc*co2, 
-                                                  at = list(n.trt = 280), 
-                                                  type = "response")) 
-jmax.full.350 <- data.frame(n.trt = 350, emmeans(jmax25, ~inoc*co2, 
-                                                  at = list(n.trt = 350), 
-                                                  type = "response")) 
-jmax.full.630 <- data.frame(n.trt = 630, emmeans(jmax25, ~inoc*co2, 
-                                                  at = list(n.trt = 630),
-                                                  type = "response")) 
-jmax.full <- jmax.full.0 %>% full_join(jmax.full.70) %>% 
-  full_join(jmax.full.140) %>% full_join(jmax.full.210) %>% 
-  full_join(jmax.full.280) %>% full_join(jmax.full.350) %>% 
-  full_join(jmax.full.630) %>% 
+jmax.full <- data.frame(emmeans(jmax25, ~inoc*co2, "n.trt",
+                                 at = list(n.trt = seq(0, 630, 5)))) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
-jmax.ntrt.0 <- data.frame(n.trt = 0, emmeans(jmax25, ~1, 
-                                              at = list(n.trt = 0), type = "response"))
-jmax.ntrt.70 <- data.frame(n.trt = 70, emmeans(jmax25, ~1, 
-                                                at = list(n.trt = 70), type = "response"))
-jmax.ntrt.140 <- data.frame(n.trt = 140, emmeans(jmax25, ~1, 
-                                                  at = list(n.trt = 140), type = "response"))
-jmax.ntrt.210 <- data.frame(n.trt = 210, emmeans(jmax25, ~1, 
-                                                  at = list(n.trt = 210), type = "response"))
-jmax.ntrt.280 <- data.frame(n.trt = 280, emmeans(jmax25, ~1, 
-                                                  at = list(n.trt = 280), type = "response"))
-jmax.ntrt.350 <- data.frame(n.trt = 350, emmeans(jmax25, ~1, 
-                                                  at = list(n.trt = 350), type = "response"))
-jmax.ntrt.630 <- data.frame(n.trt = 630, emmeans(jmax25, ~1, 
-                                                  at = list(n.trt = 630), type = "response"))
-jmax.regline <- jmax.ntrt.0 %>% full_join(jmax.ntrt.70) %>%
-  full_join(jmax.ntrt.140) %>% full_join(jmax.ntrt.210) %>%
-  full_join(jmax.ntrt.280) %>% full_join(jmax.ntrt.350) %>%
-  full_join(jmax.ntrt.630) %>%
+jmax.regline <- data.frame(emmeans(jmax25, ~1, "n.trt",
+                                    at = list(n.trt = seq(0, 630, 5)))) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(jmax.full) %>%
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
   mutate(linetype = ifelse(co2.inoc == "elv_inoc" | co2.inoc == "amb_inoc", 
-                           "dashed", "solid")) %>%
-  select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
+                           "dashed", "solid"))
 
 ##########################################################################
 ## Jmax plot
@@ -1078,66 +611,23 @@ jmax.plot
 ##########################################################################
 ## Jmax25:Vcmax25 regression line prep
 ##########################################################################
-## Copy removed outliers and lmer fxn
+df$jmax25.vcmax25[108] <- NA
 jvmax <- lmer(jmax25.vcmax25 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-Anova(jvmax)
 shapiro.test(residuals(jvmax))
-outlierTest(jmax25)
-
 test(emtrends(jmax25, ~co2*inoc, "n.trt"))
 
-
 ## Emmean fxns for regression lines + error ribbons
-jvmax.full.0 <- data.frame(n.trt = 0, emmeans(jvmax, ~inoc*co2, 
-                                             at = list(n.trt = 0), 
-                                             type = "response"))
-jvmax.full.70 <- data.frame(n.trt = 70, emmeans(jvmax, ~inoc*co2, 
-                                               at = list(n.trt = 70), 
-                                               type = "response"))
-jvmax.full.140 <- data.frame(n.trt = 140, emmeans(jvmax, ~inoc*co2, 
-                                                 at = list(n.trt = 140), 
-                                                 type = "response")) 
-jvmax.full.210 <- data.frame(n.trt = 210, emmeans(jvmax, ~inoc*co2, 
-                                                 at = list(n.trt = 210), 
-                                                 type = "response"))
-jvmax.full.280 <- data.frame(n.trt = 280, emmeans(jvmax, ~inoc*co2, 
-                                                 at = list(n.trt = 280), 
-                                                 type = "response")) 
-jvmax.full.350 <- data.frame(n.trt = 350, emmeans(jvmax, ~inoc*co2, 
-                                                 at = list(n.trt = 350), 
-                                                 type = "response")) 
-jvmax.full.630 <- data.frame(n.trt = 630, emmeans(jvmax, ~inoc*co2, 
-                                                 at = list(n.trt = 630),
-                                                 type = "response")) 
-jvmax.full <- jvmax.full.0 %>% full_join(jvmax.full.70) %>% 
-  full_join(jvmax.full.140) %>% full_join(jvmax.full.210) %>% 
-  full_join(jvmax.full.280) %>% full_join(jvmax.full.350) %>% 
-  full_join(jvmax.full.630) %>% 
+jvmax.full <- data.frame(emmeans(jvmax, ~inoc*co2, "n.trt",
+                                 at = list(n.trt = seq(0, 630, 5)))) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
-jvmax.ntrt.0 <- data.frame(n.trt = 0, emmeans(jvmax, ~1, 
-                                             at = list(n.trt = 0), type = "response"))
-jvmax.ntrt.70 <- data.frame(n.trt = 70, emmeans(jvmax, ~1, 
-                                               at = list(n.trt = 70), type = "response"))
-jvmax.ntrt.140 <- data.frame(n.trt = 140, emmeans(jvmax, ~1, 
-                                                 at = list(n.trt = 140), type = "response"))
-jvmax.ntrt.210 <- data.frame(n.trt = 210, emmeans(jvmax, ~1, 
-                                                 at = list(n.trt = 210), type = "response"))
-jvmax.ntrt.280 <- data.frame(n.trt = 280, emmeans(jvmax, ~1, 
-                                                 at = list(n.trt = 280), type = "response"))
-jvmax.ntrt.350 <- data.frame(n.trt = 350, emmeans(jvmax, ~1, 
-                                                 at = list(n.trt = 350), type = "response"))
-jvmax.ntrt.630 <- data.frame(n.trt = 630, emmeans(jvmax, ~1, 
-                                                 at = list(n.trt = 630), type = "response"))
-jvmax.regline <- jmax.ntrt.0 %>% full_join(jvmax.ntrt.70) %>%
-  full_join(jvmax.ntrt.140) %>% full_join(jvmax.ntrt.210) %>%
-  full_join(jvmax.ntrt.280) %>% full_join(jvmax.ntrt.350) %>%
-  full_join(jvmax.ntrt.630) %>%
+jvmax.regline <- data.frame(emmeans(jvmax, ~1, "n.trt",
+                                    at = list(n.trt = seq(0, 630, 5)))) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(jvmax.full) %>%
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
   mutate(linetype = ifelse(co2.inoc == "elv_inoc" | co2.inoc == "amb_inoc", 
-                           "dashed", "solid")) %>%
-  select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
+                           "dashed", "solid"))
 
 ##########################################################################
 ## Jmax:Vcmax25 plot
@@ -1174,74 +664,27 @@ jvmax.plot <- ggplot(data = df, aes(x = n.trt, y = jmax25.vcmax25)) +
         panel.border = element_rect(size = 1.25))
 jvmax.plot
 
-
-
-
 ##########################################################################
 ## Prop leaf N in photosynthesis  regression line prep
 ##########################################################################
 ## Copy removed outliers and lmer fxn
-df$p.photo[50] <- NA
-
+df$p.photo[df$p.photo > 1] <- NA
 p.photo <- lmer(p.photo ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-Anova(p.photo)
 shapiro.test(residuals(p.photo))
-outlierTest(p.photo)
-
 test(emtrends(p.photo, ~co2*inoc, "n.trt"))
 
-
 ## Emmean fxns for regression lines + error ribbons
-p.photo.full.0 <- data.frame(n.trt = 0, emmeans(p.photo, ~inoc*co2, 
-                                              at = list(n.trt = 0), 
-                                              type = "response"))
-p.photo.full.70 <- data.frame(n.trt = 70, emmeans(p.photo, ~inoc*co2, 
-                                                at = list(n.trt = 70), 
-                                                type = "response"))
-p.photo.full.140 <- data.frame(n.trt = 140, emmeans(p.photo, ~inoc*co2, 
-                                                  at = list(n.trt = 140), 
-                                                  type = "response")) 
-p.photo.full.210 <- data.frame(n.trt = 210, emmeans(p.photo, ~inoc*co2, 
-                                                  at = list(n.trt = 210), 
-                                                  type = "response"))
-p.photo.full.280 <- data.frame(n.trt = 280, emmeans(p.photo, ~inoc*co2, 
-                                                  at = list(n.trt = 280), 
-                                                  type = "response")) 
-p.photo.full.350 <- data.frame(n.trt = 350, emmeans(p.photo, ~inoc*co2, 
-                                                  at = list(n.trt = 350), 
-                                                  type = "response")) 
-p.photo.full.630 <- data.frame(n.trt = 630, emmeans(p.photo, ~inoc*co2, 
-                                                  at = list(n.trt = 630),
-                                                  type = "response")) 
-p.photo.full <- p.photo.full.0 %>% full_join(p.photo.full.70) %>% 
-  full_join(p.photo.full.140) %>% full_join(p.photo.full.210) %>% 
-  full_join(p.photo.full.280) %>% full_join(p.photo.full.350) %>% 
-  full_join(p.photo.full.630) %>% 
+p.photo.full <- data.frame(emmeans(p.photo, ~inoc*co2, "n.trt",
+                                 at = list(n.trt = seq(0, 630, 5)))) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
-p.photo.ntrt.0 <- data.frame(n.trt = 0, emmeans(p.photo, ~1, 
-                                              at = list(n.trt = 0), type = "response"))
-p.photo.ntrt.70 <- data.frame(n.trt = 70, emmeans(p.photo, ~1, 
-                                                at = list(n.trt = 70), type = "response"))
-p.photo.ntrt.140 <- data.frame(n.trt = 140, emmeans(p.photo, ~1, 
-                                                  at = list(n.trt = 140), type = "response"))
-p.photo.ntrt.210 <- data.frame(n.trt = 210, emmeans(p.photo, ~1, 
-                                                  at = list(n.trt = 210), type = "response"))
-p.photo.ntrt.280 <- data.frame(n.trt = 280, emmeans(p.photo, ~1, 
-                                                  at = list(n.trt = 280), type = "response"))
-p.photo.ntrt.350 <- data.frame(n.trt = 350, emmeans(p.photo, ~1, 
-                                                  at = list(n.trt = 350), type = "response"))
-p.photo.ntrt.630 <- data.frame(n.trt = 630, emmeans(p.photo, ~1, 
-                                                  at = list(n.trt = 630), type = "response"))
-p.photo.regline <- p.photo.ntrt.0 %>% full_join(p.photo.ntrt.70) %>%
-  full_join(p.photo.ntrt.140) %>% full_join(p.photo.ntrt.210) %>%
-  full_join(p.photo.ntrt.280) %>% full_join(p.photo.ntrt.350) %>%
-  full_join(p.photo.ntrt.630) %>%
+p.photo.regline <- data.frame(emmeans(p.photo, ~1, "n.trt",
+                                    at = list(n.trt = seq(0, 630, 5)))) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(p.photo.full) %>%
-  mutate(linetype = ifelse(co2.inoc == "elv_no.inoc" | co2.inoc == "amb_no.inoc", 
-                           "dashed", "solid")) %>%
-  select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
+  mutate(linetype = ifelse(co2.inoc == "elv_no.inoc", 
+                           "dashed", "solid"))
 
 ##########################################################################
 ## Prop leaf N in photosynthesis plot
@@ -1281,68 +724,23 @@ p.photo.plot
 ##########################################################################
 ## Prop leaf N in rubisco regression line prep
 ##########################################################################
-## Copy removed outliers and lmer fxn
-df$p.rubisco[50] <- NA
-
+df$p.rubisco[c(49)] <- NA
 p.rub <- lmer(p.rubisco ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-Anova(p.rub)
 shapiro.test(residuals(p.rub))
-outlierTest(p.rub)
-
 test(emtrends(p.rub, ~co2*inoc, "n.trt"))
 
-
 ## Emmean fxns for regression lines + error ribbons
-p.rub.full.0 <- data.frame(n.trt = 0, emmeans(p.rub, ~inoc*co2, 
-                                              at = list(n.trt = 0), 
-                                              type = "response"))
-p.rub.full.70 <- data.frame(n.trt = 70, emmeans(p.rub, ~inoc*co2, 
-                                                at = list(n.trt = 70), 
-                                                type = "response"))
-p.rub.full.140 <- data.frame(n.trt = 140, emmeans(p.rub, ~inoc*co2, 
-                                                  at = list(n.trt = 140), 
-                                                  type = "response")) 
-p.rub.full.210 <- data.frame(n.trt = 210, emmeans(p.rub, ~inoc*co2, 
-                                                  at = list(n.trt = 210), 
-                                                  type = "response"))
-p.rub.full.280 <- data.frame(n.trt = 280, emmeans(p.rub, ~inoc*co2, 
-                                                  at = list(n.trt = 280), 
-                                                  type = "response")) 
-p.rub.full.350 <- data.frame(n.trt = 350, emmeans(p.rub, ~inoc*co2, 
-                                                  at = list(n.trt = 350), 
-                                                  type = "response")) 
-p.rub.full.630 <- data.frame(n.trt = 630, emmeans(p.rub, ~inoc*co2, 
-                                                  at = list(n.trt = 630),
-                                                  type = "response")) 
-p.rub.full <- p.rub.full.0 %>% full_join(p.rub.full.70) %>% 
-  full_join(p.rub.full.140) %>% full_join(p.rub.full.210) %>% 
-  full_join(p.rub.full.280) %>% full_join(p.rub.full.350) %>% 
-  full_join(p.rub.full.630) %>% 
+p.rub.full <- data.frame(emmeans(p.rub, ~inoc*co2, "n.trt",
+                                   at = list(n.trt = seq(0, 630, 5)))) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
-p.rub.ntrt.0 <- data.frame(n.trt = 0, emmeans(p.rub, ~1, 
-                                              at = list(n.trt = 0), type = "response"))
-p.rub.ntrt.70 <- data.frame(n.trt = 70, emmeans(p.rub, ~1, 
-                                                at = list(n.trt = 70), type = "response"))
-p.rub.ntrt.140 <- data.frame(n.trt = 140, emmeans(p.rub, ~1, 
-                                                  at = list(n.trt = 140), type = "response"))
-p.rub.ntrt.210 <- data.frame(n.trt = 210, emmeans(p.rub, ~1, 
-                                                  at = list(n.trt = 210), type = "response"))
-p.rub.ntrt.280 <- data.frame(n.trt = 280, emmeans(p.rub, ~1, 
-                                                  at = list(n.trt = 280), type = "response"))
-p.rub.ntrt.350 <- data.frame(n.trt = 350, emmeans(p.rub, ~1, 
-                                                  at = list(n.trt = 350), type = "response"))
-p.rub.ntrt.630 <- data.frame(n.trt = 630, emmeans(p.rub, ~1, 
-                                                  at = list(n.trt = 630), type = "response"))
-p.rub.regline <- p.rub.ntrt.0 %>% full_join(p.rub.ntrt.70) %>%
-  full_join(p.rub.ntrt.140) %>% full_join(p.rub.ntrt.210) %>%
-  full_join(p.rub.ntrt.280) %>% full_join(p.rub.ntrt.350) %>%
-  full_join(p.rub.ntrt.630) %>%
+p.rub.regline <- data.frame(emmeans(p.rub, ~1, "n.trt",
+                                      at = list(n.trt = seq(0, 630, 5)))) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(p.rub.full) %>%
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
   mutate(linetype = ifelse(co2.inoc == "elv_no.inoc" | co2.inoc == "amb_no.inoc", 
-                           "dashed", "solid")) %>%
-  select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
+                           "dashed", "solid"))
 
 ##########################################################################
 ## Prop leaf N in rubisco plot
@@ -1380,81 +778,36 @@ p.rub.plot <- ggplot(data = df, aes(x = n.trt, y = p.rubisco)) +
 p.rub.plot
 
 ##########################################################################
-## Prop leaf N in structure regression line prep
+## Prop leaf N in bioenergetics regression line prep
 ##########################################################################
-## Copy removed outliers and lmer fxn
-df$p.structure[50] <- NA
-
-p.str <- lmer(p.structure ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-Anova(p.str)
-shapiro.test(residuals(p.str))
-outlierTest(p.str)
-
-test(emtrends(p.str, ~co2*inoc, "n.trt"))
-
+df$p.bioe[c(49)] <- NA
+p.bioe <- lmer(p.bioe ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+shapiro.test(residuals(p.bioe))
+test(emtrends(p.bioe, ~co2*inoc, "n.trt"))
 
 ## Emmean fxns for regression lines + error ribbons
-p.str.full.0 <- data.frame(n.trt = 0, emmeans(p.str, ~inoc*co2, 
-                                              at = list(n.trt = 0), 
-                                              type = "response"))
-p.str.full.70 <- data.frame(n.trt = 70, emmeans(p.str, ~inoc*co2, 
-                                                at = list(n.trt = 70), 
-                                                type = "response"))
-p.str.full.140 <- data.frame(n.trt = 140, emmeans(p.str, ~inoc*co2, 
-                                                  at = list(n.trt = 140), 
-                                                  type = "response")) 
-p.str.full.210 <- data.frame(n.trt = 210, emmeans(p.str, ~inoc*co2, 
-                                                  at = list(n.trt = 210), 
-                                                  type = "response"))
-p.str.full.280 <- data.frame(n.trt = 280, emmeans(p.str, ~inoc*co2, 
-                                                  at = list(n.trt = 280), 
-                                                  type = "response")) 
-p.str.full.350 <- data.frame(n.trt = 350, emmeans(p.str, ~inoc*co2, 
-                                                  at = list(n.trt = 350), 
-                                                  type = "response")) 
-p.str.full.630 <- data.frame(n.trt = 630, emmeans(p.str, ~inoc*co2, 
-                                                  at = list(n.trt = 630),
-                                                  type = "response")) 
-p.str.full <- p.str.full.0 %>% full_join(p.str.full.70) %>% 
-  full_join(p.str.full.140) %>% full_join(p.str.full.210) %>% 
-  full_join(p.str.full.280) %>% full_join(p.str.full.350) %>% 
-  full_join(p.str.full.630) %>% 
+p.bioe.full <- data.frame(emmeans(p.bioe, ~inoc*co2, "n.trt",
+                                 at = list(n.trt = seq(0, 630, 5)))) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
-p.str.ntrt.0 <- data.frame(n.trt = 0, emmeans(p.str, ~1, 
-                                              at = list(n.trt = 0), type = "response"))
-p.str.ntrt.70 <- data.frame(n.trt = 70, emmeans(p.str, ~1, 
-                                                at = list(n.trt = 70), type = "response"))
-p.str.ntrt.140 <- data.frame(n.trt = 140, emmeans(p.str, ~1, 
-                                                  at = list(n.trt = 140), type = "response"))
-p.str.ntrt.210 <- data.frame(n.trt = 210, emmeans(p.str, ~1, 
-                                                  at = list(n.trt = 210), type = "response"))
-p.str.ntrt.280 <- data.frame(n.trt = 280, emmeans(p.str, ~1, 
-                                                  at = list(n.trt = 280), type = "response"))
-p.str.ntrt.350 <- data.frame(n.trt = 350, emmeans(p.str, ~1, 
-                                                  at = list(n.trt = 350), type = "response"))
-p.str.ntrt.630 <- data.frame(n.trt = 630, emmeans(p.str, ~1, 
-                                                  at = list(n.trt = 630), type = "response"))
-p.str.regline <- p.str.ntrt.0 %>% full_join(p.str.ntrt.70) %>%
-  full_join(p.str.ntrt.140) %>% full_join(p.str.ntrt.210) %>%
-  full_join(p.str.ntrt.280) %>% full_join(p.str.ntrt.350) %>%
-  full_join(p.str.ntrt.630) %>%
+p.bioe.regline <- data.frame(emmeans(p.bioe, ~1, "n.trt",
+                                    at = list(n.trt = seq(0, 630, 5)))) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
-  full_join(p.str.full) %>%
-  mutate(linetype = ifelse(co2.inoc == "elv_inoc" | co2.inoc == "amb_inoc", 
-                           "dashed", "solid")) %>%
-  select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
+  full_join(p.bioe.full) %>%
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
+  mutate(linetype = ifelse(co2.inoc == "elv_no.inoc" | co2.inoc == "amb_no.inoc", 
+                           "dashed", "solid"))
 
 ##########################################################################
-## Prop leaf N in structure plot
+## Prop leaf N in bioenergetics plot
 ##########################################################################
-p.str.plot <- ggplot(data = df, aes(x = n.trt, y = p.structure)) +
+p.bioe.plot <- ggplot(data = df, aes(x = n.trt, y = p.bioe)) +
   geom_jitter(aes(fill = co2.inoc),
               size = 3, shape = 21, alpha = 0.75) +
-  geom_smooth(data = subset(p.str.regline, co2.inoc != "overall"),
+  geom_smooth(data = subset(p.bioe.regline, co2.inoc != "overall"),
               aes(color = co2.inoc, y = emmean, linetype = linetype), 
               size = 1.5, se = FALSE) +
-  geom_ribbon(data = subset(p.str.regline, co2.inoc != "overall"),
+  geom_ribbon(data = subset(p.bioe.regline, co2.inoc != "overall"),
               aes(fill = co2.inoc, y = emmean, 
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
@@ -1469,7 +822,125 @@ p.str.plot <- ggplot(data = df, aes(x = n.trt, y = p.structure)) +
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
-  scale_y_continuous(limits = c(0, 0.3), breaks = seq(0, 0.3, 0.06)) +
+  scale_y_continuous(limits = c(0, 0.12), breaks = seq(0, 0.12, 0.03)) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic(rho)["bioenergetics"]*" (g g"^"-1"*")")),
+       fill = "Treatment", color = "Treatment") +
+  guides(linetype = "none") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25))
+p.bioe.plot
+
+##########################################################################
+## Prop leaf N in light harvesting proteins regression line prep
+##########################################################################
+df$p.lightharv[c(39, 41, 49)] <- NA
+p.light <- lmer(sqrt(p.lightharv) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+shapiro.test(residuals(p.light))
+test(emtrends(p.light, ~co2*inoc, "n.trt"))
+
+## Emmean fxns for regression lines + error ribbons
+p.light.full <- data.frame(emmeans(p.light, ~inoc*co2, "n.trt",
+                                   at = list(n.trt = seq(0, 630, 5)),
+                                   type = "response")) %>%
+  unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
+
+p.light.regline <- data.frame(emmeans(p.light, ~1, "n.trt",
+                                      at = list(n.trt = seq(0, 630, 5)),
+                                      type = "response")) %>%
+  mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
+  full_join(p.light.full) %>%
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
+  mutate(linetype = ifelse(co2.inoc == "elv_inoc" | co2.inoc == "amb_inoc", 
+                           "dashed", "solid"))
+
+##########################################################################
+## Prop leaf N in light harvesting proteins plot
+##########################################################################
+p.light.plot <- ggplot(data = df, aes(x = n.trt, y = p.lightharv)) +
+  geom_jitter(aes(fill = co2.inoc),
+              size = 3, shape = 21, alpha = 0.75) +
+  geom_smooth(data = subset(p.light.regline, co2.inoc != "overall"),
+              aes(color = co2.inoc, y = response, linetype = linetype), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = subset(p.light.regline, co2.inoc != "overall"),
+              aes(fill = co2.inoc, y = response, 
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = cbbPalette3,
+                    labels = c("Ambient, inoculated",
+                               "Ambient, not inoculated",
+                               "Elevated, inoculated",
+                               "Elevated, uninoculated")) +
+  scale_color_manual(values = cbbPalette3,
+                     labels = c("Ambient, inoculated",
+                                "Ambient, not inoculated",
+                                "Elevated, inoculated",
+                                "Elevated, uninoculated")) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_y_continuous(limits = c(0, 0.05), breaks = seq(0, 0.05, 0.01)) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic(rho)["light"]*" (g g"^"-1"*")")),
+       fill = "Treatment", color = "Treatment") +
+  guides(linetype = "none") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25))
+p.light.plot
+
+##########################################################################
+## Prop leaf N in structure regression line prep
+##########################################################################
+df$p.structure[c(39, 49, 108, 109, 111)] <- NA
+p.str <- lmer(log(p.structure) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+shapiro.test(residuals(p.str))
+test(emtrends(p.str, ~co2*inoc, "n.trt"))
+
+## Emmean fxns for regression lines + error ribbons
+p.str.full <- data.frame(emmeans(p.str, ~inoc*co2, "n.trt",
+                                 at = list(n.trt = seq(0, 630, 5)),
+                                 type = "response")) %>%
+  unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
+
+p.str.regline <- data.frame(emmeans(p.str, ~1, "n.trt",
+                                    at = list(n.trt = seq(0, 630, 5)),
+                                    type = "response")) %>%
+  mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
+  full_join(p.str.full) %>%
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
+  mutate(linetype = ifelse(co2.inoc == "elv_no.inoc" | co2.inoc == "amb_no.inoc", 
+                           "dashed", "solid")) %>%
+  mutate(linetype = ifelse(co2.inoc == "elv_inoc", 
+                           "dashed", "solid"))
+
+##########################################################################
+## Prop leaf N in structure plot
+##########################################################################
+p.str.plot <- ggplot(data = df, aes(x = n.trt, y = p.structure)) +
+  geom_jitter(aes(fill = co2.inoc),
+              size = 3, shape = 21, alpha = 0.75) +
+  geom_smooth(data = subset(p.str.regline, co2.inoc != "overall"),
+              aes(color = co2.inoc, y = response, linetype = linetype), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = subset(p.str.regline, co2.inoc != "overall"),
+              aes(fill = co2.inoc, y = response, 
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = cbbPalette3,
+                    labels = c("Ambient, inoculated",
+                               "Ambient, not inoculated",
+                               "Elevated, inoculated",
+                               "Elevated, uninoculated")) +
+  scale_color_manual(values = cbbPalette3,
+                     labels = c("Ambient, inoculated",
+                                "Ambient, not inoculated",
+                                "Elevated, inoculated",
+                                "Elevated, uninoculated")) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_y_continuous(limits = c(0, 0.2), breaks = seq(0, 0.2, 0.05)) +
   labs(x = "Soil N fertilization (ppm)",
        y = expression(bold(italic(rho)["structure"]*" (g g"^"-1"*")")),
        fill = "Treatment", color = "Treatment") +
@@ -1484,67 +955,25 @@ p.str.plot
 ## PNUE regression line prep
 ##########################################################################
 ## Copy removed outliers and lmer fxn
-df$pnue[50] <- NA
-
+df$pnue[49] <- NA
 pnue <- lmer(pnue ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-Anova(pnue)
 shapiro.test(residuals(pnue))
-outlierTest(pnue)
-
 test(emtrends(pnue, ~co2*inoc, "n.trt"))
 
-
 ## Emmean fxns for regression lines + error ribbons
-pnue.full.0 <- data.frame(n.trt = 0, emmeans(pnue, ~inoc*co2, 
-                                              at = list(n.trt = 0), 
-                                              type = "response"))
-pnue.full.70 <- data.frame(n.trt = 70, emmeans(pnue, ~inoc*co2, 
-                                                at = list(n.trt = 70), 
-                                                type = "response"))
-pnue.full.140 <- data.frame(n.trt = 140, emmeans(pnue, ~inoc*co2, 
-                                                  at = list(n.trt = 140), 
-                                                  type = "response")) 
-pnue.full.210 <- data.frame(n.trt = 210, emmeans(pnue, ~inoc*co2, 
-                                                  at = list(n.trt = 210), 
-                                                  type = "response"))
-pnue.full.280 <- data.frame(n.trt = 280, emmeans(pnue, ~inoc*co2, 
-                                                  at = list(n.trt = 280), 
-                                                  type = "response")) 
-pnue.full.350 <- data.frame(n.trt = 350, emmeans(pnue, ~inoc*co2, 
-                                                  at = list(n.trt = 350), 
-                                                  type = "response")) 
-pnue.full.630 <- data.frame(n.trt = 630, emmeans(pnue, ~inoc*co2, 
-                                                  at = list(n.trt = 630),
-                                                  type = "response")) 
-pnue.full <- pnue.full.0 %>% full_join(pnue.full.70) %>% 
-  full_join(pnue.full.140) %>% full_join(pnue.full.210) %>% 
-  full_join(pnue.full.280) %>% full_join(pnue.full.350) %>% 
-  full_join(pnue.full.630) %>% 
+pnue.full <- data.frame(emmeans(pnue, ~inoc*co2, "n.trt",
+                                 at = list(n.trt = seq(0, 630, 5)),
+                                 type = "response")) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
-pnue.ntrt.0 <- data.frame(n.trt = 0, emmeans(pnue, ~1, 
-                                              at = list(n.trt = 0), type = "response"))
-pnue.ntrt.70 <- data.frame(n.trt = 70, emmeans(pnue, ~1, 
-                                                at = list(n.trt = 70), type = "response"))
-pnue.ntrt.140 <- data.frame(n.trt = 140, emmeans(pnue, ~1, 
-                                                  at = list(n.trt = 140), type = "response"))
-pnue.ntrt.210 <- data.frame(n.trt = 210, emmeans(pnue, ~1, 
-                                                  at = list(n.trt = 210), type = "response"))
-pnue.ntrt.280 <- data.frame(n.trt = 280, emmeans(pnue, ~1, 
-                                                  at = list(n.trt = 280), type = "response"))
-pnue.ntrt.350 <- data.frame(n.trt = 350, emmeans(pnue, ~1, 
-                                                  at = list(n.trt = 350), type = "response"))
-pnue.ntrt.630 <- data.frame(n.trt = 630, emmeans(pnue, ~1, 
-                                                  at = list(n.trt = 630), type = "response"))
-pnue.regline <- pnue.ntrt.0 %>% full_join(pnue.ntrt.70) %>%
-  full_join(pnue.ntrt.140) %>% full_join(pnue.ntrt.210) %>%
-  full_join(pnue.ntrt.280) %>% full_join(pnue.ntrt.350) %>%
-  full_join(pnue.ntrt.630) %>%
+pnue.regline <- data.frame(emmeans(pnue, ~1, "n.trt",
+                                    at = list(n.trt = seq(0, 630, 5)),
+                                    type = "response")) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(pnue.full) %>%
-  mutate(linetype = ifelse(co2.inoc == "amb_no.inoc" | co2.inoc == "elv_no.inoc", 
-                           "dashed", "solid")) %>%
-  select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
+  mutate(linetype = ifelse(co2.inoc == "elv_no.inoc" | co2.inoc == "amb_no.inoc", 
+                           "dashed", "solid"))
 
 ##########################################################################
 ## PNUE plot
@@ -1584,68 +1013,24 @@ pnue.plot
 ##########################################################################
 ## iWUE regression line prep - to be replaced with chi?
 ##########################################################################
-## Copy removed outliers and lmer fxn
-df$pnue[50] <- NA
-
 iwue <- lmer(iwue ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-Anova(iwue)
 shapiro.test(residuals(iwue))
-outlierTest(iwue)
-
 test(emtrends(iwue, ~co2*inoc, "n.trt"))
 
-
 ## Emmean fxns for regression lines + error ribbons
-iwue.full.0 <- data.frame(n.trt = 0, emmeans(iwue, ~inoc*co2, 
-                                             at = list(n.trt = 0), 
-                                             type = "response"))
-iwue.full.70 <- data.frame(n.trt = 70, emmeans(iwue, ~inoc*co2, 
-                                               at = list(n.trt = 70), 
-                                               type = "response"))
-iwue.full.140 <- data.frame(n.trt = 140, emmeans(iwue, ~inoc*co2, 
-                                                 at = list(n.trt = 140), 
-                                                 type = "response")) 
-iwue.full.210 <- data.frame(n.trt = 210, emmeans(iwue, ~inoc*co2, 
-                                                 at = list(n.trt = 210), 
-                                                 type = "response"))
-iwue.full.280 <- data.frame(n.trt = 280, emmeans(iwue, ~inoc*co2, 
-                                                 at = list(n.trt = 280), 
-                                                 type = "response")) 
-iwue.full.350 <- data.frame(n.trt = 350, emmeans(iwue, ~inoc*co2, 
-                                                 at = list(n.trt = 350), 
-                                                 type = "response")) 
-iwue.full.630 <- data.frame(n.trt = 630, emmeans(iwue, ~inoc*co2, 
-                                                 at = list(n.trt = 630),
-                                                 type = "response")) 
-iwue.full <- iwue.full.0 %>% full_join(iwue.full.70) %>% 
-  full_join(iwue.full.140) %>% full_join(iwue.full.210) %>% 
-  full_join(iwue.full.280) %>% full_join(iwue.full.350) %>% 
-  full_join(iwue.full.630) %>% 
+iwue.full <- data.frame(emmeans(iwue, ~inoc*co2, "n.trt",
+                                at = list(n.trt = seq(0, 630, 5)),
+                                type = "response")) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
-iwue.ntrt.0 <- data.frame(n.trt = 0, emmeans(iwue, ~1, 
-                                             at = list(n.trt = 0), type = "response"))
-iwue.ntrt.70 <- data.frame(n.trt = 70, emmeans(iwue, ~1, 
-                                               at = list(n.trt = 70), type = "response"))
-iwue.ntrt.140 <- data.frame(n.trt = 140, emmeans(iwue, ~1, 
-                                                 at = list(n.trt = 140), type = "response"))
-iwue.ntrt.210 <- data.frame(n.trt = 210, emmeans(iwue, ~1, 
-                                                 at = list(n.trt = 210), type = "response"))
-iwue.ntrt.280 <- data.frame(n.trt = 280, emmeans(iwue, ~1, 
-                                                 at = list(n.trt = 280), type = "response"))
-iwue.ntrt.350 <- data.frame(n.trt = 350, emmeans(iwue, ~1, 
-                                                 at = list(n.trt = 350), type = "response"))
-iwue.ntrt.630 <- data.frame(n.trt = 630, emmeans(iwue, ~1, 
-                                                 at = list(n.trt = 630), type = "response"))
-iwue.regline <- iwue.ntrt.0 %>% full_join(iwue.ntrt.70) %>%
-  full_join(iwue.ntrt.140) %>% full_join(iwue.ntrt.210) %>%
-  full_join(iwue.ntrt.280) %>% full_join(iwue.ntrt.350) %>%
-  full_join(iwue.ntrt.630) %>%
+iwue.regline <- data.frame(emmeans(iwue, ~1, "n.trt",
+                                   at = list(n.trt = seq(0, 630, 5)),
+                                   type = "response")) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(iwue.full) %>%
-  mutate(linetype = ifelse(co2.inoc == "amb_no.inoc" | co2.inoc == "elv_no.inoc", 
-                           "dashed", "solid")) %>%
-  select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
+  mutate(linetype = ifelse(co2.inoc == "elv_no.inoc" | co2.inoc == "amb_inoc", 
+                           "dashed", "solid"))
 
 ##########################################################################
 ## iWUE plot
@@ -1678,64 +1063,25 @@ iwue.plot
 ## Narea:gs regression line prep
 ##########################################################################
 narea.gs <- lmer(log(narea.gs) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-Anova(narea.gs)
 shapiro.test(residuals(narea.gs))
-outlierTest(narea.gs)
-
 test(emtrends(narea.gs, ~co2*inoc, "n.trt"))
 
-
 ## Emmean fxns for regression lines + error ribbons
-narea.gs.full.0 <- data.frame(n.trt = 0, emmeans(narea.gs, ~inoc*co2, 
-                                             at = list(n.trt = 0), 
-                                             type = "response"))
-narea.gs.full.70 <- data.frame(n.trt = 70, emmeans(narea.gs, ~inoc*co2, 
-                                               at = list(n.trt = 70), 
-                                               type = "response"))
-narea.gs.full.140 <- data.frame(n.trt = 140, emmeans(narea.gs, ~inoc*co2, 
-                                                 at = list(n.trt = 140), 
-                                                 type = "response")) 
-narea.gs.full.210 <- data.frame(n.trt = 210, emmeans(narea.gs, ~inoc*co2, 
-                                                 at = list(n.trt = 210), 
-                                                 type = "response"))
-narea.gs.full.280 <- data.frame(n.trt = 280, emmeans(narea.gs, ~inoc*co2, 
-                                                 at = list(n.trt = 280), 
-                                                 type = "response")) 
-narea.gs.full.350 <- data.frame(n.trt = 350, emmeans(narea.gs, ~inoc*co2, 
-                                                 at = list(n.trt = 350), 
-                                                 type = "response")) 
-narea.gs.full.630 <- data.frame(n.trt = 630, emmeans(narea.gs, ~inoc*co2, 
-                                                 at = list(n.trt = 630),
-                                                 type = "response")) 
-narea.gs.full <- narea.gs.full.0 %>% full_join(narea.gs.full.70) %>% 
-  full_join(narea.gs.full.140) %>% full_join(narea.gs.full.210) %>% 
-  full_join(narea.gs.full.280) %>% full_join(narea.gs.full.350) %>% 
-  full_join(narea.gs.full.630) %>% 
+narea.gs.full <- data.frame(emmeans(narea.gs, ~inoc*co2, "n.trt",
+                                at = list(n.trt = seq(0, 630, 5)),
+                                type = "response")) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
-narea.gs.ntrt.0 <- data.frame(n.trt = 0, emmeans(narea.gs, ~1, 
-                                             at = list(n.trt = 0), type = "response"))
-narea.gs.ntrt.70 <- data.frame(n.trt = 70, emmeans(narea.gs, ~1, 
-                                               at = list(n.trt = 70), type = "response"))
-narea.gs.ntrt.140 <- data.frame(n.trt = 140, emmeans(narea.gs, ~1, 
-                                                 at = list(n.trt = 140), type = "response"))
-narea.gs.ntrt.210 <- data.frame(n.trt = 210, emmeans(narea.gs, ~1, 
-                                                 at = list(n.trt = 210), type = "response"))
-narea.gs.ntrt.280 <- data.frame(n.trt = 280, emmeans(narea.gs, ~1, 
-                                                 at = list(n.trt = 280), type = "response"))
-narea.gs.ntrt.350 <- data.frame(n.trt = 350, emmeans(narea.gs, ~1, 
-                                                 at = list(n.trt = 350), type = "response"))
-narea.gs.ntrt.630 <- data.frame(n.trt = 630, emmeans(narea.gs, ~1, 
-                                                 at = list(n.trt = 630), type = "response"))
-narea.gs.regline <- narea.gs.ntrt.0 %>% full_join(narea.gs.ntrt.70) %>%
-  full_join(narea.gs.ntrt.140) %>% full_join(narea.gs.ntrt.210) %>%
-  full_join(narea.gs.ntrt.280) %>% full_join(narea.gs.ntrt.350) %>%
-  full_join(narea.gs.ntrt.630) %>%
+narea.gs.regline <- data.frame(emmeans(narea.gs, ~1, "n.trt",
+                                   at = list(n.trt = seq(0, 630, 5)),
+                                   type = "response")) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(narea.gs.full) %>%
-  mutate(linetype = ifelse(co2.inoc == "amb_no.inoc" | co2.inoc == "elv_no.inoc", 
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
+  mutate(linetype = ifelse(co2.inoc == "elv_no.inoc" | co2.inoc == "amb_inoc", 
                            "dashed", "solid")) %>%
-  select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
+  mutate(linetype = ifelse(co2.inoc == "amb_no.inoc" | co2.inoc == "elv_no.inoc", 
+                           "dashed", "solid"))
 
 ##########################################################################
 ## Narea:gs plot
@@ -1763,7 +1109,7 @@ narea.gs.plot <- ggplot(data = df, aes(x = n.trt, y = narea.gs)) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 32), breaks = seq(0, 32, 8)) +
   labs(x = "Soil N fertilization (ppm)",
-       y = expression(bold(italic("N")["area"]*": "*italic("g")["s"]*" ()")),
+       y = expression(bold(italic("N")["area"]*": "*italic("g")["s"]*" (add units here)")),
        fill = "Treatment", color = "Treatment") +
   guides(linetype = "none") +
   theme_bw(base_size = 18) +
@@ -1776,63 +1122,23 @@ narea.gs.plot
 ## Vcmax:gs regression line prep
 ##########################################################################
 vcmax.gs <- lmer(log(vcmax.gs) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-Anova(vcmax.gs)
 shapiro.test(residuals(vcmax.gs))
-outlierTest(vcmax.gs)
-
 test(emtrends(vcmax.gs, ~co2*inoc, "n.trt"))
 
 ## Emmean fxns for regression lines + error ribbons
-vcmax.gs.full.0 <- data.frame(n.trt = 0, emmeans(vcmax.gs, ~inoc*co2, 
-                                                 at = list(n.trt = 0), 
-                                                 type = "response"))
-vcmax.gs.full.70 <- data.frame(n.trt = 70, emmeans(vcmax.gs, ~inoc*co2, 
-                                                   at = list(n.trt = 70), 
-                                                   type = "response"))
-vcmax.gs.full.140 <- data.frame(n.trt = 140, emmeans(vcmax.gs, ~inoc*co2, 
-                                                     at = list(n.trt = 140), 
-                                                     type = "response")) 
-vcmax.gs.full.210 <- data.frame(n.trt = 210, emmeans(vcmax.gs, ~inoc*co2, 
-                                                     at = list(n.trt = 210), 
-                                                     type = "response"))
-vcmax.gs.full.280 <- data.frame(n.trt = 280, emmeans(vcmax.gs, ~inoc*co2, 
-                                                     at = list(n.trt = 280), 
-                                                     type = "response")) 
-vcmax.gs.full.350 <- data.frame(n.trt = 350, emmeans(vcmax.gs, ~inoc*co2, 
-                                                     at = list(n.trt = 350), 
-                                                     type = "response")) 
-vcmax.gs.full.630 <- data.frame(n.trt = 630, emmeans(vcmax.gs, ~inoc*co2, 
-                                                     at = list(n.trt = 630),
-                                                     type = "response")) 
-vcmax.gs.full <- vcmax.gs.full.0 %>% full_join(vcmax.gs.full.70) %>% 
-  full_join(vcmax.gs.full.140) %>% full_join(vcmax.gs.full.210) %>% 
-  full_join(vcmax.gs.full.280) %>% full_join(vcmax.gs.full.350) %>% 
-  full_join(vcmax.gs.full.630) %>% 
+vcmax.gs.full <- data.frame(emmeans(vcmax.gs, ~inoc*co2, "n.trt",
+                                    at = list(n.trt = seq(0, 630, 5)),
+                                    type = "response")) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
-vcmax.gs.ntrt.0 <- data.frame(n.trt = 0, emmeans(vcmax.gs, ~1, 
-                                                 at = list(n.trt = 0), type = "response"))
-vcmax.gs.ntrt.70 <- data.frame(n.trt = 70, emmeans(vcmax.gs, ~1, 
-                                                   at = list(n.trt = 70), type = "response"))
-vcmax.gs.ntrt.140 <- data.frame(n.trt = 140, emmeans(vcmax.gs, ~1, 
-                                                     at = list(n.trt = 140), type = "response"))
-vcmax.gs.ntrt.210 <- data.frame(n.trt = 210, emmeans(vcmax.gs, ~1, 
-                                                     at = list(n.trt = 210), type = "response"))
-vcmax.gs.ntrt.280 <- data.frame(n.trt = 280, emmeans(vcmax.gs, ~1, 
-                                                     at = list(n.trt = 280), type = "response"))
-vcmax.gs.ntrt.350 <- data.frame(n.trt = 350, emmeans(vcmax.gs, ~1, 
-                                                     at = list(n.trt = 350), type = "response"))
-vcmax.gs.ntrt.630 <- data.frame(n.trt = 630, emmeans(vcmax.gs, ~1, 
-                                                     at = list(n.trt = 630), type = "response"))
-vcmax.gs.regline <- vcmax.gs.ntrt.0 %>% full_join(vcmax.gs.ntrt.70) %>%
-  full_join(vcmax.gs.ntrt.140) %>% full_join(vcmax.gs.ntrt.210) %>%
-  full_join(vcmax.gs.ntrt.280) %>% full_join(vcmax.gs.ntrt.350) %>%
-  full_join(vcmax.gs.ntrt.630) %>%
+vcmax.gs.regline <- data.frame(emmeans(vcmax.gs, ~1, "n.trt",
+                                       at = list(n.trt = seq(0, 630, 5)),
+                                       type = "response")) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(vcmax.gs.full) %>%
-  mutate(linetype = ifelse(co2.inoc == "amb_no.inoc" | co2.inoc == "elv_no.inoc", 
-                           "dashed", "solid")) %>%
-  select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
+  mutate(linetype = ifelse(co2.inoc == "elv_no.inoc" | co2.inoc == "amb_inoc", 
+                           "dashed", "solid"))
 
 ##########################################################################
 ## Vcmax:gs plot
@@ -1852,7 +1158,7 @@ vcmax.gs.plot <- ggplot(data = df, aes(x = n.trt, y = vcmax.gs)) +
                                "Elevated, uninoculated")) +
   scale_y_continuous(limits = c(0, 800), breaks = seq(0, 800, 200)) +
   labs(x = "Soil N fertilization (ppm)",
-       y = expression(bold(italic("V")["cmax25"]*": "*italic("g")["s"]*" (μmol CO"["2"]*" mol"^"-1"*"H"["2"]*"O)")),
+       y = expression(bold(italic("V")["cmax25"]*": "*italic("g")["s"]*" (μmol CO"["2"]*" mol"^"-1"*" H"["2"]*"O)")),
        fill = "Treatment", color = "Treatment") +
   guides(linetype = "none") +
   theme_bw(base_size = 18) +
@@ -1869,7 +1175,7 @@ png("../working_drafts/figs/NxCO2xI_fig1_wholePlant.png",
 ggarrange(ncost.plot, tla.plot, tbio.plot, ncol = 1, nrow = 3,
           common.legend = TRUE, align = "hv",
           legend = "right", labels = "AUTO",
-          font.label = list(size = 20))
+          font.label = list(size = 18))
 dev.off()
 
 ##########################################################################
@@ -1880,27 +1186,32 @@ png("../working_drafts/figs/NxCO2xI_fig2_leafN.png",
 ggarrange(narea.plot, nmass.plot, marea.plot, chl.plot,
           ncol = 2, nrow = 2,
           common.legend = TRUE, align = "hv",
-          legend = "right")
+          legend = "right", labels = "AUTO",
+          font.label = list(size = 18))
 dev.off()
 
 ##########################################################################
 ## Figure 3: leaf physiology plots
 ##########################################################################
 png("../working_drafts/figs/NxCO2xI_fig3_photo.png",
-    height = 8, width = 12, units = "in", res = 600)
-ggarrange(vcmax.plot, jmax.plot, jvmax.plot, ncol = 2, nrow = 2,
+    height = 12, width = 7.5, units = "in", res = 600)
+ggarrange(vcmax.plot, jmax.plot, jvmax.plot, ncol = 1, nrow = 3,
           common.legend = TRUE, align = "hv",
-          legend = "right")
+          legend = "right", labels = "AUTO",
+          font.label = list(size = 18))
 dev.off()
 
 ##########################################################################
 ## Figure 4: propN photosynthesis/structure
 ##########################################################################
 png("../working_drafts/figs/NxCO2xI_fig4_propN.png",
-    height = 4, width = 12, units = "in", res = 600)
-ggarrange(p.photo.plot, p.str.plot, ncol = 2, nrow = 1,
+    height = 8.5, width = 17, units = "in", res = 600)
+ggarrange(p.rub.plot, p.bioe.plot, p.light.plot,
+          p.photo.plot,
+          p.str.plot, ncol = 3, nrow = 2,
           common.legend = TRUE, align = "hv",
-          legend = "right")
+          legend = "right", labels = "AUTO",
+          font.label = list(size = 18))
 dev.off()
 
 ##########################################################################
@@ -1910,7 +1221,8 @@ png("../working_drafts/figs/NxCO2xI_fig5_PNUE_iWUE.png",
     height = 8, width = 12, units = "in", res = 600)
 ggarrange(pnue.plot, iwue.plot, narea.gs.plot, vcmax.gs.plot,
           ncol = 2, nrow = 2, common.legend = TRUE, align = "hv",
-          legend = "right")
+          legend = "right", labels = "AUTO",
+          font.label = list(size = 18))
 dev.off()
 
 

@@ -370,7 +370,8 @@ test(emtrends(nmass, ~1, "n.trt"))
 ##########################################################################
 ## Chlorophyll content
 ##########################################################################
-chl.area <- lmer(sqrt(chl.mmolm2) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+df$chl.mmolm2[25] <- NA
+chl.area <- lmer(chl.mmolm2 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
 qqnorm(residuals(chl.area))
