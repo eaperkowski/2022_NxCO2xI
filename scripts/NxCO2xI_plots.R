@@ -101,10 +101,10 @@ bgc.plot <- ggplot(data = df, aes(x = n.trt, y = cbg)) +
   geom_jitter(aes(fill = co2.inoc),
               size = 3, shape = 21, alpha = 0.75) +
   geom_smooth(data = subset(cbg.regline, co2.inoc != "overall"),
-              aes(color = co2.inoc, y = emmean), 
+              aes(color = co2.inoc, y = response), 
               size = 2, se = FALSE) +
   geom_ribbon(data = subset(cbg.regline, co2.inoc != "overall"),
-              aes(fill = co2.inoc, y = emmean, 
+              aes(fill = co2.inoc, y =response, 
                   ymin = lower.CL, ymax = upper.CL), 
               size = 2, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
@@ -117,7 +117,7 @@ bgc.plot <- ggplot(data = df, aes(x = n.trt, y = cbg)) +
                                 "Ambient, not inoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
-  scale_y_continuous(limits = c(0, 4), breaks = seq(0,4,1)) +
+  scale_y_continuous(limits = c(0, 6), breaks = seq(0,4,1)) +
   labs(x = "Soil N fertilization (ppm twice per week)",
        y = "Belowground carbon biomass (gC)",
        fill = "Treatment", color = "Treatment") +
