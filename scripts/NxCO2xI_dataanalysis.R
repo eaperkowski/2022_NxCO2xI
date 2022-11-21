@@ -16,13 +16,16 @@ emm_options(opt.digits = FALSE)
 # Read in compiled data file
 df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv") %>%
   mutate(n.trt = as.numeric(n.trt)) %>%
-  dplyr::filter(id != "a_n_0_109" & id != "a_n_0_112" & id != "e_n_70_47" &
-           id != "a_n_70_118" & id != "a_n_105_122" & id != "a_n_280_135")
+  filter(inoc == "inoc" | (inoc == "no.inoc" & nodule.biomass < 0.05))
+  ## filter all uninoculated pots that have nod biomass > 0.05 g
+
+df.removed <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv") %>%
+  dplyr::filter(inoc == "no.inoc" & nodule.biomass > 0.05)
 
 ##########################################################################
 ## Ncost
 ##########################################################################
-df$ncost[c(108, 109)] <- NA
+df$ncost[c(101, 102)] <- NA
 
 ncost <- lmer(log(ncost) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
@@ -72,7 +75,7 @@ test(emtrends(ncost, ~1, "n.trt"))
 ##########################################################################
 ## Belowground carbon biomass
 ##########################################################################
-cbg <- lmer(cbg ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+cbg <- lmer(log(cbg) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
 plot(cbg)
@@ -118,7 +121,9 @@ emmeans(cbg, ~1, "n.trt", at = list(n.trt = 0), type = "response")
 ##########################################################################
 ## Whole plant nitrogen
 ##########################################################################
-wpn <- lmer(sqrt(wpn) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+df$wpn[93] <- NA
+
+wpn <- lmer(log(wpn) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
 plot(wpn)
@@ -247,6 +252,95 @@ emmeans(tbio, pairwise~inoc)
 ## Individual effect of soil N
 test(emtrends(tbio, ~1, "n.trt"))
 ## Increasing soil N decreases total biomass
+
+##########################################################################
+## Root nodule biomass: root biomass
+##########################################################################
+df$nod.root.ratio <- df$nodule.biomass / df$root.biomass
+nod.root.ratio <- lmer(sqrt(nod.root.ratio) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(nod.root.ratio)
+qqnorm(residuals(nod.root.ratio))
+qqline(residuals(nod.root.ratio))
+densityPlot(residuals(nod.root.ratio))
+shapiro.test(residuals(nod.root.ratio))
+outlierTest(nod.root.ratio)
+
+# Model results
+summary(nod.root.ratio)
+Anova(nod.root.ratio)
+r.squaredGLMM(nod.root.ratio)
+
+# Pairwise comparisons
+## Two-way interaction between inoculation and N fertilization
+test(emtrends(nod.root.ratio, ~inoc, "n.trt"))
+## Inoculation increases negative effect of n.fertilization on 
+## plant investment in N fixation. No surprise since inoculation 
+## increased nodulation
+
+## Inoculation effect
+emmeans(nod.root.ratio, pairwise~inoc)
+## No surprise, but inoculation increased investiment in nodulation
+
+## Individual effect of n.trt on nod.root.ratio
+test(emtrends(nod.root.ratio, ~1, "n.trt"))
+## Increasing soil N fertilization decreases nod.root.ratio
+
+##########################################################################
+## Root nodule biomass: root biomass
+##########################################################################
+df$nodule.biomass[81] <- NA
+
+nod.bio <- lmer(sqrt(nodule.biomass) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(nod.bio)
+qqnorm(residuals(nod.bio))
+qqline(residuals(nod.bio))
+densityPlot(residuals(nod.bio))
+shapiro.test(residuals(nod.bio))
+outlierTest(nod.bio)
+
+# Model results
+summary(nod.bio)
+Anova(nod.bio)
+r.squaredGLMM(nod.bio)
+
+# Pairwise comparisons
+## Two-way interaction between inoculation and N fertilization
+test(emtrends(nod.bio, ~inoc, "n.trt"))
+## Inoculation increases negative effect of n.fertilization on 
+## plant investment in N fixation. No surprise since inoculation 
+## increased nodulation
+
+## Inoculation effect
+emmeans(nod.bio, pairwise~inoc)
+## No surprise, but inoculation increased investiment in nodulation
+
+## Individual effect of n.trt on nod.root.ratio
+test(emtrends(nod.bio, ~1, "n.trt"))
+## Increasing soil N fertilization decreases nod.root.ratio
+
+##########################################################################
+## %Ndfa
+##########################################################################
+# ndfa <- lmer(ndfa ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+# 
+# # Check model assumptions
+# plot(ndfa)
+# qqnorm(residuals(ndfa))
+# qqline(residuals(ndfa))
+# densityPlot(residuals(ndfa))
+# shapiro.test(residuals(ndfa))
+# outlierTest(ndfa)
+# 
+# # Model results
+# summary(ndfa)
+# Anova(ndfa)
+# r.squaredGLMM(ndfa)
+
+# Pairwise comparisons
 
 ##########################################################################
 ## Leaf nitrogen content (Narea)
@@ -484,7 +578,7 @@ test(emtrends(jmax, ~1, "n.trt"))
 ##########################################################################
 ## Jmax25:Vcmax25
 ##########################################################################
-df$jmax25.vcmax25[108] <- NA
+df$jmax25.vcmax25[101] <- NA
 
 jvmax <- lmer(jmax25.vcmax25 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
@@ -523,8 +617,6 @@ test(emtrends(jvmax, ~1, "n.trt"))
 ##########################################################################
 ## Anet
 ##########################################################################
-df$anet[110] <- NA
-
 anet <- lmer(anet ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
@@ -563,9 +655,9 @@ test(emtrends(anet, ~1, "n.trt"))
 ##########################################################################
 ## gsw
 ##########################################################################
-df$gsw[77] <- NA
+df$gsw[70] <- NA
 
-gsw <- lmer(sqrt(gsw) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+gsw <- lmer(gsw ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
 plot(gsw)
@@ -658,9 +750,208 @@ emmeans(stomlim, pairwise~inoc)
 ## than uninoculated pots
 
 ##########################################################################
+## Proportion of N in photosynthesis
+##########################################################################
+df$p.photo[df$p.photo > 1] <- NA
+
+p.photo <- lmer(p.photo ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(p.photo)
+qqnorm(residuals(p.photo))
+qqline(residuals(p.photo))
+densityPlot(residuals(p.photo))
+shapiro.test(residuals(p.photo))
+outlierTest(p.photo)
+
+# Model results
+summary(p.photo)
+Anova(p.photo)
+r.squaredGLMM(p.photo)
+
+# Pairwise comparisons
+## Two-way interaction between inoculation and n.trt
+test(emtrends(p.photo, pairwise~inoc, "n.trt"))
+## Negative effect of soil N on p.photo is stronger in inoculated pots
+## than uninoculated pots. In fact, there is no effect of soil N on 
+## photo in uninoculated pots (!?!), suggesting that deviations from 
+## constant leaf N:photosynthesis relationships may only be apparent
+## when there is no N limitation?????!?!?!?!? This seems important; added
+## some detail to Notion notes page
+
+## Individual effect of co2 on p.photo
+emmeans(p.photo, pairwise~co2)
+## Elevated CO2 generally has higher p.photo
+
+## Individual effect of inoc on p.photo
+emmeans(p.photo, pairwise~inoc)
+## Inoculated pots generally have higher p.photo
+
+## Individual effect of n.trt on p.photo
+test(emtrends(p.photo, ~1, "n.trt"))
+## Increasing soil N fertilization decreases p.photo
+
+##########################################################################
+## Proportion of N in structure
+##########################################################################
+df$p.structure[c(39, 45, 101, 102, 104)] <- NA
+
+p.structure <- lmer(log(p.structure) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(p.structure)
+qqnorm(residuals(p.structure))
+qqline(residuals(p.structure))
+densityPlot(residuals(p.structure))
+shapiro.test(residuals(p.structure))
+outlierTest(p.structure)
+
+# Model results
+summary(p.structure)
+Anova(p.structure)
+r.squaredGLMM(p.structure)
+
+# Pairwise comparisons
+## Two-way interaction between inoculation and n.trt
+test(emtrends(p.structure, pairwise~inoc, "n.trt"))
+## Negative effect of soil N on p.structure is greater in uninoculated 
+## pots
+
+## Individual effect of co2
+emmeans(p.structure, pairwise~co2)
+## Elevated CO2 generally has higher p.structure
+
+## Individual effect of inoc
+emmeans(p.structure, pairwise~inoc)
+## Uninoculated pots generally have higher p.photo
+
+## Individual effect of n.trt
+test(emtrends(p.structure, ~1, "n.trt"))
+## Increasing soil N fertilization decreases p.structure
+
+##########################################################################
+## Proportion of N in Rubisco
+##########################################################################
+df$p.rubisco[c(45)] <- NA
+
+p.rub <- lmer(p.rubisco ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(p.rub)
+qqnorm(residuals(p.rub))
+qqline(residuals(p.rub))
+densityPlot(residuals(p.rub))
+shapiro.test(residuals(p.rub))
+outlierTest(p.rub)
+
+# Model results
+summary(p.rub)
+Anova(p.rub)
+r.squaredGLMM(p.rub)
+
+# Pairwise comparisons
+## Two-way interaction between inoculation and n.trt
+test(emtrends(p.rub, pairwise~inoc, "n.trt"))
+## No effect of n.trt in uninoculated pots, negative effect in inoculated
+## pots
+
+## Two-way interaction between inoculation and co2
+cld(emmeans(p.rub, pairwise~co2*inoc))
+## Uninoculated pots have higher p.rub in ambient CO2 treatment
+## No diff between CO2 treatments for inoculated pots
+
+## Individual effect of co2
+emmeans(p.rub, pairwise~co2)
+## Elevated CO2 generally has higher p.rub
+
+## Individual effect of inoc
+emmeans(p.rub, pairwise~inoc)
+## Inoculated pots generally have higher p.photo
+
+## Individual effect of n.trt
+test(emtrends(p.rub, ~1, "n.trt"))
+## Increasing soil N fertilization decreases p.rub
+
+##########################################################################
+## Proportion of N in bioenergetics
+##########################################################################
+df$p.bioe[c(45)] <- NA
+
+p.bioe <- lmer(p.bioe ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(p.bioe)
+qqnorm(residuals(p.bioe))
+qqline(residuals(p.bioe))
+densityPlot(residuals(p.bioe))
+shapiro.test(residuals(p.bioe))
+outlierTest(p.bioe)
+
+# Model results
+summary(p.bioe)
+Anova(p.bioe)
+r.squaredGLMM(p.bioe)
+
+# Pairwise comparisons
+## Two-way interaction between inoculation and n.trt
+test(emtrends(p.bioe, pairwise~inoc, "n.trt"))
+## No effect of n.trt in uninoculated pots, negative effect in inoculated
+## pots
+
+## Individual effect of co2
+emmeans(p.bioe, pairwise~co2)
+## Elevated CO2 generally has higher p.bioe
+
+## Individual effect of inoc
+emmeans(p.bioe, pairwise~inoc)
+## Inoculated pots generally have higher p.bioe
+
+## Individual effect of n.trt
+test(emtrends(p.bioe, ~1, "n.trt"))
+## Increasing soil N fertilization decreases p.bioe
+
+##########################################################################
+## Proportion of N in light harvesting
+##########################################################################
+df$p.lightharv[c(25, 39, 45)] <- NA
+
+p.light <- lmer(p.lightharv ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(p.light)
+qqnorm(residuals(p.light))
+qqline(residuals(p.light))
+densityPlot(residuals(p.light))
+shapiro.test(residuals(p.light))
+outlierTest(p.light)
+
+# Model results
+summary(p.light)
+Anova(p.light)
+r.squaredGLMM(p.light)
+
+# Pairwise comparisons
+## Two-way interaction between inoculation and n.trt
+test(emtrends(p.light, pairwise~inoc, "n.trt"))
+## No effect of n.trt in uninoculated pots, negative effect in inoculated
+## pots
+
+## Individual effect of co2
+emmeans(p.light, pairwise~co2)
+## Elevated CO2 generally has higher p.bioe
+
+## Individual effect of inoc
+emmeans(p.light, pairwise~inoc)
+## Inoculated pots generally have higher p.bioe
+
+## Individual effect of n.trt
+test(emtrends(p.light, ~1, "n.trt"))
+## Increasing soil N fertilization decreases p.bioe
+
+##########################################################################
 ## PNUE
 ##########################################################################
-df$pnue[49] <- NA
+df$pnue[45] <- NA
 
 pnue <- lmer(pnue ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
@@ -779,205 +1070,6 @@ r.squaredGLMM(vcmax.gs)
 ## Individual effect of n.trt on Vcmax:gs
 test(emtrends(vcmax.gs, ~1, "n.trt"))
 ## Increasing soil N fertilization increases Vcmax:gs.
-
-##########################################################################
-## Proportion of N in photosynthesis
-##########################################################################
-df$p.photo[df$p.photo > 1] <- NA
-
-p.photo <- lmer(p.photo ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-
-# Check model assumptions
-plot(p.photo)
-qqnorm(residuals(p.photo))
-qqline(residuals(p.photo))
-densityPlot(residuals(p.photo))
-shapiro.test(residuals(p.photo))
-outlierTest(p.photo)
-
-# Model results
-summary(p.photo)
-Anova(p.photo)
-r.squaredGLMM(p.photo)
-
-# Pairwise comparisons
-## Two-way interaction between inoculation and n.trt
-test(emtrends(p.photo, pairwise~inoc, "n.trt"))
-## Negative effect of soil N on p.photo is stronger in inoculated pots
-## than uninoculated pots. In fact, there is no effect of soil N on 
-## photo in uninoculated pots (!?!), suggesting that deviations from 
-## constant leaf N:photosynthesis relationships may only be apparent
-## when there is no N limitation?????!?!?!?!? This seems important; added
-## some detail to Notion notes page
-
-## Individual effect of co2 on p.photo
-emmeans(p.photo, pairwise~co2)
-## Elevated CO2 generally has higher p.photo
-
-## Individual effect of inoc on p.photo
-emmeans(p.photo, pairwise~inoc)
-## Inoculated pots generally have higher p.photo
-
-## Individual effect of n.trt on p.photo
-test(emtrends(p.photo, ~1, "n.trt"))
-## Increasing soil N fertilization decreases p.photo
-
-##########################################################################
-## Proportion of N in structure
-##########################################################################
-df$p.structure[c(39, 49, 108, 109, 111)] <- NA
-
-p.structure <- lmer(log(p.structure) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-
-# Check model assumptions
-plot(p.structure)
-qqnorm(residuals(p.structure))
-qqline(residuals(p.structure))
-densityPlot(residuals(p.structure))
-shapiro.test(residuals(p.structure))
-outlierTest(p.structure)
-
-# Model results
-summary(p.structure)
-Anova(p.structure)
-r.squaredGLMM(p.structure)
-
-# Pairwise comparisons
-## Two-way interaction between inoculation and n.trt
-test(emtrends(p.structure, pairwise~inoc, "n.trt"))
-## Negative effect of soil N on p.structure is greater in uninoculated 
-## pots
-
-## Individual effect of co2
-emmeans(p.structure, pairwise~co2)
-## Elevated CO2 generally has higher p.structure
-
-## Individual effect of inoc
-emmeans(p.structure, pairwise~inoc)
-## Uninoculated pots generally have higher p.photo
-
-## Individual effect of n.trt
-test(emtrends(p.structure, ~1, "n.trt"))
-## Increasing soil N fertilization decreases p.structure
-
-##########################################################################
-## Proportion of N in Rubisco
-##########################################################################
-df$p.rubisco[c(49)] <- NA
-
-p.rub <- lmer(p.rubisco ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-
-# Check model assumptions
-plot(p.rub)
-qqnorm(residuals(p.rub))
-qqline(residuals(p.rub))
-densityPlot(residuals(p.rub))
-shapiro.test(residuals(p.rub))
-outlierTest(p.rub)
-
-# Model results
-summary(p.rub)
-Anova(p.rub)
-r.squaredGLMM(p.rub)
-
-# Pairwise comparisons
-## Two-way interaction between inoculation and n.trt
-test(emtrends(p.rub, pairwise~inoc, "n.trt"))
-## No effect of n.trt in uninoculated pots, negative effect in inoculated
-## pots
-
-## Two-way interaction between inoculation and co2
-cld(emmeans(p.rub, pairwise~co2*inoc))
-## Uninoculated pots have higher p.rub in ambient CO2 treatment
-## No diff between CO2 treatments for inoculated pots
-
-## Individual effect of co2
-emmeans(p.rub, pairwise~co2)
-## Elevated CO2 generally has higher p.rub
-
-## Individual effect of inoc
-emmeans(p.rub, pairwise~inoc)
-## Inoculated pots generally have higher p.photo
-
-## Individual effect of n.trt
-test(emtrends(p.rub, ~1, "n.trt"))
-## Increasing soil N fertilization decreases p.rub
-
-##########################################################################
-## Proportion of N in bioenergetics
-##########################################################################
-df$p.bioe[c(49)] <- NA
-
-p.bioe <- lmer(p.bioe ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-
-# Check model assumptions
-plot(p.bioe)
-qqnorm(residuals(p.bioe))
-qqline(residuals(p.bioe))
-densityPlot(residuals(p.bioe))
-shapiro.test(residuals(p.bioe))
-outlierTest(p.bioe)
-
-# Model results
-summary(p.bioe)
-Anova(p.bioe)
-r.squaredGLMM(p.bioe)
-
-# Pairwise comparisons
-## Two-way interaction between inoculation and n.trt
-test(emtrends(p.bioe, pairwise~inoc, "n.trt"))
-## No effect of n.trt in uninoculated pots, negative effect in inoculated
-## pots
-
-## Individual effect of co2
-emmeans(p.bioe, pairwise~co2)
-## Elevated CO2 generally has higher p.bioe
-
-## Individual effect of inoc
-emmeans(p.bioe, pairwise~inoc)
-## Inoculated pots generally have higher p.bioe
-
-## Individual effect of n.trt
-test(emtrends(p.bioe, ~1, "n.trt"))
-## Increasing soil N fertilization decreases p.bioe
-
-##########################################################################
-## Proportion of N in light harvesting
-##########################################################################
-df$p.lightharv[c(39, 41, 49)] <- NA
-
-p.light <- lmer(sqrt(p.lightharv) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-
-# Check model assumptions
-plot(p.light)
-qqnorm(residuals(p.light))
-qqline(residuals(p.light))
-densityPlot(residuals(p.light))
-shapiro.test(residuals(p.light))
-outlierTest(p.light)
-
-# Model results
-summary(p.light)
-Anova(p.light)
-r.squaredGLMM(p.light)
-
-# Pairwise comparisons
-## Two-way interaction between inoculation and n.trt
-test(emtrends(p.light, pairwise~inoc, "n.trt"))
-## No effect of n.trt in uninoculated pots, negative effect in inoculated
-## pots
-
-## Individual effect of co2
-emmeans(p.light, pairwise~co2)
-## Elevated CO2 generally has higher p.bioe
-
-## Individual effect of inoc
-emmeans(p.light, pairwise~inoc)
-## Inoculated pots generally have higher p.bioe
-
-## Individual effect of n.trt
-test(emtrends(p.light, ~1, "n.trt"))
-## Increasing soil N fertilization decreases p.bioe
 
 ##########################################################################
 ## Table 1: Whole plant traits
@@ -1110,13 +1202,104 @@ tbio.table <- data.frame(Anova(tbio)) %>%
                             "<0.001", pval.tbio)) %>%
   arrange(treatment)
 
+
+
 table1 <- ncost.table %>% full_join(cbg.table) %>% full_join(wpn.table) %>%
-  full_join(tla.table) %>% full_join(tbio.table)
+  full_join(tla.table) %>% full_join(tbio.table) %>%
+  replace(is.na(.), "-")
 write.csv(table1, file = "../working_drafts/tables/NxCO2xI_table1_WP.csv",
          row.names = FALSE)
 
 ##########################################################################
-## Table 2: Leaf N content
+## Table 2: Nitrogen fixation
+##########################################################################
+nodroot.coefs <- data.frame(summary(nod.root.ratio)$coefficient) %>%
+  mutate(treatment = row.names(.),
+         coef.nodroot = format(Estimate, scientific = TRUE, digits = 3),
+         se.nodroot = round(Std..Error, digits = 3),
+         t.value.nodroot = round(t.value, digits = 3)) %>%
+  dplyr::select(treatment, coef.nodroot, se.nodroot, t.value.nodroot) %>%
+  mutate(treatment = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
+                       "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")) %>%
+  dplyr::select(treatment, coef.nodroot) %>%
+  print(., row.names = FALSE)
+
+nodroot.table <- data.frame(Anova(nod.root.ratio)) %>%
+  mutate(treatment = row.names(.)) %>%
+  full_join(nodroot.coefs) %>%
+  dplyr::select(treatment, df = Df, coef.nodroot, 
+                chisq.nodroot = Chisq, pval.nodroot = Pr..Chisq.) %>%
+  mutate(treatment = factor(treatment, 
+                            levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
+                                       "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
+         across(chisq.nodroot:pval.nodroot, round, digits = 3),
+         chisq.nodroot = ifelse(chisq.nodroot <0.001 & chisq.nodroot >= 0, 
+                              "<0.001", chisq.nodroot),
+         pval.nodroot = ifelse(pval.nodroot <0.001 & pval.nodroot >= 0, 
+                             "<0.001", pval.nodroot)) %>%
+  arrange(treatment)
+
+nodbio.coefs <- data.frame(summary(nod.bio)$coefficient) %>%
+  mutate(treatment = row.names(.),
+         coef.nodbio = format(Estimate, scientific = TRUE, digits = 3),
+         se.nodbio = round(Std..Error, digits = 3),
+         t.value.nodbio = round(t.value, digits = 3)) %>%
+  dplyr::select(treatment, coef.nodbio, se.nodbio, t.value.nodbio) %>%
+  mutate(treatment = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
+                       "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")) %>%
+  dplyr::select(treatment, coef.nodbio) %>%
+  print(., row.names = FALSE)
+
+nodbio.table <- data.frame(Anova(nod.bio)) %>%
+  mutate(treatment = row.names(.)) %>%
+  full_join(nodbio.coefs) %>%
+  dplyr::select(treatment, df = Df, coef.nodbio, 
+                chisq.nodbio = Chisq, pval.nodbio = Pr..Chisq.) %>%
+  mutate(treatment = factor(treatment, 
+                            levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
+                                       "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
+         across(chisq.nodbio:pval.nodbio, round, digits = 3),
+         chisq.nodbio = ifelse(chisq.nodbio <0.001 & chisq.nodbio >= 0, 
+                                "<0.001", chisq.nodbio),
+         pval.nodbio = ifelse(pval.nodbio <0.001 & pval.nodbio >= 0, 
+                               "<0.001", pval.nodbio)) %>%
+  arrange(treatment)
+
+# ndfa.coefs <- data.frame(summary(ndfa)$coefficient) %>%
+#   mutate(treatment = row.names(.),
+#          coef.ndfa = format(Estimate, scientific = TRUE, digits = 3),
+#          se.ndfa = round(Std..Error, digits = 3),
+#          t.value.ndfa = round(t.value, digits = 3)) %>%
+#   dplyr::select(treatment, coef.ndfa, se.ndfa, t.value.ndfa) %>%
+#   mutate(treatment = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
+#                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")) %>%
+#   dplyr::select(treatment, coef.ndfa) %>%
+#   print(., row.names = FALSE)
+# 
+# ndfa.table <- data.frame(Anova(ndfa)) %>%
+#   mutate(treatment = row.names(.)) %>%
+#   full_join(ndfa.coefs) %>%
+#   dplyr::select(treatment, df = Df, coef.ndfa, 
+#                 chisq.ndfa = Chisq, pval.ndfa = Pr..Chisq.) %>%
+#   mutate(treatment = factor(treatment, 
+#                             levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
+#                                        "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
+#          across(chisq.ndfa:pval.ndfa, round, digits = 3),
+#          chisq.ndfa = ifelse(chisq.ndfa < 0.001 & chisq.ndfa >= 0, 
+#                                "<0.001", chisq.ndfa),
+#          pval.ndfa = ifelse(pval.ndfa < 0.001 & pval.ndfa >= 0, 
+#                               "<0.001", pval.ndfa)) %>%
+#   arrange(treatment)
+
+table2 <- nodroot.table %>% full_join(nodbio.table) %>% 
+  # full_join(ndfa.table) %>%
+  replace(is.na(.), "-")
+write.csv(table2, file = "../working_drafts/tables/NxCO2xI_table2_nfix.csv",
+          row.names = FALSE)
+
+
+##########################################################################
+## Table 3: Leaf N content
 ##########################################################################
 narea.coefs <- data.frame(summary(narea)$coefficient) %>%
   mutate(treatment = row.names(.),
@@ -1196,12 +1379,40 @@ marea.table <- data.frame(Anova(marea)) %>%
                              "<0.001", pval.marea)) %>%
   arrange(treatment)
 
-table2 <- narea.table %>% full_join(nmass.table) %>% full_join(marea.table)
-write.csv(table2, file = "../working_drafts/tables/NxCO2xI_table2_leafN.csv",
+chl.area.coefs <- data.frame(summary(chl.area)$coefficient) %>%
+  mutate(treatment = row.names(.),
+         coef.chl.area = format(Estimate, scientific = TRUE, digits = 3),
+         se.chl.area = round(Std..Error, digits = 3),
+         t.value.chl.area = round(t.value, digits = 3)) %>%
+  dplyr::select(treatment, coef.chl.area, se.chl.area, t.value.chl.area) %>%
+  mutate(treatment = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
+                       "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")) %>%
+  dplyr::select(treatment, coef.chl.area) %>%
+  print(., row.names = FALSE)
+
+chl.area.table <- data.frame(Anova(chl.area)) %>%
+  mutate(treatment = row.names(.)) %>%
+  full_join(chl.area.coefs) %>%
+  dplyr::select(treatment, df = Df, coef.chl.area, 
+                chisq.chl.area = Chisq, pval.chl.area = Pr..Chisq.) %>%
+  mutate(treatment = factor(treatment, 
+                            levels = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc",
+                                       "co2:n.trt", "inoc:n.trt", "co2:inoc:n.trt")),
+         across(chisq.chl.area:pval.chl.area, round, digits = 3),
+         chisq.chl.area = ifelse(chisq.chl.area <0.001 & chisq.chl.area >= 0, 
+                              "<0.001", chisq.chl.area),
+         pval.chl.area = ifelse(pval.chl.area <0.001 & pval.chl.area >= 0, 
+                             "<0.001", pval.chl.area)) %>%
+  arrange(treatment)
+
+table3 <- narea.table %>% full_join(nmass.table) %>% 
+  full_join(marea.table) %>% full_join(chl.area.table) %>%
+  replace(is.na(.), "-")
+write.csv(table3, file = "../working_drafts/tables/NxCO2xI_table3_leafN.csv",
           row.names = FALSE)
 
 ##########################################################################
-## Table 3: Gas exchange
+## Table 4: Gas exchange
 ##########################################################################
 vcmax.coefs <- data.frame(summary(vcmax)$coefficient) %>%
   mutate(treatment = row.names(.),
@@ -1359,13 +1570,14 @@ l.table <- data.frame(Anova(stomlim)) %>%
                             "<0.001", pval.l)) %>%
   arrange(treatment)
 
-table3 <- vcmax.table %>% full_join(jmax.table) %>% full_join(jvmax.table) %>%
-  full_join(gsw.table) %>% full_join(cica.table) %>% full_join(l.table)
-write.csv(table3, file = "../working_drafts/tables/NxCO2xI_table3_gasEx.csv",
+table4 <- vcmax.table %>% full_join(jmax.table) %>% full_join(jvmax.table) %>%
+  full_join(gsw.table) %>% full_join(cica.table) %>% full_join(l.table) %>%
+  replace(is.na(.), "-")
+write.csv(table4, file = "../working_drafts/tables/NxCO2xI_table4_gasEx.csv",
           row.names = FALSE)
 
 ##########################################################################
-## Table 4: Prop leaf N to photosynthesis, structure, etc.
+## Table 5: Prop leaf N to photosynthesis, structure, etc.
 ##########################################################################
 p.rub.coefs <- data.frame(summary(p.rub)$coefficient) %>%
   mutate(treatment = row.names(.),
@@ -1497,15 +1709,16 @@ p.str.table <- data.frame(Anova(p.structure)) %>%
                                "<0.001", pval.p.str)) %>%
   arrange(treatment)
 
-table4 <- p.rub.table %>% full_join(p.bioe.table) %>% 
+table5 <- p.rub.table %>% full_join(p.bioe.table) %>% 
   full_join(p.light.table) %>% full_join(p.photo.table) %>%
-  full_join(p.str.table)
+  full_join(p.str.table) %>%
+  replace(is.na(.), "-")
 
-write.csv(table4, file = "../working_drafts/tables/NxCO2xI_table4_propN.csv",
+write.csv(table5, file = "../working_drafts/tables/NxCO2xI_table5_propN.csv",
           row.names = FALSE)
 
 ##########################################################################
-## Table 5: PNUE/iWUE
+## Table 6: PNUE/iWUE
 ##########################################################################
 pnue.coefs <- data.frame(summary(pnue)$coefficient) %>%
   mutate(treatment = row.names(.),
@@ -1611,7 +1824,8 @@ vcmax.gs.table <- data.frame(Anova(vcmax.gs)) %>%
                                 "<0.001", pval.vcmax.gs)) %>%
   arrange(treatment)
 
-table5 <- pnue.table %>% full_join(iwue.table) %>% full_join(narea.gs.table) %>%
-  full_join(vcmax.gs.table)
-write.csv(table5, file = "../working_drafts/tables/NxCO2xI_table5_pnue_iwue.csv",
+table6 <- pnue.table %>% full_join(iwue.table) %>% full_join(narea.gs.table) %>%
+  full_join(vcmax.gs.table) %>%
+  replace(is.na(.), "-")
+write.csv(table6, file = "../working_drafts/tables/NxCO2xI_table6_pnue_iwue.csv",
           row.names = FALSE)

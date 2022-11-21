@@ -14,9 +14,12 @@ emm_options(opt.digits = FALSE)
 df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv",
                na.strings = "NA") %>%
   mutate(n.trt = as.numeric(n.trt)) %>%
-  dplyr::filter(id != "a_n_0_109" & id != "a_n_0_112" & id != "e_n_70_47" &
-                  id != "a_n_70_118" & id != "a_n_105_122" & id != "a_n_280_135") %>%
-  unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
+  filter(inoc == "inoc" | (inoc == "no.inoc" & nodule.biomass < 0.05)) %>%
+  unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE) 
+  # 
+  # dplyr::filter(id != "a_n_0_109" & id != "a_n_0_112" & id != "e_n_70_47" &
+  #                 id != "a_n_70_118" & id != "a_n_105_122" & id != "a_n_280_135") %>%
+  # unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
 ## Add colorblind friendly palette
 cbbPalette3 <- c("#DDAA33", "#004488", "#BB5566", "#555555")
@@ -24,8 +27,9 @@ cbbPalette3 <- c("#DDAA33", "#004488", "#BB5566", "#555555")
 ##########################################################################
 ## Ncost regression line prep
 ##########################################################################
-df$ncost[c(108,109)] <- NA
+df$ncost[c(101, 102)] <- NA
 ncost <- lmer(log(ncost) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+test(emtrends(ncost, ~inoc*co2, "n.trt"))
 
 ## Emmean fxns for regression lines + error ribbons
 ncost.full <- data.frame(emmeans(ncost, ~inoc*co2, "n.trt",
@@ -56,12 +60,12 @@ ncost.plot <- ggplot(data = df, aes(x = n.trt, y = ncost)) +
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_color_manual(values = cbbPalette3,
                      labels = c("Ambient, inoculated",
-                                "Ambient, not inoculated",
+                                "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -80,6 +84,9 @@ ncost.plot
 ## Belowground C regression line prep
 ##########################################################################
 cbg <- lmer(cbg ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+cbg <- lmer(log(cbg) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+
 
 ## Emmean fxns for regression lines + error ribbons
 cbg.full <- data.frame(emmeans(cbg, ~inoc*co2, "n.trt",
@@ -101,24 +108,24 @@ bgc.plot <- ggplot(data = df, aes(x = n.trt, y = cbg)) +
   geom_jitter(aes(fill = co2.inoc),
               size = 3, shape = 21, alpha = 0.75) +
   geom_smooth(data = subset(cbg.regline, co2.inoc != "overall"),
-              aes(color = co2.inoc, y = response), 
+              aes(color = co2.inoc, y = emmean), 
               size = 2, se = FALSE) +
   geom_ribbon(data = subset(cbg.regline, co2.inoc != "overall"),
-              aes(fill = co2.inoc, y =response, 
+              aes(fill = co2.inoc, y = emmean, 
                   ymin = lower.CL, ymax = upper.CL), 
               size = 2, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_color_manual(values = cbbPalette3,
                      labels = c("Ambient, inoculated",
-                                "Ambient, not inoculated",
+                                "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
-  scale_y_continuous(limits = c(0, 6), breaks = seq(0,4,1)) +
-  labs(x = "Soil N fertilization (ppm twice per week)",
+  scale_y_continuous(limits = c(0, 4), breaks = seq(0,4,1)) +
+  labs(x = "Soil N fertilization (ppm)",
        y = "Belowground carbon biomass (gC)",
        fill = "Treatment", color = "Treatment") +
   theme(axis.title = element_text(face = "bold"),
@@ -132,7 +139,9 @@ bgc.plot
 ##########################################################################
 ## Whole plant N regression line prep
 ##########################################################################
-wpn <- lmer(sqrt(wpn) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+df$wpn[93] <- NA
+
+wpn <- lmer(wpn ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 ## Emmean fxns for regression lines + error ribbons
 wpn.full <- data.frame(emmeans(wpn, ~inoc*co2, "n.trt",
@@ -154,24 +163,24 @@ wpn.plot <- ggplot(data = df, aes(x = n.trt, y = wpn)) +
   geom_jitter(aes(fill = co2.inoc),
               size = 4, shape = 21, alpha = 0.75) +
   geom_smooth(data = subset(wpn.regline, co2.inoc != "overall"),
-              aes(color = co2.inoc, y = response), 
+              aes(color = co2.inoc, y = emmean), 
               size = 2, se = FALSE) +
   geom_ribbon(data = subset(wpn.regline, co2.inoc != "overall"),
-              aes(fill = co2.inoc, y = response, 
+              aes(fill = co2.inoc, y = emmean, 
                   ymin = lower.CL, ymax = upper.CL), 
               size = 2, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_color_manual(values = cbbPalette3,
                      labels = c("Ambient, inoculated",
-                                "Ambient, not inoculated",
+                                "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   scale_y_continuous(limits = c(0, 0.48), breaks = seq(0, 0.48, 0.12)) +
-  labs(x = "Soil N fertilization (ppm twice per week)",
+  labs(x = "Soil N fertilization (ppm)",
        y = "Whole plant nitrogen biomass (gN)",
        fill = "Treatment", color = "Treatment") +
   theme_bw(base_size = 20) +
@@ -212,12 +221,12 @@ tla.plot <- ggplot(data = df, aes(x = n.trt, y = tla)) +
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_color_manual(values = cbbPalette3,
                      labels = c("Ambient, inoculated",
-                                "Ambient, not inoculated",
+                                "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   labs(x = "Soil N fertilization (ppm)",
@@ -262,12 +271,12 @@ tbio.plot <- ggplot(data = df, aes(x = n.trt, y = total.biomass)) +
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_color_manual(values = cbbPalette3,
                      labels = c("Ambient, inoculated",
-                                "Ambient, not inoculated",
+                                "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   labs(x = "Soil N fertilization (ppm)",
@@ -280,9 +289,128 @@ tbio.plot <- ggplot(data = df, aes(x = n.trt, y = total.biomass)) +
 tbio.plot
 
 ##########################################################################
+## Root nodule:root biomass regression line prep
+##########################################################################
+df$nodule.biomass[df$nodule.biomass > 0.05 & df$inoc == "no.inoc"] <- NA
+df$nod.root.ratio <- df$nodule.biomass / df$root.biomass
+
+nodroot <- lmer(sqrt(nod.root.ratio) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+test(emtrends(nodroot, ~co2*inoc, "n.trt"))
+
+## Emmean fxns for regression lines + error ribbons
+nodroot.full <- data.frame(emmeans(nodroot, ~inoc*co2, "n.trt",
+                                at = list(n.trt = seq(0, 630, 5)),
+                                type = "response")) %>%
+  unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
+
+nodroot.regline <- data.frame(emmeans(nodroot, ~1, "n.trt",
+                                   at = list(n.trt = seq(0, 630, 5)),
+                                   type = "response")) %>%
+  mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
+  full_join(nodroot.full) %>%
+  mutate(linetype = ifelse(co2.inoc == "amb_no.inoc" |
+                             co2.inoc == "elv_no.inoc", "dashed", "solid")) %>%
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
+
+##########################################################################
+## Root nodule:root biomass regression line prep
+##########################################################################
+nodroot.plot <- ggplot(data = df, aes(x = n.trt, y = nod.root.ratio)) +
+  geom_jitter(aes(fill = co2.inoc),
+              size = 3, shape = 21, alpha = 0.75) +
+  geom_smooth(data = subset(nodroot.regline, co2.inoc != "overall"),
+              aes(color = co2.inoc, y = response, linetype = linetype), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = subset(nodroot.regline, co2.inoc != "overall"),
+              aes(fill = co2.inoc, y = response, 
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = cbbPalette3,
+                    labels = c("Ambient, inoculated",
+                               "Ambient, uninoculated",
+                               "Elevated, inoculated",
+                               "Elevated, uninoculated")) +
+  scale_color_manual(values = cbbPalette3,
+                     labels = c("Ambient, inoculated",
+                                "Ambient, uninoculated",
+                                "Elevated, inoculated",
+                                "Elevated, uninoculated")) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_y_continuous(limits = c(0, 0.4), breaks = seq(0, 0.4, 0.1)) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = "Root nodule: root biomass",
+       fill = "Treatment", color = "Treatment") +
+  theme_bw(base_size = 18) +
+  guides(linetype = "none") +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25))
+nodroot.plot
+
+##########################################################################
+## Root nodule biomass regression line prep
+##########################################################################
+df$nodule.biomass[81] <- NA
+nod <- lmer(sqrt(nodule.biomass) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+test(emtrends(nod, ~inoc*co2, "n.trt"))
+
+
+## Emmean fxns for regression lines + error ribbons
+nod.full <- data.frame(emmeans(nod, ~inoc*co2, "n.trt",
+                               at = list(n.trt = seq(0, 630, 5)),
+                               type = "response")) %>%
+  unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
+
+nod.regline <- data.frame(emmeans(nod, ~1, "n.trt",
+                                  at = list(n.trt = seq(0, 630, 5)),
+                                  type = "response")) %>%
+  mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
+  full_join(nod.full) %>%
+  mutate(linetype = ifelse(co2.inoc == "elv_no.inoc" |
+                             co2.inoc == "amb_no.inoc",
+                           "dashed", "solid")) %>%
+  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
+
+##########################################################################
+## Root nodule biomass regression line prep
+##########################################################################
+nod.plot <- ggplot(data = df, aes(x = n.trt, y = nodule.biomass)) +
+  geom_jitter(aes(fill = co2.inoc),
+              size = 3, shape = 21, alpha = 0.75) +
+  geom_smooth(data = subset(nod.regline, co2.inoc != "overall"),
+              aes(color = co2.inoc, y = response, linetype = linetype), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = subset(nod.regline, co2.inoc != "overall"),
+              aes(fill = co2.inoc, y = response, 
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = cbbPalette3,
+                    labels = c("Ambient, inoculated",
+                               "Ambient, uninoculated",
+                               "Elevated, inoculated",
+                               "Elevated, uninoculated")) +
+  scale_color_manual(values = cbbPalette3,
+                     labels = c("Ambient, inoculated",
+                                "Ambient, uninoculated",
+                                "Elevated, inoculated",
+                                "Elevated, uninoculated")) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_y_continuous(limits = c(0, 0.6), breaks = seq(0, 0.6, 0.15)) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = "Root nodule biomass (g)",
+       fill = "Treatment", color = "Treatment") +
+  theme_bw(base_size = 18) +
+  guides(linetype = "none") +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25))
+nod.plot
+
+##########################################################################
 ## Narea regression line prep
 ##########################################################################
 narea <- lmer(narea ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+test(emtrends(narea, ~inoc*co2, "n.trt"))
 
 ## Emmean fxns for regression lines + error ribbons
 narea.full <- data.frame(emmeans(narea, ~inoc*co2, "n.trt",
@@ -312,12 +440,12 @@ narea.plot <- ggplot(data = df, aes(x = n.trt, y = narea)) +
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_color_manual(values = cbbPalette3,
                      labels = c("Ambient, inoculated",
-                                "Ambient, not inoculated",
+                                "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   labs(x = "Soil N fertilization (ppm)",
@@ -364,12 +492,12 @@ nmass.plot <- ggplot(data = df, aes(x = n.trt, y = nmass.focal)) +
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_color_manual(values = cbbPalette3,
                      labels = c("Ambient, inoculated",
-                                "Ambient, not inoculated",
+                                "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -419,12 +547,12 @@ marea.plot <- ggplot(data = df, aes(x = n.trt, y = marea)) +
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_color_manual(values = cbbPalette3,
                      labels = c("Ambient, inoculated",
-                                "Ambient, not inoculated",
+                                "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -477,12 +605,12 @@ chl.plot <- ggplot(data = df, aes(x = n.trt, y = chl.mmolm2)) +
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_color_manual(values = cbbPalette3,
                      labels = c("Ambient, inoculated",
-                                "Ambient, not inoculated",
+                                "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -532,12 +660,12 @@ vcmax.plot <- ggplot(data = df, aes(x = n.trt, y = vcmax25)) +
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_color_manual(values = cbbPalette3,
                      labels = c("Ambient, inoculated",
-                                "Ambient, not inoculated",
+                                "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -588,12 +716,12 @@ jmax.plot <- ggplot(data = df, aes(x = n.trt, y = jmax25)) +
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_color_manual(values = cbbPalette3,
                      labels = c("Ambient, inoculated",
-                                "Ambient, not inoculated",
+                                "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -611,9 +739,8 @@ jmax.plot
 ##########################################################################
 ## Jmax25:Vcmax25 regression line prep
 ##########################################################################
-df$jmax25.vcmax25[108] <- NA
+df$jmax25.vcmax25[101] <- NA
 jvmax <- lmer(jmax25.vcmax25 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-shapiro.test(residuals(jvmax))
 test(emtrends(jmax25, ~co2*inoc, "n.trt"))
 
 ## Emmean fxns for regression lines + error ribbons
@@ -644,12 +771,12 @@ jvmax.plot <- ggplot(data = df, aes(x = n.trt, y = jmax25.vcmax25)) +
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_color_manual(values = cbbPalette3,
                      labels = c("Ambient, inoculated",
-                                "Ambient, not inoculated",
+                                "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -701,12 +828,12 @@ p.photo.plot <- ggplot(data = df, aes(x = n.trt, y = p.photo)) +
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_color_manual(values = cbbPalette3,
                      labels = c("Ambient, inoculated",
-                                "Ambient, not inoculated",
+                                "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -724,7 +851,7 @@ p.photo.plot
 ##########################################################################
 ## Prop leaf N in rubisco regression line prep
 ##########################################################################
-df$p.rubisco[c(49)] <- NA
+df$p.rubisco[c(45)] <- NA
 p.rub <- lmer(p.rubisco ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 shapiro.test(residuals(p.rub))
 test(emtrends(p.rub, ~co2*inoc, "n.trt"))
@@ -757,12 +884,12 @@ p.rub.plot <- ggplot(data = df, aes(x = n.trt, y = p.rubisco)) +
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_color_manual(values = cbbPalette3,
                      labels = c("Ambient, inoculated",
-                                "Ambient, not inoculated",
+                                "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -780,7 +907,7 @@ p.rub.plot
 ##########################################################################
 ## Prop leaf N in bioenergetics regression line prep
 ##########################################################################
-df$p.bioe[c(49)] <- NA
+df$p.bioe[c(45)] <- NA
 p.bioe <- lmer(p.bioe ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 shapiro.test(residuals(p.bioe))
 test(emtrends(p.bioe, ~co2*inoc, "n.trt"))
@@ -813,12 +940,12 @@ p.bioe.plot <- ggplot(data = df, aes(x = n.trt, y = p.bioe)) +
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_color_manual(values = cbbPalette3,
                      labels = c("Ambient, inoculated",
-                                "Ambient, not inoculated",
+                                "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -836,8 +963,8 @@ p.bioe.plot
 ##########################################################################
 ## Prop leaf N in light harvesting proteins regression line prep
 ##########################################################################
-df$p.lightharv[c(39, 41, 49)] <- NA
-p.light <- lmer(sqrt(p.lightharv) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+df$p.lightharv[c(25, 39, 45)] <- NA
+p.light <- lmer(p.lightharv ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 shapiro.test(residuals(p.light))
 test(emtrends(p.light, ~co2*inoc, "n.trt"))
 
@@ -853,7 +980,7 @@ p.light.regline <- data.frame(emmeans(p.light, ~1, "n.trt",
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(p.light.full) %>%
   dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
-  mutate(linetype = ifelse(co2.inoc == "elv_inoc" | co2.inoc == "amb_inoc", 
+  mutate(linetype = ifelse(co2.inoc == "elv_inoc", 
                            "dashed", "solid"))
 
 ##########################################################################
@@ -863,20 +990,20 @@ p.light.plot <- ggplot(data = df, aes(x = n.trt, y = p.lightharv)) +
   geom_jitter(aes(fill = co2.inoc),
               size = 3, shape = 21, alpha = 0.75) +
   geom_smooth(data = subset(p.light.regline, co2.inoc != "overall"),
-              aes(color = co2.inoc, y = response, linetype = linetype), 
+              aes(color = co2.inoc, y = emmean, linetype = linetype), 
               size = 1.5, se = FALSE) +
   geom_ribbon(data = subset(p.light.regline, co2.inoc != "overall"),
-              aes(fill = co2.inoc, y = response, 
+              aes(fill = co2.inoc, y = emmean, 
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_color_manual(values = cbbPalette3,
                      labels = c("Ambient, inoculated",
-                                "Ambient, not inoculated",
+                                "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -894,7 +1021,7 @@ p.light.plot
 ##########################################################################
 ## Prop leaf N in structure regression line prep
 ##########################################################################
-df$p.structure[c(39, 49, 108, 109, 111)] <- NA
+df$p.structure[c(39, 45, 101, 102, 104)] <- NA
 p.str <- lmer(log(p.structure) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 shapiro.test(residuals(p.str))
 test(emtrends(p.str, ~co2*inoc, "n.trt"))
@@ -931,12 +1058,12 @@ p.str.plot <- ggplot(data = df, aes(x = n.trt, y = p.structure)) +
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_color_manual(values = cbbPalette3,
                      labels = c("Ambient, inoculated",
-                                "Ambient, not inoculated",
+                                "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -955,7 +1082,7 @@ p.str.plot
 ## PNUE regression line prep
 ##########################################################################
 ## Copy removed outliers and lmer fxn
-df$pnue[49] <- NA
+df$pnue[45] <- NA
 pnue <- lmer(pnue ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 shapiro.test(residuals(pnue))
 test(emtrends(pnue, ~co2*inoc, "n.trt"))
@@ -990,12 +1117,12 @@ pnue.plot <- ggplot(data = df, aes(x = n.trt, y = pnue)) +
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_color_manual(values = cbbPalette3,
                      labels = c("Ambient, inoculated",
-                                "Ambient, not inoculated",
+                                "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -1045,7 +1172,7 @@ iwue.plot <- ggplot(data = df, aes(x = n.trt, y = iwue)) +
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_y_continuous(limits = c(25, 125), breaks = seq(25, 125, 25)) +
@@ -1078,8 +1205,6 @@ narea.gs.regline <- data.frame(emmeans(narea.gs, ~1, "n.trt",
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(narea.gs.full) %>%
   dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
-  mutate(linetype = ifelse(co2.inoc == "elv_no.inoc" | co2.inoc == "amb_inoc", 
-                           "dashed", "solid")) %>%
   mutate(linetype = ifelse(co2.inoc == "amb_no.inoc" | co2.inoc == "elv_no.inoc", 
                            "dashed", "solid"))
 
@@ -1098,12 +1223,12 @@ narea.gs.plot <- ggplot(data = df, aes(x = n.trt, y = narea.gs)) +
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_color_manual(values = cbbPalette3,
                      labels = c("Ambient, inoculated",
-                                "Ambient, not inoculated",
+                                "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -1153,7 +1278,7 @@ vcmax.gs.plot <- ggplot(data = df, aes(x = n.trt, y = vcmax.gs)) +
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = cbbPalette3,
                     labels = c("Ambient, inoculated",
-                               "Ambient, not inoculated",
+                               "Ambient, uninoculated",
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_y_continuous(limits = c(0, 800), breaks = seq(0, 800, 200)) +
@@ -1179,9 +1304,20 @@ ggarrange(ncost.plot, tla.plot, tbio.plot, ncol = 1, nrow = 3,
 dev.off()
 
 ##########################################################################
-## Figure 2: leaf N plots
+## Figure 2: nitrogen fixation
 ##########################################################################
-png("../working_drafts/figs/NxCO2xI_fig2_leafN.png",
+png("../working_drafts/figs/NxCO2xI_fig2_nfix.png",
+    height = 4.5, width = 12, units = "in", res = 600)
+ggarrange(nod.plot, nodroot.plot, ncol = 2, nrow = 1,
+          common.legend = TRUE, align = "hv",
+          legend = "right", labels = "AUTO",
+          font.label = list(size = 18))
+dev.off()
+
+##########################################################################
+## Figure 3: leaf N plots
+##########################################################################
+png("../working_drafts/figs/NxCO2xI_fig3_leafN.png",
     height = 8, width = 12, units = "in", res = 600)
 ggarrange(narea.plot, nmass.plot, marea.plot, chl.plot,
           ncol = 2, nrow = 2,
@@ -1191,9 +1327,9 @@ ggarrange(narea.plot, nmass.plot, marea.plot, chl.plot,
 dev.off()
 
 ##########################################################################
-## Figure 3: leaf physiology plots
+## Figure 4: leaf physiology plots
 ##########################################################################
-png("../working_drafts/figs/NxCO2xI_fig3_photo.png",
+png("../working_drafts/figs/NxCO2xI_fig4_photo.png",
     height = 12, width = 7.5, units = "in", res = 600)
 ggarrange(vcmax.plot, jmax.plot, jvmax.plot, ncol = 1, nrow = 3,
           common.legend = TRUE, align = "hv",
@@ -1202,9 +1338,9 @@ ggarrange(vcmax.plot, jmax.plot, jvmax.plot, ncol = 1, nrow = 3,
 dev.off()
 
 ##########################################################################
-## Figure 4: propN photosynthesis/structure
+## Figure 5: propN photosynthesis/structure
 ##########################################################################
-png("../working_drafts/figs/NxCO2xI_fig4_propN.png",
+png("../working_drafts/figs/NxCO2xI_fig5_propN.png",
     height = 8.5, width = 17, units = "in", res = 600)
 ggarrange(p.rub.plot, p.bioe.plot, p.light.plot,
           p.photo.plot,
@@ -1217,7 +1353,7 @@ dev.off()
 ##########################################################################
 ## Figure 5: PNUE/iWUE tradeoffs
 ##########################################################################
-png("../working_drafts/figs/NxCO2xI_fig5_PNUE_iWUE.png",
+png("../working_drafts/figs/NxCO2xI_fig6_PNUE_iWUE.png",
     height = 8, width = 12, units = "in", res = 600)
 ggarrange(pnue.plot, iwue.plot, narea.gs.plot, vcmax.gs.plot,
           ncol = 2, nrow = 2, common.legend = TRUE, align = "hv",
