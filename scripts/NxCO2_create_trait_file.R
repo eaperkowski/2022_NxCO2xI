@@ -146,7 +146,7 @@ compile_df <- id %>%
          marea = focal.biomass / (focal.area / 10000),
          marea.chl = chlor.biomass / (chl.leaf.area / 10000),
          narea = nmass.focal * marea,
-         narea.chl = nmass.chl * marea.chl,
+         narea.chl = nmass.focal * marea.chl,
          
          ## Proportion of N calculations
          p.rubisco = p_rubisco(vcmax25, narea),
@@ -165,8 +165,8 @@ compile_df <- id %>%
          stomlim = stomatal_limitation(A_net = anet, Vcmax = vcmax25, leaf.temp = tleaf,
                                        Rd.meas = TRUE, Rd = rd25, temp = "C")[[5]],
          
-         ## Tissue C and N biomass. Note that focal leaf is multiplied by 2
-         ## to account for chlorophyll focal leaf
+         ## Tissue C and N biomass. Note that chlorophyll biomass is multiplied
+         ## by nmass.focal due to high correlation between both
          leaf.totaln = (nmass.tl * leaf.biomass) + 
            (nmass.focal * focal.biomass) + (nmass.focal * chlor.biomass),
          stem.totaln = nmass.ts * stem.biomass,

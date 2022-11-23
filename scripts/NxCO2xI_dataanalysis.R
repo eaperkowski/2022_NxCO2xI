@@ -43,15 +43,14 @@ Anova(ncost)
 r.squaredGLMM(ncost)
 
 # Pairwise comparisons
-test(emtrends(ncost, ~1, "n.trt", regrid = "response"))
-
 ## Two-way interaction between CO2 and soil N
+test(emtrends(ncost, ~co2*inoc, "n.trt"))
 cld(emtrends(ncost, pairwise~co2*inoc, "n.trt"))
 ## Negative effect of increasing soil N is greater in ambient CO2
 
 ## Two-way interaction between inoc and soil N
 test(emtrends(ncost, pairwise~inoc, "n.trt"))
-## Negativ effect of increasing soil N is greater in non-inoculated pots
+## Negative effect of increasing soil N is greater in non-inoculated pots
 
 ## Two-way interaction between CO2 and inoc
 cld(emmeans(ncost, pairwise~co2*inoc))
@@ -105,15 +104,15 @@ cld(emmeans(cbg, pairwise~inoc*co2, type = "response"))
 ## CO2 than at elevated CO2.
 
 ## Individual effect of CO2
-emmeans(cbg, pairwise~co2)
+emmeans(cbg, pairwise~co2, type = "response")
 ## elevated co2 generally has higher values
 
 ## Individual effect of inoc
-emmeans(cbg, pairwise~inoc)
+emmeans(cbg, pairwise~inoc, type = "response")
 ## Inoculated pots generally had higher values
 
 ## Individual effect of soil N
-test(emtrends(cbg, ~1, "n.trt", regrid = "response"))
+test(emtrends(cbg, ~1, "n.trt"))
 emmeans(cbg, ~1, "n.trt", at = list(n.trt = 0), type = "response")
 ## Increasing soil N increases cbg
 ## Eq: 0.0023x + 0.469 
@@ -121,8 +120,6 @@ emmeans(cbg, ~1, "n.trt", at = list(n.trt = 0), type = "response")
 ##########################################################################
 ## Whole plant nitrogen
 ##########################################################################
-df$wpn[93] <- NA
-
 wpn <- lmer(log(wpn) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
@@ -143,23 +140,12 @@ r.squaredGLMM(wpn)
 test(emtrends(wpn, pairwise~inoc, "n.trt"))
 ## Positive effect of increasing soil N is greater in uninoculated pots
 
-## Two-way interaction between inoc and soil N
-test(emtrends(wpn, pairwise~co2, "n.trt"))
-## Negativ effect of increasing soil N is greater in non-inoculated pots
-
-## Two-way interaction between CO2 and inoc
-cld(emmeans(wpn, pairwise~inoc*co2, type = "response"))
-## There is a stronger %difference between inoculation status at elevated
-## CO2 than at ambient CO2. ## Specifically, noninoculated pots grown under 
-## ambient CO2 had 9.5% higher Ncost, while noninoculated pots grown under
-## elevated CO2 had 27.6% higher Ncost. Perhaps due to higher Ndemand?
-
 ## Individual effect of CO2
-emmeans(wpn, pairwise~co2)
+emmeans(wpn, pairwise~co2, type = "response")
 ## elevated co2 generally has higher Ncost
 
 ## Individual effect of inoc
-emmeans(wpn, pairwise~inoc)
+emmeans(wpn, pairwise~inoc, type = "response")
 ## Noninoculated pots generally had higher Ncost
 
 ## Individual effect of soil N
@@ -233,10 +219,6 @@ Anova(tbio)
 r.squaredGLMM(tbio)
 
 # Pairwise comparisons
-## Two-way interaction between CO2 and soil N (marginal)
-test(emtrends(tbio, pairwise~co2, "n.trt"))
-## Marginally stronger positive effect of increasing soil N in elevated CO2
-
 ## Two-way interaction between inoc and soil N
 test(emtrends(tbio, pairwise~inoc, "n.trt"))
 ## Positive effect of increasing soil N is greater in non-inoculated pots
@@ -273,19 +255,20 @@ Anova(nod.root.ratio)
 r.squaredGLMM(nod.root.ratio)
 
 # Pairwise comparisons
-## Two-way interaction between inoculation and N fertilization
+## Three-way interaction between inoculation and N fertilization
+test(emtrends(nod.root.ratio, ~inoc*co2, "n.trt"))
+cld(emtrends(nod.root.ratio, pairwise~inoc*co2, "n.trt"))
+
+
 test(emtrends(nod.root.ratio, ~inoc, "n.trt"))
-## Inoculation increases negative effect of n.fertilization on 
-## plant investment in N fixation. No surprise since inoculation 
-## increased nodulation
+test(emtrends(nod.root.ratio, ~co2, "n.trt"))
 
-## Inoculation effect
+
+## Individual effects
+emmeans(nod.root.ratio, pairwise~co2)
 emmeans(nod.root.ratio, pairwise~inoc)
-## No surprise, but inoculation increased investiment in nodulation
 
-## Individual effect of n.trt on nod.root.ratio
 test(emtrends(nod.root.ratio, ~1, "n.trt"))
-## Increasing soil N fertilization decreases nod.root.ratio
 
 ##########################################################################
 ## Root nodule biomass: root biomass
@@ -313,6 +296,12 @@ test(emtrends(nod.bio, ~inoc, "n.trt"))
 ## Inoculation increases negative effect of n.fertilization on 
 ## plant investment in N fixation. No surprise since inoculation 
 ## increased nodulation
+
+## Interaction between CO2 and N fert
+test(emtrends(nod.bio, pairwise~co2, "n.trt"))
+
+## CO2 effect
+emmeans(nod.bio, pairwise~co2)
 
 ## Inoculation effect
 emmeans(nod.bio, pairwise~inoc)
@@ -373,17 +362,10 @@ test(emtrends(narea, pairwise~inoc, "n.trt"))
 cld(emmeans(narea, pairwise~inoc*co2))
  # Stronger stimulation in Narea in inoculated pots grown under elevated CO2
 
-# Individual effect of co2
+# Individual effects
 emmeans(narea, pairwise~co2)
-# Narea is generally greater under ambient CO2
-
-# Individual effect of inoc
 emmeans(narea, pairwise~inoc)
-# Narea is generally larger in inoculated pots
-
-# Individual effect of n.trt
-emtrends(narea, ~1, "n.trt")
-# Narea increases with N fertilization
+test(emtrends(narea, ~1, "n.trt"))
 
 ##########################################################################
 ## Marea (LMA)
@@ -411,17 +393,10 @@ test(emtrends(marea, pairwise~co2, "n.trt"))
 test(emtrends(marea, pairwise~inoc, "n.trt"))
 # Stronger stimulation in Narea with increasing soil N in non-inoculated pots
 
-# Individual effect of co2
+# Individual effects
 emmeans(marea, pairwise~co2)
-# Marea is larger in elevated CO2 treatment
-
-# Individual effect of inoc
 emmeans(marea, pairwise~inoc)
-# Marea is larger in inoculated pots
-
-# Individual effect of n.trt
-emtrends(marea, ~1, "n.trt")
-# Increasing N fertilization increases Marea
+test(emtrends(marea, ~1, "n.trt"))
 
 ##########################################################################
 ## Nmass
