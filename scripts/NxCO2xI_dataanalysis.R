@@ -525,7 +525,7 @@ Anova(stomlim)
 r.squaredGLMM(stomlim)
 
 # Pairwise comparisons
-cld(emmeans(stomlim, pairwise~co2*inoc))
+emmeans(stomlim, pairwise~co2*inoc)
 
 # Individual effects
 test(emtrends(stomlim, ~1, "n.trt"))
@@ -535,7 +535,6 @@ emmeans(stomlim, pairwise~inoc)
 ## Proportion of N in photosynthesis
 ##########################################################################
 df$p.photo[df$p.photo > 1] <- NA
-
 p.photo <- lmer(p.photo ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
@@ -623,7 +622,6 @@ test(emtrends(p.rub, ~1, "n.trt"))
 ## Proportion of N in bioenergetics
 ##########################################################################
 df$p.bioe[c(45)] <- NA
-
 p.bioe <- lmer(p.bioe ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
@@ -651,7 +649,6 @@ test(emtrends(p.bioe, ~1, "n.trt"))
 ## Proportion of N in light harvesting
 ##########################################################################
 df$p.lightharv[c(25, 39, 45)] <- NA
-
 p.light <- lmer(p.lightharv ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
@@ -670,7 +667,6 @@ r.squaredGLMM(p.light)
 # Pairwise comparisons
 test(emtrends(p.light, pairwise~co2*inoc, "n.trt"))
 test(emtrends(p.light, pairwise~inoc, "n.trt"))
-
 
 ## Individual effects
 emmeans(p.light, pairwise~co2)
