@@ -16,10 +16,6 @@ df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv",
   mutate(n.trt = as.numeric(n.trt)) %>%
   filter(inoc == "inoc" | (inoc == "no.inoc" & nodule.biomass < 0.05)) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE) 
-  # 
-  # dplyr::filter(id != "a_n_0_109" & id != "a_n_0_112" & id != "e_n_70_47" &
-  #                 id != "a_n_70_118" & id != "a_n_105_122" & id != "a_n_280_135") %>%
-  # unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
 ## Add colorblind friendly palette
 cbbPalette3 <- c("#DDAA33", "#004488", "#BB5566", "#555555")
@@ -84,9 +80,7 @@ ncost.plot
 ## Belowground C regression line prep
 ##########################################################################
 cbg <- lmer(cbg ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-cbg <- lmer(log(cbg) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-
-
+#cbg <- lmer(log(cbg) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 ## Emmean fxns for regression lines + error ribbons
 cbg.full <- data.frame(emmeans(cbg, ~inoc*co2, "n.trt",
@@ -139,8 +133,6 @@ bgc.plot
 ##########################################################################
 ## Whole plant N regression line prep
 ##########################################################################
-df$wpn[93] <- NA
-
 wpn <- lmer(wpn ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 ## Emmean fxns for regression lines + error ribbons
@@ -366,8 +358,7 @@ nod.regline <- data.frame(emmeans(nod, ~1, "n.trt",
                                   type = "response")) %>%
   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
   full_join(nod.full) %>%
-  mutate(linetype = ifelse(co2.inoc == "elv_no.inoc" |
-                             co2.inoc == "amb_no.inoc",
+  mutate(linetype = ifelse(co2.inoc == "amb_no.inoc",
                            "dashed", "solid")) %>%
   dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
 
