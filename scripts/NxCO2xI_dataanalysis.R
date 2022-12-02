@@ -15,7 +15,8 @@ emm_options(opt.digits = FALSE)
 
 # Read in compiled data file
 df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv") %>%
-  mutate(n.trt = as.numeric(n.trt)) %>%
+  mutate(n.trt = as.numeric(n.trt),
+         rd25.vcmax25 = rd25 / vcmax25) %>%
   filter(inoc == "inoc" | (inoc == "no.inoc" & nodule.biomass < 0.05))
   ## filter all uninoculated pots that have nod biomass > 0.05 g
 
@@ -456,6 +457,66 @@ test(emtrends(anet, ~inoc, "n.trt"))
 emmeans(anet, pairwise~co2)
 emmeans(anet, pairwise~inoc)
 test(emtrends(anet, ~1, "n.trt"))
+
+##########################################################################
+## Rd25
+##########################################################################
+df$rd25[df$rd25 < 0] <- NA
+
+df$rd25[c(19, 34, 57)] <- NA
+
+rd25 <- lmer(rd25 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(rd25)
+qqnorm(residuals(rd25))
+qqline(residuals(rd25))
+densityPlot(residuals(rd25))
+shapiro.test(residuals(rd25))
+outlierTest(rd25)
+
+# Model results
+summary(rd25)
+Anova(rd25)
+r.squaredGLMM(rd25)
+
+# Pairwise comparisons
+test(emtrends(rd25, ~inoc, "n.trt"))
+
+# Individual effects
+emmeans(rd25, pairwise~co2)
+emmeans(rd25, pairwise~inoc)
+test(emtrends(rd25, ~1, "n.trt"))
+
+##########################################################################
+## Rd25:Vcmax25
+##########################################################################
+df$rd25.vcmax25[df$rd25.vcmax25 < 0] <- NA
+
+df$rd25.vcmax25[c(39, 40, 42)] <- NA
+
+rd25.vcmax25 <- lmer(rd25.vcmax25 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(rd25.vcmax25)
+qqnorm(residuals(rd25.vcmax25))
+qqline(residuals(rd25.vcmax25))
+densityPlot(residuals(rd25.vcmax25))
+shapiro.test(residuals(rd25.vcmax25))
+outlierTest(rd25.vcmax25)
+
+# Model results
+summary(rd25.vcmax25)
+Anova(rd25.vcmax25)
+r.squaredGLMM(rd25.vcmax25)
+
+# Pairwise comparisons
+test(emtrends(rd25.vcmax25, ~inoc, "n.trt"))
+
+# Individual effects
+emmeans(rd25.vcmax25, pairwise~co2)
+emmeans(rd25.vcmax25, pairwise~inoc)
+test(emtrends(rd25.vcmax25, ~1, "n.trt"))
 
 ##########################################################################
 ## gsw
