@@ -863,7 +863,7 @@ rd25.vcmax25.regline <- data.frame(emmeans(rd25.vcmax25, ~1, "n.trt",
 ##########################################################################
 ## Rd25:Vcmax25 plot
 ##########################################################################
-rd25.plot <- ggplot(data = df, aes(x = n.trt, y = rd25.vcmax25)) +
+rd25.vcmax25.plot <- ggplot(data = df, aes(x = n.trt, y = rd25.vcmax25)) +
   geom_jitter(aes(fill = co2.inoc),
               size = 3, shape = 21, alpha = 0.75) +
   geom_smooth(data = subset(rd25.vcmax25.regline, co2.inoc != "overall"),
@@ -893,23 +893,7 @@ rd25.plot <- ggplot(data = df, aes(x = n.trt, y = rd25.vcmax25)) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
         panel.border = element_rect(size = 1.25))
-rd25.plot
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+rd25.vcmax25.plot
 
 ##########################################################################
 ## Prop leaf N in photosynthesis  regression line prep
@@ -1450,8 +1434,8 @@ dev.off()
 ## Figure 4: leaf physiology plots
 ##########################################################################
 png("../working_drafts/figs/NxCO2xI_fig4_photo.png",
-    height = 12, width = 7.5, units = "in", res = 600)
-ggarrange(vcmax.plot, jmax.plot, jvmax.plot, ncol = 1, nrow = 3,
+    height = 8, width = 12, units = "in", res = 600)
+ggarrange(vcmax.plot, jmax.plot, jvmax.plot, rd25.plot, ncol = 2, nrow = 2,
           common.legend = TRUE, align = "hv",
           legend = "right", labels = "AUTO",
           font.label = list(size = 18))
@@ -1480,6 +1464,9 @@ ggarrange(pnue.plot, iwue.plot, narea.gs.plot, vcmax.gs.plot,
           legend = "right", labels = "AUTO",
           font.label = list(size = 18))
 dev.off()
+
+
+
 
 
 
