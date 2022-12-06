@@ -1287,7 +1287,8 @@ iwue.plot <- ggplot(data = df, aes(x = n.trt, y = iwue)) +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25))
+        panel.border = element_rect(size = 1.25),
+        axis.title.y = element_text(size = 14))
 iwue.plot
 
 ##########################################################################
@@ -1338,7 +1339,7 @@ narea.gs.plot <- ggplot(data = df, aes(x = n.trt, y = narea.gs)) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 32), breaks = seq(0, 32, 8)) +
   labs(x = "Soil N fertilization (ppm)",
-       y = expression(bold(italic("N")["area"]*": "*italic("g")["s"]*" (add units here)")),
+       y = expression(bold(italic("N")["area"]*": "*italic("g")["s"]*" (gN s mol"^"-1"*" H"["2"]*"O)")),
        fill = "Treatment", color = "Treatment") +
   guides(linetype = "none") +
   theme_bw(base_size = 18) +
@@ -1393,7 +1394,8 @@ vcmax.gs.plot <- ggplot(data = df, aes(x = n.trt, y = vcmax.gs)) +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25))
+        panel.border = element_rect(size = 1.25),
+        axis.title.y = element_text(size = 14))
 vcmax.gs.plot
 
 ##########################################################################
