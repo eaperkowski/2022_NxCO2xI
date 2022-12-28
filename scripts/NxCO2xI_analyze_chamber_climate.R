@@ -1,6 +1,7 @@
 ## Load libraries
 library(dplyr)
 library(lubridate)
+library(tidyverse)
 
 ## Read in chamber climate data
 chamber.data <- list.files(path = "../chamber_climate",
@@ -15,11 +16,19 @@ chamber.clim <- lapply(chamber.data, read.csv) %>%
   mutate(month = str_pad(month, 2, side = "left", pad = "0"),
          hour = str_pad(hour, 2, side = "left", pad = "0"),
          minute = str_pad(minute, 2, side = "left", pad = "0")) %>%
-  unite(col = "date", year:day, sep = "-") %>%
-  unite(col = "time", hour:second, sep = ":") %>%
-  unite(col = "date.time", date:time, sep = " ") %>%
+  tidyr::unite(col = "date", year:day, sep = "-") %>%
+  tidyr::unite(col = "time", hour:second, sep = ":") %>%
+  tidyr::unite(col = "date.time", date:time, sep = " ") %>%
   mutate(date = ymd_hms(date.time))
 
+df <- chamber.clim %>%
+  mutate(day = day(date),
+         month = month(date),
+         month.day = str_c(month, "/", day))
+
+ggplot(data = subset(df, chamber == "1" & month.day == "7/10"),
+       aes(x = date, y = co2.meas)) +
+  geom_line()
 
 ############ 
 ##Read in HOBO sensor temp data 

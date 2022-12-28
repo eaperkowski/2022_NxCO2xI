@@ -207,3 +207,11 @@ lmf.plot <- ggplot(data = df, aes(x = n.trt, y = lmf)) +
         panel.border = element_rect(size = 1.25))
 lmf.plot
 
+png("../working_drafts/figs/NxCO2xI_allocation_expl_plot.png",
+    height = 4.5, width = 16, units = "in", res = 600)
+ggarrange(lmf.plot, smf.plot, rmf.plot,
+          nrow = 1, ncol = 3, common.legend = TRUE,
+          legend = "right")
+dev.off()
+
+
