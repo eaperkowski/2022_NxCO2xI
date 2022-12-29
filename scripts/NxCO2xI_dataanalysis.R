@@ -261,7 +261,7 @@ Anova(rd25)
 r.squaredGLMM(rd25)
 
 # Pairwise comparisons
-test(emtrends(rd25, ~inoc, "n.trt"))
+test(emtrends(rd25, pairwise~inoc, "n.trt"))
 
 # Individual effects
 emmeans(rd25, pairwise~co2)
@@ -566,6 +566,8 @@ test(emtrends(vcmax.gs, ~1, "n.trt"))
 ##########################################################################
 ## Ncost
 ##########################################################################
+df$ncost[c(101, 102)] <- NA
+
 ncost <- lmer(log(ncost) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
@@ -582,6 +584,9 @@ Anova(ncost)
 r.squaredGLMM(ncost)
 
 # Pairwise comparisons
+## Three-way interaction
+test(emtrends(ncost, pairwise~co2*inoc, "n.trt"))
+
 ## Two-way interaction between CO2 and soil N
 test(emtrends(ncost, pairwise~co2, "n.trt"))
 test(emtrends(ncost, pairwise~inoc, "n.trt"))
@@ -667,7 +672,7 @@ r.squaredGLMM(tla)
 # Pairwise comparisons
 test(emtrends(tla, pairwise~co2, "n.trt"))
 test(emtrends(tla, pairwise~inoc, "n.trt"))
-cld(emmeans(tla, pairwise~co2*inoc))
+emmeans(tla, pairwise~co2*inoc)
 
 ## Individual effects
 emmeans(tla, pairwise~co2)
@@ -694,6 +699,8 @@ r.squaredGLMM(tbio)
 
 # Pairwise comparisons
 test(emtrends(tbio, pairwise~inoc, "n.trt"))
+test(emtrends(tbio, pairwise~co2, "n.trt"))
+emmeans(tbio, pairwise~co2*inoc)
 
 ## Individual effects
 emmeans(tbio, pairwise~co2)
@@ -703,39 +710,6 @@ test(emtrends(tbio, ~1, "n.trt"))
 ##########################################################################
 ## Root nodule biomass: root biomass
 ##########################################################################
-df$nod.root.ratio <- df$nodule.biomass / df$root.biomass
-nod.root.ratio <- lmer(sqrt(nod.root.ratio) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-
-# Check model assumptions
-plot(nod.root.ratio)
-qqnorm(residuals(nod.root.ratio))
-qqline(residuals(nod.root.ratio))
-densityPlot(residuals(nod.root.ratio))
-shapiro.test(residuals(nod.root.ratio))
-outlierTest(nod.root.ratio)
-
-# Model results
-summary(nod.root.ratio)
-Anova(nod.root.ratio)
-r.squaredGLMM(nod.root.ratio)
-
-# Pairwise comparisons
-## Three-way interaction between inoculation and N fertilization
-test(emtrends(nod.root.ratio, pairwise~inoc*co2, "n.trt"))
-cld(emtrends(nod.root.ratio, pairwise~inoc*co2, "n.trt"))
-
-test(emtrends(nod.root.ratio, pairwise~inoc, "n.trt"))
-test(emtrends(nod.root.ratio, pairwise~co2, "n.trt"))
-
-## Individual effects
-emmeans(nod.root.ratio, pairwise~co2)
-emmeans(nod.root.ratio, pairwise~inoc)
-test(emtrends(nod.root.ratio, ~1, "n.trt"))
-
-##########################################################################
-## Root nodule biomass: root biomass
-##########################################################################
-df$nodule.biomass[81] <- NA
 nod.bio <- lmer(sqrt(nodule.biomass) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
@@ -759,6 +733,42 @@ test(emtrends(nod.bio, pairwise~co2, "n.trt"))
 emmeans(nod.bio, pairwise~co2)
 emmeans(nod.bio, pairwise~inoc)
 test(emtrends(nod.bio, ~1, "n.trt"))
+
+##########################################################################
+## Root nodule biomass: root biomass
+##########################################################################
+df$nod.root.ratio <- df$nodule.biomass / df$root.biomass
+df$nod.root.ratio[df$nod.root.ratio > 0.05 & df$inoc == "no.inoc"] <- NA
+
+
+
+nod.root.ratio <- lmer(sqrt(nod.root.ratio) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(nod.root.ratio)
+qqnorm(residuals(nod.root.ratio))
+qqline(residuals(nod.root.ratio))
+densityPlot(residuals(nod.root.ratio))
+shapiro.test(residuals(nod.root.ratio))
+outlierTest(nod.root.ratio)
+
+# Model results
+summary(nod.root.ratio)
+Anova(nod.root.ratio)
+r.squaredGLMM(nod.root.ratio)
+
+# Pairwise comparisons
+## Three-way interaction between inoculation and N fertilization
+test(emtrends(nod.root.ratio, pairwise~inoc*co2, "n.trt"))
+test(emtrends(nod.root.ratio, pairwise~inoc, "n.trt"))
+test(emtrends(nod.root.ratio, pairwise~co2, "n.trt"))
+
+emmeans(nod.root.ratio, pairwise~co2*inoc)
+
+## Individual effects
+emmeans(nod.root.ratio, pairwise~co2)
+emmeans(nod.root.ratio, pairwise~inoc)
+test(emtrends(nod.root.ratio, ~1, "n.trt"))
 
 ##########################################################################
 ## %Ndfa
@@ -1479,10 +1489,11 @@ nodbio.table <- data.frame(Anova(nod.bio)) %>%
 #                               "<0.001", pval.ndfa)) %>%
 #   arrange(treatment)
 
-table2 <- nodroot.table %>% full_join(nodbio.table) %>% 
+table6 <- nodbio.table %>%
+   full_join(nodroot.table) %>% 
   # full_join(ndfa.table) %>%
   replace(is.na(.), "-")
-write.csv(table2, file = "../working_drafts/tables/NxCO2xI_table2_nfix.csv",
+write.csv(table6, file = "../working_drafts/tables/NxCO2xI_table6_nfix.csv",
           row.names = FALSE)
 
 
