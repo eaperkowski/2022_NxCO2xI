@@ -11,9 +11,12 @@ library(ggpubr)
 emm_options(opt.digits = FALSE)
 
 # Load compiled datasheet
-df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv",
+df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv", 
                na.strings = "NA") %>%
-  mutate(n.trt = as.numeric(n.trt)) %>%
+  mutate(n.trt = as.numeric(n.trt),
+         rd25.vcmax25 = rd25 / vcmax25,
+         inoc = factor(inoc, levels = c("no.inoc", "inoc")),
+         co2 = factor(co2, levels = c("amb", "elv"))) %>%
   filter(inoc == "inoc" | (inoc == "no.inoc" & nodule.biomass < 0.05)) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE) 
 
@@ -62,7 +65,8 @@ narea.plot <- ggplot(data = df, aes(x = n.trt, y = narea)) +
                                 "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
-  labs(x = "Soil N fertilization (ppm)",
+  scale_y_continuous(limits = c(0, 3.24), breaks = seq(0, 3.2, 0.8)) +
+  labs(x = NULL,
        y = expression(bold(italic("N")["area"]*" (gN m"^"-2"*")")),
        fill = "Treatment", color = "Treatment") +
   theme_bw(base_size = 18) +
@@ -116,7 +120,7 @@ nmass.plot <- ggplot(data = df, aes(x = n.trt, y = nmass.focal)) +
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 0.08), breaks = seq(0, 0.08, 0.02)) +
-  labs(x = "Soil N fertilization (ppm)",
+  labs(x = NULL,
        y = expression(bold(italic("N")["mass"]*" (g g"^"-1"*")")),
        fill = "Treatment", color = "Treatment") +
   theme_bw(base_size = 18) +
@@ -125,6 +129,7 @@ nmass.plot <- ggplot(data = df, aes(x = n.trt, y = nmass.focal)) +
         legend.title = element_text(face = "bold"),
         panel.border = element_rect(size = 1.25))
 nmass.plot
+
 
 ##########################################################################
 ## Marea regression line prep
@@ -170,8 +175,8 @@ marea.plot <- ggplot(data = df, aes(x = n.trt, y = marea)) +
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
-  scale_y_continuous(limits = c(30, 90), breaks = seq(30, 90, 30)) +
-  labs(x = "Soil N fertilization (ppm)",
+  scale_y_continuous(limits = c(30, 90), breaks = seq(30, 90, 15)) +
+  labs(x = NULL,
        y = expression(bold(italic("M")["area"]*" (g m"^"-2"*")")),
        fill = "Treatment", color = "Treatment") +
   guides(linetype = "none") +
@@ -184,7 +189,7 @@ marea.plot
 ##########################################################################
 ## Chlarea regression line prep
 ##########################################################################
-df$chl.mmolm2[25] <- NA
+
 chlarea <- lmer(chl.mmolm2 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 shapiro.test(residuals(chlarea))
 car::outlierTest(chlarea)
@@ -229,7 +234,7 @@ chl.plot <- ggplot(data = df, aes(x = n.trt, y = chl.mmolm2)) +
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 0.28), breaks = seq(0, 0.28, 0.07)) +
-  labs(x = "Soil N fertilization (ppm)",
+  labs(x = NULL,
        y = expression(bold(italic("Chl")["area"]*" (mmol m"^"-2"*")")),
        fill = "Treatment", color = "Treatment") +
   theme_bw(base_size = 18) +
@@ -284,7 +289,7 @@ vcmax.plot <- ggplot(data = df, aes(x = n.trt, y = vcmax25)) +
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 150), breaks = seq(0, 150, 50)) +
-  labs(x = "Soil N fertilization (ppm)",
+  labs(x = NULL,
        y = expression(bold(italic("V")["cmax25"]*" (μmol m"^"-2"*"s"^"-1"*")")),
        fill = "Treatment", color = "Treatment") +
   guides(linetype = "none") +
@@ -340,7 +345,7 @@ jmax.plot <- ggplot(data = df, aes(x = n.trt, y = jmax25)) +
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 240), breaks = seq(0, 240, 60)) +
-  labs(x = "Soil N fertilization (ppm)",
+  labs(x = NULL,
        y = expression(bold(italic("J")["max25"]*" (μmol m"^"-2"*"s"^"-1"*")")),
        fill = "Treatment", color = "Treatment") +
   guides(linetype = "none") +
@@ -395,7 +400,7 @@ jvmax.plot <- ggplot(data = df, aes(x = n.trt, y = jmax25.vcmax25)) +
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(1.4, 2.2), breaks = seq(1.4, 2.2, 0.2)) +
-  labs(x = "Soil N fertilization (ppm)",
+  labs(x = NULL,
        y = expression(bold(italic("J")["max25"]*":"*italic(V)["cmax25"])),
        fill = "Treatment", color = "Treatment") +
   guides(linetype = "none") +
@@ -451,7 +456,7 @@ rd25.plot <- ggplot(data = df, aes(x = n.trt, y = rd25)) +
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 6), breaks = seq(0, 6, 2)) +
-  labs(x = "Soil N fertilization (ppm)",
+  labs(x = NULL,
        y = expression(bold(italic("R")["d25"]*" (μmol m"^"-2"*"s"^"-1"*")")),
        fill = "Treatment", color = "Treatment") +
   guides(linetype = "none") +
@@ -565,7 +570,7 @@ p.photo.plot <- ggplot(data = df, aes(x = n.trt, y = p.photo)) +
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 0.8), breaks = seq(0, 0.8, 0.2)) +
-  labs(x = "Soil N fertilization (ppm)",
+  labs(x = NULL,
        y = expression(bold(italic(rho)["photo"]*" (g g"^"-1"*")")),
        fill = "Treatment", color = "Treatment") +
   guides(linetype = "none") +
@@ -621,7 +626,7 @@ p.rub.plot <- ggplot(data = df, aes(x = n.trt, y = p.rubisco)) +
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 0.6), breaks = seq(0, 0.6, 0.2)) +
-  labs(x = "Soil N fertilization (ppm)",
+  labs(x = NULL,
        y = expression(bold(italic(rho)["rubisco"]*" (g g"^"-1"*")")),
        fill = "Treatment", color = "Treatment") +
   guides(linetype = "none") +
@@ -677,7 +682,7 @@ p.bioe.plot <- ggplot(data = df, aes(x = n.trt, y = p.bioe)) +
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 0.12), breaks = seq(0, 0.12, 0.03)) +
-  labs(x = "Soil N fertilization (ppm)",
+  labs(x = NULL,
        y = expression(bold(italic(rho)["bioenergetics"]*" (g g"^"-1"*")")),
        fill = "Treatment", color = "Treatment") +
   guides(linetype = "none") +
@@ -735,7 +740,7 @@ p.light.plot <- ggplot(data = df, aes(x = n.trt, y = p.lightharv)) +
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 0.05), breaks = seq(0, 0.05, 0.01)) +
-  labs(x = "Soil N fertilization (ppm)",
+  labs(x = NULL,
        y = expression(bold(italic(rho)["light"]*" (g g"^"-1"*")")),
        fill = "Treatment", color = "Treatment") +
   guides(linetype = "none") +
@@ -795,7 +800,7 @@ p.str.plot <- ggplot(data = df, aes(x = n.trt, y = p.structure)) +
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 0.2), breaks = seq(0, 0.2, 0.05)) +
-  labs(x = "Soil N fertilization (ppm)",
+  labs(x = NULL,
        y = expression(bold(italic(rho)["structure"]*" (g g"^"-1"*")")),
        fill = "Treatment", color = "Treatment") +
   guides(linetype = "none") +
@@ -854,7 +859,7 @@ pnue.plot <- ggplot(data = df, aes(x = n.trt, y = pnue)) +
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 20), breaks = seq(0, 20, 5)) +
-  labs(x = "Soil N fertilization (ppm)",
+  labs(x = NULL,
        y = expression(bold("PNUE (μmol CO"["2"]*" gN"^"-1"*"s"^"-1"*")")),
        fill = "Treatment", color = "Treatment") +
   guides(linetype = "none") +
@@ -903,7 +908,7 @@ iwue.plot <- ggplot(data = df, aes(x = n.trt, y = iwue)) +
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_y_continuous(limits = c(25, 125), breaks = seq(25, 125, 25)) +
-  labs(x = "Soil N fertilization (ppm)",
+  labs(x = NULL,
        y = expression(bold("iWUE (μmol CO"["2"]*" mol"^"-1"*"H"["2"]*"O)")),
        fill = "Treatment", color = "Treatment") +
   guides(linetype = "none") +
@@ -961,7 +966,7 @@ narea.gs.plot <- ggplot(data = df, aes(x = n.trt, y = narea.gs)) +
                                 "Elevated, uninoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 32), breaks = seq(0, 32, 8)) +
-  labs(x = "Soil N fertilization (ppm)",
+  labs(x = NULL,
        y = expression(bold(italic("N")["area"]*": "*italic("g")["s"]*" (gN s mol"^"-1"*" H"["2"]*"O)")),
        fill = "Treatment", color = "Treatment") +
   guides(linetype = "none") +
@@ -1010,7 +1015,7 @@ vcmax.gs.plot <- ggplot(data = df, aes(x = n.trt, y = vcmax.gs)) +
                                "Elevated, inoculated",
                                "Elevated, uninoculated")) +
   scale_y_continuous(limits = c(0, 800), breaks = seq(0, 800, 200)) +
-  labs(x = "Soil N fertilization (ppm)",
+  labs(x = NULL,
        y = expression(bold(italic("V")["cmax25"]*": "*italic("g")["s"]*" (μmol CO"["2"]*" mol"^"-1"*" H"["2"]*"O)")),
        fill = "Treatment", color = "Treatment") +
   guides(linetype = "none") +
@@ -1120,7 +1125,7 @@ bgc.plot <- ggplot(data = df, aes(x = n.trt, y = cbg)) +
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   scale_y_continuous(limits = c(0, 4), breaks = seq(0,4,1)) +
-  labs(x = "Soil N fertilization (ppm)",
+  labs(x = NULL,
        y = "Belowground carbon biomass (gC)",
        fill = "Treatment", color = "Treatment") +
   theme(axis.title = element_text(face = "bold"),
@@ -1135,6 +1140,8 @@ bgc.plot
 ## Whole plant N regression line prep
 ##########################################################################
 wpn <- lmer(wpn ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+Anova(wpn)
+
 
 ## Emmean fxns for regression lines + error ribbons
 wpn.full <- data.frame(emmeans(wpn, ~inoc*co2, "n.trt",
@@ -1173,7 +1180,7 @@ wpn.plot <- ggplot(data = df, aes(x = n.trt, y = wpn)) +
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
   scale_y_continuous(limits = c(0, 0.48), breaks = seq(0, 0.48, 0.12)) +
-  labs(x = "Soil N fertilization (ppm)",
+  labs(x = NULL,
        y = "Whole plant nitrogen biomass (gN)",
        fill = "Treatment", color = "Treatment") +
   theme_bw(base_size = 20) +
@@ -1423,7 +1430,10 @@ ggarrange(narea.plot, nmass.plot, marea.plot, chl.plot,
           ncol = 2, nrow = 2,
           common.legend = TRUE, align = "hv",
           legend = "right", labels = "AUTO",
-          font.label = list(size = 18))
+          font.label = list(size = 18)) %>%
+  annotate_figure(bottom = text_grob("Soil N fertilization (ppm)", 
+                                     size = 18, face = "bold",
+                                     hjust = 0.8))
 dev.off()
 
 
@@ -1435,7 +1445,10 @@ png("../working_drafts/figs/NxCO2xI_fig2_photo.png",
 ggarrange(vcmax.plot, jmax.plot, rd25.plot, jvmax.plot, 
           ncol = 2, nrow = 2,  common.legend = TRUE, 
           align = "hv", legend = "right", labels = "AUTO",
-          font.label = list(size = 18))
+          font.label = list(size = 18)) %>%
+  annotate_figure(bottom = text_grob("Soil N fertilization (ppm)", 
+                                     size = 18, face = "bold",
+                                     hjust = 0.8))
 dev.off()
 
 ##########################################################################
@@ -1446,7 +1459,10 @@ png("../working_drafts/figs/NxCO2xI_fig3_propN.png",
 ggarrange(p.photo.plot, p.str.plot, ncol = 2, nrow = 1,
           common.legend = TRUE, align = "hv",
           legend = "right", labels = "AUTO",
-          font.label = list(size = 18))
+          font.label = list(size = 18)) %>%
+  annotate_figure(bottom = text_grob("Soil N fertilization (ppm)", 
+                                     size = 18, face = "bold",
+                                     hjust = 0.8))
 dev.off()
 
 ##########################################################################
@@ -1457,7 +1473,10 @@ png("../working_drafts/figs/NxCO2xI_fig4_PNUE_iWUE.png",
 ggarrange(pnue.plot, iwue.plot, narea.gs.plot, vcmax.gs.plot,
           ncol = 2, nrow = 2, common.legend = TRUE, align = "hv",
           legend = "right", labels = "AUTO",
-          font.label = list(size = 18))
+          font.label = list(size = 18)) %>%
+  annotate_figure(bottom = text_grob("Soil N fertilization (ppm)", 
+                                     size = 18, face = "bold",
+                                     hjust = 0.8))
 dev.off()
 
 ##########################################################################
@@ -1475,22 +1494,3 @@ ggarrange(ncost.plot, tla.plot, tbio.plot,
                                      size = 18, face = "bold",
                                      hjust = 0.8))
 dev.off()
-
-##########################################################################
-## Figure 6: nitrogen fixation
-##########################################################################
-png("../working_drafts/figs/NxCO2xI_fig6_nfix.png",
-    height = 4.5, width = 12, units = "in", res = 600)
-ggarrange(nod.plot, nodroot.plot, ncol = 2, nrow = 1,
-          common.legend = TRUE, align = "hv",
-          legend = "right", labels = "AUTO",
-          font.label = list(size = 18))
-dev.off()
-
-
-
-
-
-
-
-

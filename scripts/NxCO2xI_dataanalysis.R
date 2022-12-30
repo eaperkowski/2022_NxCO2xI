@@ -16,9 +16,12 @@ emm_options(opt.digits = FALSE)
 # Read in compiled data file
 df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv") %>%
   mutate(n.trt = as.numeric(n.trt),
-         rd25.vcmax25 = rd25 / vcmax25) %>%
+         rd25.vcmax25 = rd25 / vcmax25,
+         inoc = factor(inoc, levels = c("no.inoc", "inoc")),
+         co2 = factor(co2, levels = c("amb", "elv"))) %>%
   filter(inoc == "inoc" | (inoc == "no.inoc" & nodule.biomass < 0.05))
-  ## filter all uninoculated pots that have nod biomass > 0.05 g
+  ## filter all uninoculated pots that have nod biomass > 0.05 g;
+  ## hard code inoc/co2 to make coefficients easier to understand
 
 df.removed <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv") %>%
   dplyr::filter(inoc == "no.inoc" & nodule.biomass > 0.05)
@@ -628,7 +631,9 @@ test(emtrends(cbg, ~1, "n.trt"))
 ##########################################################################
 ## Whole plant nitrogen
 ##########################################################################
-wpn <- lmer(log(wpn) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+df$wpn[c(93)] <- NA
+
+wpn <- lmer(wpn ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
 plot(wpn)
@@ -645,6 +650,7 @@ r.squaredGLMM(wpn)
 
 # Pairwise comparisons
 test(emtrends(wpn, pairwise~inoc, "n.trt"))
+test(emtrends(wpn, pairwise~co2, "n.trt"))
 
 ## Individual effects
 emmeans(wpn, pairwise~co2, type = "response")
@@ -734,6 +740,10 @@ emmeans(nod.bio, pairwise~co2)
 emmeans(nod.bio, pairwise~inoc)
 test(emtrends(nod.bio, ~1, "n.trt"))
 
+# Percent change in inoculated pots
+emmeans(nod.bio, ~inoc, "n.trt", at = list(n.trt = c(0, 630)))
+(0.231-0.625)/0.625
+
 ##########################################################################
 ## Root nodule biomass: root biomass
 ##########################################################################
@@ -760,15 +770,20 @@ r.squaredGLMM(nod.root.ratio)
 # Pairwise comparisons
 ## Three-way interaction between inoculation and N fertilization
 test(emtrends(nod.root.ratio, pairwise~inoc*co2, "n.trt"))
+
+## Two way interactions
 test(emtrends(nod.root.ratio, pairwise~inoc, "n.trt"))
 test(emtrends(nod.root.ratio, pairwise~co2, "n.trt"))
-
 emmeans(nod.root.ratio, pairwise~co2*inoc)
 
 ## Individual effects
 emmeans(nod.root.ratio, pairwise~co2)
 emmeans(nod.root.ratio, pairwise~inoc)
 test(emtrends(nod.root.ratio, ~1, "n.trt"))
+
+# Percent change in inoculated pots
+emmeans(nod.root.ratio, ~inoc, "n.trt", at = list(n.trt = c(0, 630)))
+(0.231-0.625)/0.625
 
 ##########################################################################
 ## %Ndfa
