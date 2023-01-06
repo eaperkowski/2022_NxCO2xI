@@ -15,13 +15,22 @@ df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv",
                na.strings = "NA") %>%
   mutate(n.trt = as.numeric(n.trt),
          rd25.vcmax25 = rd25 / vcmax25,
-         inoc = factor(inoc, levels = c("no.inoc", "inoc")),
+         inoc = factor(inoc, levels = c("inoc", "no.inoc")),
          co2 = factor(co2, levels = c("amb", "elv"))) %>%
   filter(inoc == "inoc" | (inoc == "no.inoc" & nodule.biomass < 0.05)) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE) 
 
 ## Add colorblind friendly palette
-cbbPalette3 <- c("#DDAA33", "#004488", "#BB5566", "#555555")
+nfix.cols <- c("#DDAA33", "#555555")
+co2.cols <- c("#004488", "#BB5566")
+
+## Create blank plot as spacer plot
+blank.plot <- ggplot() + 
+  theme_bw() +
+  theme(panel.background = element_rect(color = "white",
+                                        fill = "white"),
+        panel.border = element_rect(color = "white"))
+
 
 ##########################################################################
 ## Narea regression line prep
@@ -30,385 +39,565 @@ narea <- lmer(narea ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 test(emtrends(narea, ~inoc*co2, "n.trt"))
 
 ## Emmean fxns for regression lines + error ribbons
-narea.full <- data.frame(emmeans(narea, ~inoc*co2, "n.trt",
-                                at = list(n.trt = seq(0, 630, 5)),
-                                type = "response")) %>%
-  unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
+narea.co2.fert <- data.frame(emmeans(narea, ~co2, "n.trt",
+                                     at = list(n.trt = seq(0, 630, 5)),
+                                     type = "response"))
 
-narea.regline <- data.frame(emmeans(narea, ~1, "n.trt",
-                                   at = list(n.trt = seq(0, 630, 5)),
-                                   type = "response")) %>%
-  mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
-  full_join(narea.full) %>%
-  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
+narea.inoc.fert <- data.frame(emmeans(narea, ~inoc, "n.trt",
+                                      at = list(n.trt = seq(0, 630, 5)),
+                                      type = "response"))
 
 ##########################################################################
 ## Narea plot
 ##########################################################################
-narea.plot <- ggplot(data = df, aes(x = n.trt, y = narea)) +
-  geom_jitter(aes(fill = co2.inoc),
-              size = 3, shape = 21, alpha = 0.75) +
-  geom_smooth(data = subset(narea.regline, co2.inoc != "overall"),
-              aes(color = co2.inoc, y = emmean), 
+narea.co2.plot <- ggplot(data = df, 
+                         aes(x = n.trt, 
+                             y = narea,    
+                             fill = co2)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = narea.co2.fert,
+              aes(color = co2, y = emmean), 
               size = 1.5, se = FALSE) +
-  geom_ribbon(data = subset(narea.regline, co2.inoc != "overall"),
-              aes(fill = co2.inoc, y = emmean, 
+  geom_ribbon(data = narea.co2.fert,
+              aes(fill = co2, y = emmean, 
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
-  scale_fill_manual(values = cbbPalette3,
-                    labels = c("Ambient, inoculated",
-                               "Ambient, uninoculated",
-                               "Elevated, inoculated",
-                               "Elevated, uninoculated")) +
-  scale_color_manual(values = cbbPalette3,
-                     labels = c("Ambient, inoculated",
-                                "Ambient, uninoculated",
-                                "Elevated, inoculated",
-                                "Elevated, uninoculated")) +
+  scale_fill_manual(values = co2.cols,
+                    labels = c("Ambient",
+                               "Elevated")) +
+  scale_color_manual(values = co2.cols,
+                     labels = c("Ambient",
+                                "Elevated")) +
   scale_y_continuous(limits = c(0, 3.24), breaks = seq(0, 3.2, 0.8)) +
-  labs(x = NULL,
+  labs(x = "Soil N fertilization (ppm)",
        y = expression(bold(italic("N")["area"]*" (gN m"^"-2"*")")),
-       fill = "Treatment", color = "Treatment") +
+       fill = expression(bold("CO"["2"])), color = expression(bold("CO"["2"])),
+       shape = "Inoculation") +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
         panel.border = element_rect(size = 1.25))
-narea.plot
+narea.co2.plot
+
+
+narea.fert.inoc.plot <- ggplot(data = df,
+                                aes(x = n.trt,
+                                    y = narea,
+                                    fill = inoc)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = narea.inoc.fert,
+              aes(color = inoc, y = emmean), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = narea.inoc.fert,
+              aes(fill = inoc, y = emmean, 
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = nfix.cols,
+                    labels = c("Inoculated",
+                               "Uninoculated")) +
+  scale_color_manual(values = nfix.cols,
+                     labels = c("Inoculated",
+                                "Uninoculated")) +
+  scale_y_continuous(limits = c(0, 3.24), breaks = seq(0, 3.2, 0.8)) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("N")["area"]*" (gN m"^"-2"*")")),
+       fill = "Inoculation", color = "Inoculation") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25))
+narea.fert.inoc.plot
+
 
 ##########################################################################
 ## Nmass regression line prep
 ##########################################################################
 nmass <- lmer(nmass.focal ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-test(emtrends(nmass, ~co2*inoc, "n.trt"))
+test(emtrends(nmass, ~inoc, "n.trt"))
+test(emtrends(nmass, ~co2, "n.trt"))
 
 ## Emmean fxns for regression lines + error ribbons
-nmass.full <- data.frame(emmeans(nmass, ~inoc*co2, "n.trt",
-                                 at = list(n.trt = seq(0, 630, 5)),
-                                 type = "response")) %>%
-  unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
+nmass.co2.fert <- data.frame(emmeans(nmass, ~co2, "n.trt",
+                                     at = list(n.trt = seq(0, 630, 5)),
+                                     type = "response"))
 
-nmass.regline <- data.frame(emmeans(nmass, ~1, "n.trt",
-                                    at = list(n.trt = seq(0, 630, 5)),
-                                    type = "response")) %>%
-  mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
-  full_join(nmass.full) %>%
-  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
-  mutate(linetype = ifelse(co2.inoc == "elv_inoc", "dashed", "solid"))
+nmass.inoc.fert <- data.frame(emmeans(nmass, ~inoc, "n.trt",
+                                      at = list(n.trt = seq(0, 630, 5)),
+                                      type = "response")) %>%
+  arrange(factor(inoc, levels = c("inoc", "no.inoc")))
 
 ##########################################################################
 ## Nmass plot
 ##########################################################################
-nmass.plot <- ggplot(data = df, aes(x = n.trt, y = nmass.focal)) +
-  geom_jitter(aes(fill = co2.inoc),
-              size = 3, shape = 21, alpha = 0.75) +
-  geom_smooth(data = subset(nmass.regline, co2.inoc != "overall"),
-              aes(color = co2.inoc, y = emmean, linetype = linetype), 
+nmass.co2.plot <- ggplot(data = df, 
+                         aes(x = n.trt, 
+                             y = nmass.focal,    
+                             fill = co2)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = nmass.co2.fert,
+              aes(color = co2, y = emmean), 
               size = 1.5, se = FALSE) +
-  geom_ribbon(data = subset(nmass.regline, co2.inoc != "overall"),
-              aes(fill = co2.inoc, y = emmean, 
+  geom_ribbon(data = nmass.co2.fert,
+              aes(fill = co2, y = emmean, 
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
-  scale_fill_manual(values = cbbPalette3,
-                    labels = c("Ambient, inoculated",
-                               "Ambient, uninoculated",
-                               "Elevated, inoculated",
-                               "Elevated, uninoculated")) +
-  scale_color_manual(values = cbbPalette3,
-                     labels = c("Ambient, inoculated",
-                                "Ambient, uninoculated",
-                                "Elevated, inoculated",
-                                "Elevated, uninoculated")) +
-  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_fill_manual(values = co2.cols,
+                    labels = c("Ambient",
+                               "Elevated")) +
+  scale_color_manual(values = co2.cols,
+                     labels = c("Ambient",
+                                "Elevated")) +
   scale_y_continuous(limits = c(0, 0.08), breaks = seq(0, 0.08, 0.02)) +
-  labs(x = NULL,
-       y = expression(bold(italic("N")["mass"]*" (g g"^"-1"*")")),
-       fill = "Treatment", color = "Treatment") +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("N")["mass"]*" (gN g"^"-1"*")")),
+       fill = expression(bold("CO"["2"])), color = expression(bold("CO"["2"])),
+       shape = "Inoculation") +
   theme_bw(base_size = 18) +
-  guides(linetype = "none") +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
         panel.border = element_rect(size = 1.25))
-nmass.plot
+nmass.co2.plot
 
+nmass.fert.inoc.plot <- ggplot(data = df,
+                               aes(x = n.trt,
+                                   y = nmass.focal,
+                                   fill = inoc)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = nmass.inoc.fert,
+              aes(color = inoc, y = emmean), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = nmass.inoc.fert,
+              aes(fill = inoc, y = emmean, 
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = nfix.cols,
+                    labels = c("Inoculated",
+                               "Uninoculated")) +
+  scale_color_manual(values = nfix.cols,
+                     labels = c("Inoculated",
+                                "Uninoculated")) +
+  scale_y_continuous(limits = c(0, 0.08), breaks = seq(0, 0.08, 0.02)) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("N")["mass"]*" (gN g"^"-1"*")")),
+       fill = "Inoculation", color = "Inoculation") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25))
+nmass.fert.inoc.plot
 
 ##########################################################################
 ## Marea regression line prep
 ##########################################################################
 marea <- lmer(log(marea) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-test(emtrends(marea, ~co2*inoc, "n.trt"))
+test(emtrends(marea, ~inoc, "n.trt"))
+test(emtrends(marea, ~co2, "n.trt"))
 
 ## Emmean fxns for regression lines + error ribbons
-marea.full <- data.frame(emmeans(marea, ~inoc*co2, "n.trt",
-                                 at = list(n.trt = seq(0, 630, 5)),
-                                 type = "response")) %>%
-  unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
+marea.co2.fert <- data.frame(emmeans(marea, ~co2, "n.trt",
+                                     at = list(n.trt = seq(0, 630, 5)),
+                                     type = "response")) %>%
+  mutate(linetype = ifelse(co2 == "elv", "solid", "dashed"))
 
-marea.regline <- data.frame(emmeans(marea, ~1, "n.trt",
-                                    at = list(n.trt = seq(0, 630, 5)),
-                                    type = "response")) %>%
-  mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
-  full_join(marea.full) %>%
-  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
-  mutate(linetype = ifelse(co2.inoc == "amb_inoc", "dashed", "solid"))
+marea.inoc.fert <- data.frame(emmeans(marea, ~inoc, "n.trt",
+                                      at = list(n.trt = seq(0, 630, 5)),
+                                      type = "response")) %>%
+  arrange(factor(inoc, levels = c("inoc", "no.inoc")))
+
 
 ##########################################################################
 ## Marea plot
 ##########################################################################
-marea.plot <- ggplot(data = df, aes(x = n.trt, y = marea)) +
-  geom_jitter(aes(fill = co2.inoc),
-              size = 3, shape = 21, alpha = 0.75) +
-  geom_smooth(data = subset(marea.regline, co2.inoc != "overall"),
-              aes(color = co2.inoc, y = response, linetype = linetype), 
+marea.co2.plot <- ggplot(data = df, 
+                         aes(x = n.trt, 
+                             y = marea,    
+                             fill = co2)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = marea.co2.fert,
+              aes(color = co2, y = response, linetype = linetype), 
               size = 1.5, se = FALSE) +
-  geom_ribbon(data = subset(marea.regline, co2.inoc != "overall"),
-              aes(fill = co2.inoc, y = response, 
+  geom_ribbon(data = marea.co2.fert,
+              aes(fill = co2, y = response, 
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
-  scale_fill_manual(values = cbbPalette3,
-                    labels = c("Ambient, inoculated",
-                               "Ambient, uninoculated",
-                               "Elevated, inoculated",
-                               "Elevated, uninoculated")) +
-  scale_color_manual(values = cbbPalette3,
-                     labels = c("Ambient, inoculated",
-                                "Ambient, uninoculated",
-                                "Elevated, inoculated",
-                                "Elevated, uninoculated")) +
+  scale_fill_manual(values = co2.cols,
+                    labels = c("Ambient",
+                               "Elevated")) +
+  scale_color_manual(values = co2.cols,
+                     labels = c("Ambient",
+                                "Elevated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(30, 90), breaks = seq(30, 90, 15)) +
-  labs(x = NULL,
+  labs(x = "Soil N fertilization (ppm)",
        y = expression(bold(italic("M")["area"]*" (g m"^"-2"*")")),
-       fill = "Treatment", color = "Treatment") +
-  guides(linetype = "none") +
-  theme_bw(base_size = 18) +
-  theme(axis.title = element_text(face = "bold"),
-        legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25))
-marea.plot
-
-##########################################################################
-## Chlarea regression line prep
-##########################################################################
-
-chlarea <- lmer(chl.mmolm2 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-shapiro.test(residuals(chlarea))
-car::outlierTest(chlarea)
-
-test(emtrends(chlarea, ~co2*inoc, "n.trt"))
-
-## Emmean fxns for regression lines + error ribbons
-chlarea.full <- data.frame(emmeans(chlarea, ~inoc*co2, "n.trt",
-                                 at = list(n.trt = seq(0, 630, 5)),
-                                 type = "response")) %>%
-  unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
-
-chlarea.regline <- data.frame(emmeans(chlarea, ~1, "n.trt",
-                                    at = list(n.trt = seq(0, 630, 5)),
-                                    type = "response")) %>%
-  mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
-  full_join(chlarea.full) %>%
-  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1)
-
-##########################################################################
-## Chl area plot
-##########################################################################
-chl.plot <- ggplot(data = df, aes(x = n.trt, y = chl.mmolm2)) +
-  geom_jitter(aes(fill = co2.inoc),
-              size = 3, shape = 21, alpha = 0.75) +
-  geom_smooth(data = subset(chlarea.regline, co2.inoc != "overall"),
-              aes(color = co2.inoc, y = emmean), 
-              size = 1.5, se = FALSE) +
-  geom_ribbon(data = subset(chlarea.regline, co2.inoc != "overall"),
-              aes(fill = co2.inoc, y = emmean, 
-                  ymin = lower.CL, ymax = upper.CL), 
-              size = 1.5, alpha = 0.25) +
-  scale_fill_manual(values = cbbPalette3,
-                    labels = c("Ambient, inoculated",
-                               "Ambient, uninoculated",
-                               "Elevated, inoculated",
-                               "Elevated, uninoculated")) +
-  scale_color_manual(values = cbbPalette3,
-                     labels = c("Ambient, inoculated",
-                                "Ambient, uninoculated",
-                                "Elevated, inoculated",
-                                "Elevated, uninoculated")) +
-  scale_linetype_manual(values = c("dashed", "solid")) +
-  scale_y_continuous(limits = c(0, 0.28), breaks = seq(0, 0.28, 0.07)) +
-  labs(x = NULL,
-       y = expression(bold(italic("Chl")["area"]*" (mmol m"^"-2"*")")),
-       fill = "Treatment", color = "Treatment") +
+       fill = expression(bold("CO"["2"])), color = expression(bold("CO"["2"])),
+       shape = "Inoculation") +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
         panel.border = element_rect(size = 1.25)) +
   guides(linetype = "none")
-chl.plot
+marea.co2.plot
+
+
+marea.fert.inoc.plot <- ggplot(data = df,
+                               aes(x = n.trt,
+                                   y = marea,
+                                   fill = inoc)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = marea.inoc.fert,
+              aes(color = inoc, y = response), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = marea.inoc.fert,
+              aes(fill = inoc, y = response, 
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = nfix.cols,
+                    labels = c("Inoculated",
+                               "Uninoculated")) +
+  scale_color_manual(values = nfix.cols,
+                     labels = c("Inoculated",
+                                "Uninoculated")) +
+  scale_y_continuous(limits = c(30, 90), breaks = seq(30, 90, 15)) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("M")["area"]*" (g m"^"-2"*")")),
+       fill = "Inoculation", color = "Inoculation") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25))
+marea.fert.inoc.plot
+
+##########################################################################
+## Chlarea regression line prep
+##########################################################################
+chlarea <- lmer(chl.mmolm2 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+test(emtrends(chlarea, ~inoc, "n.trt"))
+test(emtrends(chlarea, ~co2, "n.trt"))
+
+## Emmean fxns for regression lines + error ribbons
+chlarea.co2.fert <- data.frame(emmeans(chlarea, ~co2, "n.trt",
+                                     at = list(n.trt = seq(0, 630, 5)),
+                                     type = "response"))
+
+chlarea.inoc.fert <- data.frame(emmeans(chlarea, ~inoc, "n.trt",
+                                      at = list(n.trt = seq(0, 630, 5)),
+                                      type = "response"))
+
+##########################################################################
+## Chl area plot
+##########################################################################
+chlarea.co2.plot <- ggplot(data = df, 
+                         aes(x = n.trt, 
+                             y = chl.mmolm2,    
+                             fill = co2)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = chlarea.co2.fert,
+              aes(color = co2, y = emmean), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = chlarea.co2.fert,
+              aes(fill = co2, y = emmean, 
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = co2.cols,
+                    labels = c("Ambient",
+                               "Elevated")) +
+  scale_color_manual(values = co2.cols,
+                     labels = c("Ambient",
+                                "Elevated")) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_y_continuous(limits = c(0, 0.28), breaks = seq(0, 0.28, 0.07)) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("Chl")["area"]*" (mmol m"^"-2"*")")),
+       fill = expression(bold("CO"["2"])), color = expression(bold("CO"["2"])),
+       shape = "Inoculation") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25)) +
+  guides(linetype = "none")
+chlarea.co2.plot
+
+
+chlarea.fert.inoc.plot <- ggplot(data = df,
+                               aes(x = n.trt,
+                                   y = chl.mmolm2,
+                                   fill = inoc)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = chlarea.inoc.fert,
+              aes(color = inoc, y = emmean), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = chlarea.inoc.fert,
+              aes(fill = inoc, y = emmean, 
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = nfix.cols,
+                    labels = c("Inoculated",
+                               "Uninoculated")) +
+  scale_color_manual(values = nfix.cols,
+                     labels = c("Inoculated",
+                                "Uninoculated")) +
+  scale_y_continuous(limits = c(0, 0.28), breaks = seq(0, 0.28, 0.07)) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("Chl")["area"]*" (mmol m"^"-2"*")")),
+       fill = "Inoculation", color = "Inoculation") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25))
+chlarea.fert.inoc.plot
 
 ##########################################################################
 ## Vcmax regression line prep
 ##########################################################################
 ## Copy removed outliers and lmer fxn
 vcmax25 <- lmer(vcmax25 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-test(emtrends(vcmax25, ~co2*inoc, "n.trt"))
+test(emtrends(vcmax25, ~co2, "n.trt"))
+test(emtrends(vcmax25, ~inoc, "n.trt"))
 
 ## Emmean fxns for regression lines + error ribbons
-vcmax.full <- data.frame(emmeans(vcmax25, ~inoc*co2, "n.trt",
-                                   at = list(n.trt = seq(0, 630, 5)))) %>%
-  unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
+vcmax25.co2.fert <- data.frame(emmeans(vcmax25, ~co2, "n.trt",
+                                     at = list(n.trt = seq(0, 630, 5)),
+                                     type = "response"))
 
-vcmax.regline <- data.frame(emmeans(vcmax25, ~1, "n.trt",
-                                      at = list(n.trt = seq(0, 630, 5)))) %>%
-  mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
-  full_join(vcmax.full) %>%
-  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
-  mutate(linetype = ifelse(co2.inoc == "elv_inoc" | co2.inoc == "amb_inoc", 
-                           "dashed", "solid"))
+vcmax25.inoc.fert <- data.frame(emmeans(vcmax25, ~inoc, "n.trt",
+                                      at = list(n.trt = seq(0, 630, 5)),
+                                      type = "response")) %>%
+  mutate(linetype = ifelse(inoc == "inoc", "dashed", "solid"))
 
 ##########################################################################
 ## Vcmax plot
 ##########################################################################
-vcmax.plot <- ggplot(data = df, aes(x = n.trt, y = vcmax25)) +
-  geom_jitter(aes(fill = co2.inoc),
-              size = 3, shape = 21, alpha = 0.75) +
-  geom_smooth(data = subset(vcmax.regline, co2.inoc != "overall"),
-              aes(color = co2.inoc, y = emmean, linetype = linetype), 
+vcmax25.co2.plot <- ggplot(data = df, 
+                           aes(x = n.trt, 
+                               y = vcmax25,    
+                               fill = co2)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = vcmax25.co2.fert,
+              aes(color = co2, y = emmean), 
               size = 1.5, se = FALSE) +
-  geom_ribbon(data = subset(vcmax.regline, co2.inoc != "overall"),
-              aes(fill = co2.inoc, y = emmean, 
+  geom_ribbon(data = vcmax25.co2.fert,
+              aes(fill = co2, y = emmean, 
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
-  scale_fill_manual(values = cbbPalette3,
-                    labels = c("Ambient, inoculated",
-                               "Ambient, uninoculated",
-                               "Elevated, inoculated",
-                               "Elevated, uninoculated")) +
-  scale_color_manual(values = cbbPalette3,
-                     labels = c("Ambient, inoculated",
-                                "Ambient, uninoculated",
-                                "Elevated, inoculated",
-                                "Elevated, uninoculated")) +
+  scale_fill_manual(values = co2.cols,
+                    labels = c("Ambient",
+                               "Elevated")) +
+  scale_color_manual(values = co2.cols,
+                     labels = c("Ambient",
+                                "Elevated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 150), breaks = seq(0, 150, 50)) +
-  labs(x = NULL,
-       y = expression(bold(italic("V")["cmax25"]*" (μmol m"^"-2"*"s"^"-1"*")")),
-       fill = "Treatment", color = "Treatment") +
-  guides(linetype = "none") +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("V")["cmax25"]*" ("*mu*"mol m"^"-2"*"s"^"-1"*")")),
+       fill = expression(bold("CO"["2"])), color = expression(bold("CO"["2"])),
+       shape = "Inoculation") +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25))
-vcmax.plot
+        panel.border = element_rect(size = 1.25)) +
+  guides(linetype = "none")
+vcmax25.co2.plot
+
+
+vcmax25.fert.inoc.plot <- ggplot(data = df,
+                                 aes(x = n.trt,
+                                     y = vcmax25,
+                                     fill = inoc)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = vcmax25.inoc.fert,
+              aes(linetype = linetype,
+                  color = inoc, y = emmean), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = vcmax25.inoc.fert,
+              aes(fill = inoc, y = emmean, 
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = nfix.cols,
+                    labels = c("Inoculated",
+                               "Uninoculated")) +
+  scale_color_manual(values = nfix.cols,
+                     labels = c("Inoculated",
+                                "Uninoculated")) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_y_continuous(limits = c(0, 150), breaks = seq(0, 150, 50)) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("V")["cmax25"]*" ("*mu*"mol m"^"-2"*"s"^"-1"*")")),
+       fill = "Inoculation", color = "Inoculation") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25)) +
+  guides(linetype = "none")
+vcmax25.fert.inoc.plot
 
 ##########################################################################
 ## Jmax regression line prep
 ##########################################################################
-## Copy removed outliers and lmer fxn
 jmax25 <- lmer(jmax25 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-shapiro.test(residuals(jmax25))
-test(emtrends(jmax25, ~co2*inoc, "n.trt"))
+
+test(emtrends(vcmax25, ~co2, "n.trt"))
+test(emtrends(vcmax25, ~inoc, "n.trt"))
 
 ## Emmean fxns for regression lines + error ribbons
-jmax.full <- data.frame(emmeans(jmax25, ~inoc*co2, "n.trt",
-                                 at = list(n.trt = seq(0, 630, 5)))) %>%
-  unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
+jmax25.co2.fert <- data.frame(emmeans(jmax25, ~co2, "n.trt",
+                                       at = list(n.trt = seq(0, 630, 5)),
+                                       type = "response"))
 
-jmax.regline <- data.frame(emmeans(jmax25, ~1, "n.trt",
-                                    at = list(n.trt = seq(0, 630, 5)))) %>%
-  mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
-  full_join(jmax.full) %>%
-  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
-  mutate(linetype = ifelse(co2.inoc == "elv_inoc" | co2.inoc == "amb_inoc", 
-                           "dashed", "solid"))
+jmax25.inoc.fert <- data.frame(emmeans(jmax25, ~inoc, "n.trt",
+                                        at = list(n.trt = seq(0, 630, 5)),
+                                        type = "response")) %>%
+  mutate(linetype = ifelse(inoc == "inoc", "dashed", "solid"))
+
 
 ##########################################################################
 ## Jmax plot
 ##########################################################################
-jmax.plot <- ggplot(data = df, aes(x = n.trt, y = jmax25)) +
-  geom_jitter(aes(fill = co2.inoc),
-              size = 3, shape = 21, alpha = 0.75) +
-  geom_smooth(data = subset(jmax.regline, co2.inoc != "overall"),
-              aes(color = co2.inoc, y = emmean, linetype = linetype), 
+jmax25.co2.plot <- ggplot(data = df, 
+                           aes(x = n.trt, 
+                               y = jmax25,    
+                               fill = co2)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = jmax25.co2.fert,
+              aes(color = co2, y = emmean), 
               size = 1.5, se = FALSE) +
-  geom_ribbon(data = subset(jmax.regline, co2.inoc != "overall"),
-              aes(fill = co2.inoc, y = emmean, 
+  geom_ribbon(data = jmax25.co2.fert,
+              aes(fill = co2, y = emmean, 
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
-  scale_fill_manual(values = cbbPalette3,
-                    labels = c("Ambient, inoculated",
-                               "Ambient, uninoculated",
-                               "Elevated, inoculated",
-                               "Elevated, uninoculated")) +
-  scale_color_manual(values = cbbPalette3,
-                     labels = c("Ambient, inoculated",
-                                "Ambient, uninoculated",
-                                "Elevated, inoculated",
-                                "Elevated, uninoculated")) +
-  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_fill_manual(values = co2.cols,
+                    labels = c("Ambient",
+                               "Elevated")) +
+  scale_color_manual(values = co2.cols,
+                     labels = c("Ambient",
+                                "Elevated")) +
   scale_y_continuous(limits = c(0, 240), breaks = seq(0, 240, 60)) +
-  labs(x = NULL,
-       y = expression(bold(italic("J")["max25"]*" (μmol m"^"-2"*"s"^"-1"*")")),
-       fill = "Treatment", color = "Treatment") +
-  guides(linetype = "none") +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("J")["max25"]*" ("*mu*"mol m"^"-2"*"s"^"-1"*")")),
+       fill = expression(bold("CO"["2"])), color = expression(bold("CO"["2"])),
+       shape = "Inoculation") +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25))
-jmax.plot
+        panel.border = element_rect(size = 1.25)) +
+  guides(linetype = "none")
+jmax25.co2.plot
+
+
+jmax25.fert.inoc.plot <- ggplot(data = df,
+                                 aes(x = n.trt,
+                                     y = jmax25,
+                                     fill = inoc)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = jmax25.inoc.fert,
+              aes(linetype = linetype,
+                  color = inoc, y = emmean), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = jmax25.inoc.fert,
+              aes(fill = inoc, y = emmean, 
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = nfix.cols,
+                    labels = c("Inoculated",
+                               "Uninoculated")) +
+  scale_color_manual(values = nfix.cols,
+                     labels = c("Inoculated",
+                                "Uninoculated")) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_y_continuous(limits = c(0, 240), breaks = seq(0, 240, 60)) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("J")["max25"]*" ("*mu*"mol m"^"-2"*"s"^"-1"*")")),
+       fill = "Inoculation", color = "Inoculation") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25)) +
+  guides(linetype = "none")
+jmax25.fert.inoc.plot
 
 ##########################################################################
 ## Jmax25:Vcmax25 regression line prep
 ##########################################################################
 df$jmax25.vcmax25[101] <- NA
-jvmax <- lmer(jmax25.vcmax25 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-test(emtrends(jmax25, ~co2*inoc, "n.trt"))
+jvmax25 <- lmer(jmax25.vcmax25 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+test(emtrends(jvmax25, ~co2, "n.trt"))
+test(emtrends(jvmax25, ~inoc, "n.trt"))
 
 ## Emmean fxns for regression lines + error ribbons
-jvmax.full <- data.frame(emmeans(jvmax, ~inoc*co2, "n.trt",
-                                 at = list(n.trt = seq(0, 630, 5)))) %>%
-  unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
+jvmax25.co2.fert <- data.frame(emmeans(jvmax25, ~co2, "n.trt",
+                                      at = list(n.trt = seq(0, 630, 5)),
+                                      type = "response"))
 
-jvmax.regline <- data.frame(emmeans(jvmax, ~1, "n.trt",
-                                    at = list(n.trt = seq(0, 630, 5)))) %>%
-  mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
-  full_join(jvmax.full) %>%
-  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
-  mutate(linetype = ifelse(co2.inoc == "elv_inoc" | co2.inoc == "amb_inoc", 
-                           "dashed", "solid"))
+jvmax25.inoc.fert <- data.frame(emmeans(jvmax25, ~inoc, "n.trt",
+                                       at = list(n.trt = seq(0, 630, 5)),
+                                       type = "response")) %>%
+  mutate(linetype = ifelse(inoc == "inoc", "dashed", "solid"))
+
 
 ##########################################################################
-## Jmax:Vcmax25 plot
+## Jmax plot
 ##########################################################################
-jvmax.plot <- ggplot(data = df, aes(x = n.trt, y = jmax25.vcmax25)) +
-  geom_jitter(aes(fill = co2.inoc),
-              size = 3, shape = 21, alpha = 0.75) +
-  geom_smooth(data = subset(jvmax.regline, co2.inoc != "overall"),
-              aes(color = co2.inoc, y = emmean, linetype = linetype), 
+jvmax25.co2.plot <- ggplot(data = df, 
+                          aes(x = n.trt, 
+                              y = jmax25.vcmax25,    
+                              fill = co2)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = jvmax25.co2.fert,
+              aes(color = co2, y = emmean), 
               size = 1.5, se = FALSE) +
-  geom_ribbon(data = subset(jvmax.regline, co2.inoc != "overall"),
-              aes(fill = co2.inoc, y = emmean, 
+  geom_ribbon(data = jvmax25.co2.fert,
+              aes(fill = co2, y = emmean, 
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
-  scale_fill_manual(values = cbbPalette3,
-                    labels = c("Ambient, inoculated",
-                               "Ambient, uninoculated",
-                               "Elevated, inoculated",
-                               "Elevated, uninoculated")) +
-  scale_color_manual(values = cbbPalette3,
-                     labels = c("Ambient, inoculated",
-                                "Ambient, uninoculated",
-                                "Elevated, inoculated",
-                                "Elevated, uninoculated")) +
-  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_fill_manual(values = co2.cols,
+                    labels = c("Ambient",
+                               "Elevated")) +
+  scale_color_manual(values = co2.cols,
+                     labels = c("Ambient",
+                                "Elevated")) +
   scale_y_continuous(limits = c(1.4, 2.2), breaks = seq(1.4, 2.2, 0.2)) +
-  labs(x = NULL,
-       y = expression(bold(italic("J")["max25"]*":"*italic(V)["cmax25"])),
-       fill = "Treatment", color = "Treatment") +
-  guides(linetype = "none") +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("J")["max25"]*":"*italic("V")["cmax25"])),
+       fill = expression(bold("CO"["2"])), color = expression(bold("CO"["2"])),
+       shape = "Inoculation") +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25))
-jvmax.plot
+        panel.border = element_rect(size = 1.25)) +
+  guides(linetype = "none")
+jvmax25.co2.plot
+
+
+jvmax25.fert.inoc.plot <- ggplot(data = df,
+                                aes(x = n.trt,
+                                    y = jmax25.vcmax25,
+                                    fill = inoc)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = jvmax25.inoc.fert,
+              aes(linetype = linetype,
+                  color = inoc, y = emmean), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = jvmax25.inoc.fert,
+              aes(fill = inoc, y = emmean, 
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = nfix.cols,
+                    labels = c("Inoculated",
+                               "Uninoculated")) +
+  scale_color_manual(values = nfix.cols,
+                     labels = c("Inoculated",
+                                "Uninoculated")) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_y_continuous(limits = c(1.4, 2.2), breaks = seq(1.4, 2.2, 0.2)) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("J")["max25"]*":"*italic("V")["cmax25"])),
+       fill = "Inoculation", color = "Inoculation") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25)) +
+  guides(linetype = "none")
+jvmax25.fert.inoc.plot
 
 ##########################################################################
 ## Rd25 regression line prep
@@ -416,112 +605,85 @@ jvmax.plot
 df$rd25[df$rd25 < 0] <- NA
 df$rd25[c(19, 34, 57)] <- NA
 rd25 <- lmer(rd25 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-test(emtrends(rd25, ~co2*inoc, "n.trt"))
+test(emtrends(rd25, ~co2, "n.trt"))
+test(emtrends(rd25, ~inoc, "n.trt"))
 
 ## Emmean fxns for regression lines + error ribbons
-rd25.full <- data.frame(emmeans(rd25, ~inoc*co2, "n.trt",
-                                 at = list(n.trt = seq(0, 630, 5)))) %>%
-  unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
+rd25.co2.fert <- data.frame(emmeans(rd25, ~co2, "n.trt",
+                                       at = list(n.trt = seq(0, 630, 5)),
+                                       type = "response")) %>%
+  mutate(linetype = ifelse(co2 == "elv", "dashed", "solid"))
 
-rd25.regline <- data.frame(emmeans(rd25, ~1, "n.trt",
-                                    at = list(n.trt = seq(0, 630, 5)))) %>%
-  mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
-  full_join(rd25.full) %>%
-  dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
-  mutate(linetype = ifelse(co2.inoc == "elv_inoc" | co2.inoc == "amb_inoc", 
-                           "dashed", "solid"))
+rd25.inoc.fert <- data.frame(emmeans(rd25, ~inoc, "n.trt",
+                                        at = list(n.trt = seq(0, 630, 5)),
+                                        type = "response")) %>%
+  mutate(linetype = ifelse(inoc == "inoc", "dashed", "solid"))
 
 ##########################################################################
 ## Rd25 plot
 ##########################################################################
-rd25.plot <- ggplot(data = df, aes(x = n.trt, y = rd25)) +
-  geom_jitter(aes(fill = co2.inoc),
-              size = 3, shape = 21, alpha = 0.75) +
-  geom_smooth(data = subset(rd25.regline, co2.inoc != "overall"),
-              aes(color = co2.inoc, y = emmean, linetype = linetype), 
+rd25.co2.plot <- ggplot(data = df, 
+                          aes(x = n.trt, 
+                              y = rd25,    
+                              fill = co2)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = rd25.co2.fert,
+              aes(linetype = linetype, color = co2, y = emmean), 
               size = 1.5, se = FALSE) +
-  geom_ribbon(data = subset(rd25.regline, co2.inoc != "overall"),
-              aes(fill = co2.inoc, y = emmean, 
+  geom_ribbon(data = rd25.co2.fert,
+              aes(fill = co2, y = emmean, 
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
-  scale_fill_manual(values = cbbPalette3,
-                    labels = c("Ambient, inoculated",
-                               "Ambient, uninoculated",
-                               "Elevated, inoculated",
-                               "Elevated, uninoculated")) +
-  scale_color_manual(values = cbbPalette3,
-                     labels = c("Ambient, inoculated",
-                                "Ambient, uninoculated",
-                                "Elevated, inoculated",
-                                "Elevated, uninoculated")) +
+  scale_fill_manual(values = co2.cols,
+                    labels = c("Ambient",
+                               "Elevated")) +
+  scale_color_manual(values = co2.cols,
+                     labels = c("Ambient",
+                                "Elevated")) +
+  scale_y_continuous(limits = c(0, 6), breaks = seq(0, 6, 1.5)) +
   scale_linetype_manual(values = c("dashed", "solid")) +
-  scale_y_continuous(limits = c(0, 6), breaks = seq(0, 6, 2)) +
-  labs(x = NULL,
-       y = expression(bold(italic("R")["d25"]*" (μmol m"^"-2"*"s"^"-1"*")")),
-       fill = "Treatment", color = "Treatment") +
-  guides(linetype = "none") +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("R")["d25"]*" ("*mu*"mol m"^"-2"*"s"^"-1"*")")),
+       fill = expression(bold("CO"["2"])), color = expression(bold("CO"["2"])),
+       shape = "Inoculation") +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25))
-rd25.plot
+        panel.border = element_rect(size = 1.25)) +
+  guides(linetype = "none")
+rd25.co2.plot
 
-##########################################################################
-## Rd25.vcmax25 regression line prep
-##########################################################################
-# df$rd25.vcmax25[df$rd25.vcmax25 < 0] <- NA
-# df$rd25.vcmax25[c(39, 40, 42)] <- NA
-# rd25.vcmax25 <- lmer(rd25.vcmax25 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-# 
-# test(emtrends(rd25, ~co2*inoc, "n.trt"))
-# 
-# ## Emmean fxns for regression lines + error ribbons
-# rd25.vcmax25.full <- data.frame(emmeans(rd25.vcmax25, ~inoc*co2, "n.trt",
-#                                 at = list(n.trt = seq(0, 630, 5)))) %>%
-#   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
-# 
-# rd25.vcmax25.regline <- data.frame(emmeans(rd25.vcmax25, ~1, "n.trt",
-#                                    at = list(n.trt = seq(0, 630, 5)))) %>%
-#   mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
-#   full_join(rd25.vcmax25.full) %>%
-#   dplyr::select(n.trt, co2, inoc, co2.inoc, everything(), -X1) %>%
-#   mutate(linetype = ifelse(co2.inoc == "elv_inoc" | co2.inoc == "amb_inoc", 
-#                            "dashed", "solid"))
 
-##########################################################################
-## Rd25:Vcmax25 plot
-##########################################################################
-# rd25.vcmax25.plot <- ggplot(data = df, aes(x = n.trt, y = rd25.vcmax25)) +
-#   geom_jitter(aes(fill = co2.inoc),
-#               size = 3, shape = 21, alpha = 0.75) +
-#   geom_smooth(data = subset(rd25.vcmax25.regline, co2.inoc != "overall"),
-#               aes(color = co2.inoc, y = emmean, linetype = linetype), 
-#               size = 1.5, se = FALSE) +
-#   geom_ribbon(data = subset(rd25.vcmax25.regline, co2.inoc != "overall"),
-#               aes(fill = co2.inoc, y = emmean, 
-#                   ymin = lower.CL, ymax = upper.CL), 
-#               size = 1.5, alpha = 0.25) +
-#   scale_fill_manual(values = cbbPalette3,
-#                     labels = c("Ambient, inoculated",
-#                                "Ambient, uninoculated",
-#                                "Elevated, inoculated",
-#                                "Elevated, uninoculated")) +
-#   scale_color_manual(values = cbbPalette3,
-#                      labels = c("Ambient, inoculated",
-#                                 "Ambient, uninoculated",
-#                                 "Elevated, inoculated",
-#                                 "Elevated, uninoculated")) +
-#   scale_linetype_manual(values = c("dashed", "solid")) +
-#   scale_y_continuous(limits = c(0, 6), breaks = seq(0, 6, 2)) +
-#   labs(x = "Soil N fertilization (ppm)",
-#        y = expression(bold(italic("R")["d25"]*" (μmol m"^"-2"*"s"^"-1"*")")),
-#        fill = "Treatment", color = "Treatment") +
-#   guides(linetype = "none") +
-#   theme_bw(base_size = 18) +
-#   theme(axis.title = element_text(face = "bold"),
-#         legend.title = element_text(face = "bold"),
-#         panel.border = element_rect(size = 1.25))
-# rd25.vcmax25.plot
+rd25.fert.inoc.plot <- ggplot(data = df,
+                                aes(x = n.trt,
+                                    y = rd25,
+                                    fill = inoc)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = rd25.inoc.fert,
+              aes(linetype = linetype,
+                  color = inoc, y = emmean), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = rd25.inoc.fert,
+              aes(fill = inoc, y = emmean, 
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = nfix.cols,
+                    labels = c("Inoculated",
+                               "Uninoculated")) +
+  scale_color_manual(values = nfix.cols,
+                     labels = c("Inoculated",
+                                "Uninoculated")) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_y_continuous(limits = c(0, 6), breaks = seq(0, 6, 1.5)) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("R")["d25"]*" ("*mu*"mol m"^"-2"*"s"^"-1"*")")),
+       fill = "Inoculation", color = "Inoculation") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25)) +
+  guides(linetype = "none")
+rd25.fert.inoc.plot
 
 ##########################################################################
 ## Prop leaf N in photosynthesis  regression line prep
@@ -1424,16 +1586,27 @@ ndfa.plot <- ggplot(data = fake, aes(x=x,y=y)) +
 ##########################################################################
 ## Figure 1: leaf N plots
 ##########################################################################
+legend_co2_plots <- get_legend(narea.co2.plot)
+legend_fert_plots <- get_legend(narea.fert.inoc.plot)
+legend_blank_plot <- get_legend(blank.plot)
+
 png("../working_drafts/figs/NxCO2xI_fig1_leafN.png",
-    height = 8, width = 12, units = "in", res = 600)
-ggarrange(narea.plot, nmass.plot, marea.plot, chl.plot,
-          ncol = 2, nrow = 2,
-          common.legend = TRUE, align = "hv",
-          legend = "right", labels = "AUTO",
-          font.label = list(size = 18)) %>%
-  annotate_figure(bottom = text_grob("Soil N fertilization (ppm)", 
-                                     size = 18, face = "bold",
-                                     hjust = 0.8))
+    height = 16, width = 12, units = "in", res = 600)
+ggarrange(ggarrange(narea.co2.plot, nmass.co2.plot, marea.co2.plot, 
+                    chlarea.co2.plot, ncol = 1, nrow = 4, 
+                    align = "hv", legend = "none", 
+                    labels = c("A", "C", "E", "G"), font.label = list(size = 18)),
+          ggarrange(narea.fert.inoc.plot, nmass.fert.inoc.plot, 
+                    marea.fert.inoc.plot, chlarea.fert.inoc.plot, ncol = 1, 
+                    nrow = 4, align = "hv", legend = "none",
+                    labels = c("B", "D", "F", "H"), font.label = list(size = 18)), 
+          ggarrange(legend_blank_plot, legend_blank_plot, legend_blank_plot,
+                    legend_blank_plot, legend_blank_plot,
+                    legend_co2_plots, legend_fert_plots, 
+                    legend_blank_plot, legend_blank_plot, legend_blank_plot,
+                    legend_blank_plot, legend_blank_plot,
+                    nrow = 12, align = "hv"),
+          ncol = 3, align = "hv", legend = "none", widths = c(0.4, 0.4, 0.2))
 dev.off()
 
 
@@ -1441,14 +1614,23 @@ dev.off()
 ## Figure 2: leaf physiology plots
 ##########################################################################
 png("../working_drafts/figs/NxCO2xI_fig2_photo.png",
-    height = 8, width = 12, units = "in", res = 600)
-ggarrange(vcmax.plot, jmax.plot, rd25.plot, jvmax.plot, 
-          ncol = 2, nrow = 2,  common.legend = TRUE, 
-          align = "hv", legend = "right", labels = "AUTO",
-          font.label = list(size = 18)) %>%
-  annotate_figure(bottom = text_grob("Soil N fertilization (ppm)", 
-                                     size = 18, face = "bold",
-                                     hjust = 0.8))
+    height = 12, width = 12, units = "in", res = 600)
+ggarrange(ggarrange(vcmax25.co2.plot, jmax25.co2.plot,
+                    jvmax25.co2.plot, ncol = 1, nrow = 3, 
+                    align = "hv", legend = "none", 
+                    labels = c("A", "C", "E", "G"), font.label = list(size = 18)),
+          ggarrange(vcmax25.fert.inoc.plot, jmax25.fert.inoc.plot, 
+                    jvmax25.fert.inoc.plot, ncol = 1, 
+                    nrow = 3, align = "hv", legend = "none",
+                    labels = c("B", "D", "F", "H"), font.label = list(size = 18)), 
+          ggarrange(legend_blank_plot, legend_blank_plot, legend_blank_plot,
+                    legend_blank_plot, 
+                    legend_co2_plots, legend_fert_plots, 
+                    legend_blank_plot, legend_blank_plot, legend_blank_plot,
+                    legend_blank_plot,
+                    nrow = 10, align = "hv"),
+          ncol = 3, align = "hv", legend = "none", widths = c(0.4, 0.4, 0.2))
+
 dev.off()
 
 ##########################################################################

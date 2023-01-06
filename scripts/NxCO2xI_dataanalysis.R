@@ -46,6 +46,7 @@ r.squaredGLMM(narea)
 
 # Post-hoc tests
 # Interaction between CO2 and n.trt
+
 test(emtrends(narea, pairwise~co2, "n.trt")) 
 test(emtrends(narea, pairwise~inoc, "n.trt"))
 cld(emmeans(narea, pairwise~inoc*co2))
