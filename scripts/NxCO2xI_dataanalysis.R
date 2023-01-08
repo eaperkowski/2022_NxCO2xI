@@ -571,8 +571,10 @@ test(emtrends(vcmax.gs, ~1, "n.trt"))
 ## Ncost
 ##########################################################################
 df$ncost[c(101, 102)] <- NA
+df$ncost[c(39, 104)] <- NA
+df$ncost[32] <- NA
 
-ncost <- lmer(log(ncost) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+ncost <- lmer(ncost ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
 plot(ncost)
@@ -622,7 +624,7 @@ r.squaredGLMM(cbg)
 # Pairwise comparisons
 test(emtrends(cbg, pairwise~inoc, "n.trt"))
 test(emtrends(cbg, pairwise~co2, "n.trt"))
-emmeans(cbg, pairwise~inoc*co2, type = "response")
+emmeans(cbg, pairwise~co2*inoc, type = "response")
 
 ## Individual effects
 emmeans(cbg, pairwise~co2, type = "response")
@@ -689,7 +691,7 @@ test(emtrends(tla, ~1, "n.trt"))
 ##########################################################################
 ## Total biomass
 ##########################################################################
-tbio <- lmer(log(total.biomass) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+tbio <- lmer(total.biomass ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
 plot(tbio)
@@ -717,6 +719,8 @@ test(emtrends(tbio, ~1, "n.trt"))
 ##########################################################################
 ## Root nodule biomass: root biomass
 ##########################################################################
+df$nodule.biomass[81] <- NA
+
 nod.bio <- lmer(sqrt(nodule.biomass) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
@@ -743,15 +747,12 @@ test(emtrends(nod.bio, ~1, "n.trt"))
 
 # Percent change in inoculated pots
 emmeans(nod.bio, ~inoc, "n.trt", at = list(n.trt = c(0, 630)))
-(0.231-0.625)/0.625
 
 ##########################################################################
 ## Root nodule biomass: root biomass
 ##########################################################################
 df$nod.root.ratio <- df$nodule.biomass / df$root.biomass
 df$nod.root.ratio[df$nod.root.ratio > 0.05 & df$inoc == "no.inoc"] <- NA
-
-
 
 nod.root.ratio <- lmer(sqrt(nod.root.ratio) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
@@ -769,10 +770,6 @@ Anova(nod.root.ratio)
 r.squaredGLMM(nod.root.ratio)
 
 # Pairwise comparisons
-## Three-way interaction between inoculation and N fertilization
-test(emtrends(nod.root.ratio, pairwise~inoc*co2, "n.trt"))
-
-## Two way interactions
 test(emtrends(nod.root.ratio, pairwise~inoc, "n.trt"))
 test(emtrends(nod.root.ratio, pairwise~co2, "n.trt"))
 emmeans(nod.root.ratio, pairwise~co2*inoc)
@@ -784,7 +781,6 @@ test(emtrends(nod.root.ratio, ~1, "n.trt"))
 
 # Percent change in inoculated pots
 emmeans(nod.root.ratio, ~inoc, "n.trt", at = list(n.trt = c(0, 630)))
-(0.231-0.625)/0.625
 
 ##########################################################################
 ## %Ndfa
@@ -1296,7 +1292,6 @@ table6 <- pnue.table %>% full_join(iwue.table) %>% full_join(narea.gs.table) %>%
   replace(is.na(.), "-")
 write.csv(table6, file = "../working_drafts/tables/NxCO2xI_table4_pnue_iwue.csv",
           row.names = FALSE)
-
 
 ##########################################################################
 ## Table 5: Whole plant traits
