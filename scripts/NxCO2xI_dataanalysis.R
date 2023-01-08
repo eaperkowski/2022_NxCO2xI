@@ -49,12 +49,13 @@ r.squaredGLMM(narea)
 
 test(emtrends(narea, pairwise~co2, "n.trt")) 
 test(emtrends(narea, pairwise~inoc, "n.trt"))
-cld(emmeans(narea, pairwise~inoc*co2))
+emmeans(narea, pairwise~inoc*co2)
 
 # Individual effects
 emmeans(narea, pairwise~co2)
 emmeans(narea, pairwise~inoc)
 test(emtrends(narea, ~1, "n.trt"))
+
 
 ##########################################################################
 ## Marea (LMA)
@@ -78,7 +79,7 @@ test(emtrends(marea, pairwise~co2, "n.trt"))
 test(emtrends(marea, pairwise~inoc, "n.trt"))
 
 # Individual effects
-emmeans(marea, pairwise~co2)
+emmeans(marea, pairwise~co2, type = "response")
 emmeans(marea, pairwise~inoc)
 test(emtrends(marea, ~1, "n.trt"))
 
@@ -129,7 +130,7 @@ r.squaredGLMM(chl.area)
 test(emtrends(chl.area, pairwise~inoc, "n.trt"))
 test(emtrends(chl.area, pairwise~co2, "n.trt")) 
 test(emtrends(chl.area, pairwise~co2*inoc, "n.trt"))
-emmeans(chl.area, pairwise~inoc*co2)
+emmeans(chl.area, pairwise~co2*inoc)
 
 # Individual effect of co2
 emmeans(chl.area, pairwise~co2)
