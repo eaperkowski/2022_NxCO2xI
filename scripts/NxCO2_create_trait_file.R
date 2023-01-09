@@ -20,6 +20,7 @@ photo <- read.csv("../data_sheets/NxCO2_photo_data.csv")
 ###############################################################################
 source("../../r_functions/propN_funcs.R")
 source("../../r_functions/stomatal_limitation.R")
+source("../../r_functions/calc_chi.R")
 
 ###############################################################################
 ## Chlorophyll content
@@ -156,8 +157,9 @@ compile_df <- id %>%
          p.structure = p_structure(lma = marea, narea = narea),
          
          ## Nitrogen-water use tradeoffs
-         pnue = anet / narea,
+         pnue = anet / (narea / 14),
          iwue = anet / gsw,
+         #chi = calc_chi_c3(leaf.d13c = leaf.d13c, air = NA),
          narea.gs = narea / gsw,
          vcmax.gs = vcmax25 / gsw,
          

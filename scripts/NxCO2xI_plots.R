@@ -15,7 +15,7 @@ df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv",
                na.strings = "NA") %>%
   mutate(n.trt = as.numeric(n.trt),
          rd25.vcmax25 = rd25 / vcmax25,
-         inoc = factor(inoc, levels = c("inoc", "no.inoc")),
+         inoc = factor(inoc, levels = c("no.inoc", "inoc")),
          co2 = factor(co2, levels = c("amb", "elv"))) %>%
   filter(inoc == "inoc" | (inoc == "no.inoc" & nodule.biomass < 0.05)) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE) 
@@ -93,11 +93,11 @@ narea.fert.inoc.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = nfix.cols,
-                    labels = c("Inoculated",
-                               "Uninoculated")) +
+                    labels = c("Uninoculated",
+                               "Inoculated")) +
   scale_color_manual(values = nfix.cols,
-                     labels = c("Inoculated",
-                                "Uninoculated")) +
+                     labels = c("Uninoculated",
+                                "Inoculated")) +
   scale_y_continuous(limits = c(0, 3.24), breaks = seq(0, 3.2, 0.8)) +
   labs(x = "Soil N fertilization (ppm)",
        y = expression(bold(italic("N")["area"]*" (gN m"^"-2"*")")),
@@ -171,11 +171,11 @@ nmass.fert.inoc.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = nfix.cols,
-                    labels = c("Inoculated",
-                               "Uninoculated")) +
+                    labels = c("Uninoculated",
+                               "Inoculated")) +
   scale_color_manual(values = nfix.cols,
-                     labels = c("Inoculated",
-                                "Uninoculated")) +
+                     labels = c("Uninoculated",
+                                "Inoculated")) +
   scale_y_continuous(limits = c(0, 0.08), breaks = seq(0, 0.08, 0.02)) +
   labs(x = "Soil N fertilization (ppm)",
        y = expression(bold(italic("N")["mass"]*" (gN g"^"-1"*")")),
@@ -201,8 +201,7 @@ marea.co2.fert <- data.frame(emmeans(marea, ~co2, "n.trt",
 
 marea.inoc.fert <- data.frame(emmeans(marea, ~inoc, "n.trt",
                                       at = list(n.trt = seq(0, 630, 5)),
-                                      type = "response")) %>%
-  arrange(factor(inoc, levels = c("inoc", "no.inoc")))
+                                      type = "response")) 
 
 
 ##########################################################################
@@ -253,11 +252,11 @@ marea.fert.inoc.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = nfix.cols,
-                    labels = c("Inoculated",
-                               "Uninoculated")) +
+                    labels = c("Uninoculated",
+                               "Inoculated")) +
   scale_color_manual(values = nfix.cols,
-                     labels = c("Inoculated",
-                                "Uninoculated")) +
+                     labels = c("Uninoculated",
+                                "Inoculated")) +
   scale_y_continuous(limits = c(30, 90), breaks = seq(30, 90, 15)) +
   labs(x = "Soil N fertilization (ppm)",
        y = expression(bold(italic("M")["area"]*" (g m"^"-2"*")")),
@@ -332,11 +331,11 @@ chlarea.fert.inoc.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = nfix.cols,
-                    labels = c("Inoculated",
-                               "Uninoculated")) +
+                    labels = c("Uninoculated",
+                               "Inoculated")) +
   scale_color_manual(values = nfix.cols,
-                     labels = c("Inoculated",
-                                "Uninoculated")) +
+                     labels = c("Uninoculated",
+                                "Inoculated")) +
   scale_y_continuous(limits = c(0, 0.28), breaks = seq(0, 0.28, 0.07)) +
   labs(x = "Soil N fertilization (ppm)",
        y = expression(bold(italic("Chl")["area"]*" (mmol m"^"-2"*")")),
@@ -414,11 +413,11 @@ vcmax25.fert.inoc.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = nfix.cols,
-                    labels = c("Inoculated",
-                               "Uninoculated")) +
+                    labels = c("Uninoculated",
+                               "Inoculated")) +
   scale_color_manual(values = nfix.cols,
-                     labels = c("Inoculated",
-                                "Uninoculated")) +
+                     labels = c("Uninoculated",
+                                "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 150), breaks = seq(0, 150, 50)) +
   labs(x = "Soil N fertilization (ppm)",
@@ -498,11 +497,11 @@ jmax25.fert.inoc.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = nfix.cols,
-                    labels = c("Inoculated",
-                               "Uninoculated")) +
+                    labels = c("Uninoculated",
+                               "Inoculated")) +
   scale_color_manual(values = nfix.cols,
-                     labels = c("Inoculated",
-                                "Uninoculated")) +
+                     labels = c("Uninoculated",
+                                "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 240), breaks = seq(0, 240, 60)) +
   labs(x = "Soil N fertilization (ppm)",
@@ -518,7 +517,7 @@ jmax25.fert.inoc.plot
 ##########################################################################
 ## Jmax25:Vcmax25 regression line prep
 ##########################################################################
-df$jmax25.vcmax25[101] <- NA
+df$jmax25.vcmax25[100] <- NA
 jvmax25 <- lmer(jmax25.vcmax25 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 test(emtrends(jvmax25, ~co2, "n.trt"))
 test(emtrends(jvmax25, ~inoc, "n.trt"))
@@ -582,11 +581,11 @@ jvmax25.fert.inoc.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = nfix.cols,
-                    labels = c("Inoculated",
-                               "Uninoculated")) +
+                    labels = c("Uninoculated",
+                               "Inoculated")) +
   scale_color_manual(values = nfix.cols,
-                     labels = c("Inoculated",
-                                "Uninoculated")) +
+                     labels = c("Uninoculated",
+                                "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(1.4, 2.2), breaks = seq(1.4, 2.2, 0.2)) +
   labs(x = "Soil N fertilization (ppm)",
@@ -603,7 +602,8 @@ jvmax25.fert.inoc.plot
 ## Rd25 regression line prep
 ##########################################################################
 df$rd25[df$rd25 < 0] <- NA
-df$rd25[c(19, 34, 57)] <- NA
+df$rd25[c(29, 34, 56)] <- NA
+
 rd25 <- lmer(rd25 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 test(emtrends(rd25, ~co2, "n.trt"))
 test(emtrends(rd25, ~inoc, "n.trt"))
@@ -668,11 +668,11 @@ rd25.fert.inoc.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = nfix.cols,
-                    labels = c("Inoculated",
-                               "Uninoculated")) +
+                    labels = c("Uninoculated",
+                               "Inoculated")) +
   scale_color_manual(values = nfix.cols,
-                     labels = c("Inoculated",
-                                "Uninoculated")) +
+                     labels = c("Uninoculated",
+                                "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 6), breaks = seq(0, 6, 1.5)) +
   labs(x = "Soil N fertilization (ppm)",
@@ -754,11 +754,11 @@ p.photo.fert.inoc.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = nfix.cols,
-                    labels = c("Inoculated",
-                               "Uninoculated")) +
+                    labels = c("Uninoculated",
+                               "Inoculated")) +
   scale_color_manual(values = nfix.cols,
-                     labels = c("Inoculated",
-                                "Uninoculated")) +
+                     labels = c("Uninoculated",
+                                "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 0.8), breaks = seq(0, 0.8, 0.2)) +
   labs(x = "Soil N fertilization (ppm)",
@@ -835,11 +835,11 @@ p.str.fert.inoc.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = nfix.cols,
-                    labels = c("Inoculated",
-                               "Uninoculated")) +
+                    labels = c("Uninoculated",
+                               "Inoculated")) +
   scale_color_manual(values = nfix.cols,
-                     labels = c("Inoculated",
-                                "Uninoculated")) +
+                     labels = c("Uninoculated",
+                                "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 0.2), breaks = seq(0, 0.2, 0.05)) +
   labs(x = "Soil N fertilization (ppm)",
@@ -855,7 +855,7 @@ p.str.fert.inoc.plot
 ##########################################################################
 ## PNUE regression line prep
 ##########################################################################
-df$pnue[45] <- NA
+df$pnue[41] <- NA
 pnue <- lmer(pnue ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 test(emtrends(pnue, ~co2, "n.trt"))
 test(emtrends(pnue, ~inoc, "n.trt"))
@@ -892,10 +892,10 @@ pnue.co2.plot <- ggplot(data = df,
   scale_color_manual(values = co2.cols,
                      labels = c("Ambient",
                                 "Elevated")) +
-  scale_y_continuous(limits = c(0, 20), breaks = seq(0, 20, 5)) +
+  scale_y_continuous(limits = c(0, 240), breaks = seq(0, 240, 60)) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   labs(x = "Soil N fertilization (ppm)",
-       y = expression(bold("PNUE ("*mu*"mol CO"["2"]*" gN"^"-1"*" s"^"-1"*")")),
+       y = expression(bold("PNUE ("*mu*"mol CO"["2"]*" mol N"^"-1"*" s"^"-1"*")")),
        fill = expression(bold("CO"["2"])), color = expression(bold("CO"["2"])),
        shape = "Inoculation") +
   theme_bw(base_size = 18) +
@@ -920,15 +920,15 @@ pnue.fert.inoc.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = nfix.cols,
-                    labels = c("Inoculated",
-                               "Uninoculated")) +
+                    labels = c("Uninoculated",
+                               "Inoculated")) +
   scale_color_manual(values = nfix.cols,
-                     labels = c("Inoculated",
-                                "Uninoculated")) +
+                     labels = c("Uninoculated",
+                                "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
-  scale_y_continuous(limits = c(0, 20), breaks = seq(0, 20, 5)) +
+  scale_y_continuous(limits = c(0, 240), breaks = seq(0, 240, 60)) +
   labs(x = "Soil N fertilization (ppm)",
-       y = expression(bold("PNUE ("*mu*"mol CO"["2"]*" gN"^"-1"*" s"^"-1"*")")),
+       y = expression(bold("PNUE ("*mu*"mol CO"["2"]*" mol N"^"-1"*" s"^"-1"*")")),
        fill = "Inoculation", color = "Inoculation") +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
@@ -1003,11 +1003,11 @@ iwue.fert.inoc.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = nfix.cols,
-                    labels = c("Inoculated",
-                               "Uninoculated")) +
+                    labels = c("Uninoculated",
+                               "Inoculated")) +
   scale_color_manual(values = nfix.cols,
-                     labels = c("Inoculated",
-                                "Uninoculated")) +
+                     labels = c("Uninoculated",
+                                "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(25, 125), breaks = seq(25, 125, 25)) +
   labs(x = "Soil N fertilization (ppm)",
@@ -1087,11 +1087,11 @@ narea.gs.fert.inoc.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = nfix.cols,
-                    labels = c("Inoculated",
-                               "Uninoculated")) +
+                    labels = c("Uninoculated",
+                               "Inoculated")) +
   scale_color_manual(values = nfix.cols,
-                     labels = c("Inoculated",
-                                "Uninoculated")) +
+                     labels = c("Uninoculated",
+                                "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 32), breaks = seq(0, 32, 8)) +
   labs(x = "Soil N fertilization (ppm)",
@@ -1171,11 +1171,11 @@ vcmax.gs.fert.inoc.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = nfix.cols,
-                    labels = c("Inoculated",
-                               "Uninoculated")) +
+                    labels = c("Uninoculated",
+                               "Inoculated")) +
   scale_color_manual(values = nfix.cols,
-                     labels = c("Inoculated",
-                                "Uninoculated")) +
+                     labels = c("Uninoculated",
+                                "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 800), breaks = seq(0, 800, 200)) +
   labs(x = "Soil N fertilization (ppm)",
@@ -1255,11 +1255,11 @@ tla.fert.inoc.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = nfix.cols,
-                    labels = c("Inoculated",
-                               "Uninoculated")) +
+                    labels = c("Uninoculated",
+                               "Inoculated")) +
   scale_color_manual(values = nfix.cols,
-                     labels = c("Inoculated",
-                                "Uninoculated")) +
+                     labels = c("Uninoculated",
+                                "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 1200), breaks = seq(0, 1200, 300)) +
   labs(x = "Soil N fertilization (ppm)",
@@ -1336,11 +1336,11 @@ tbio.fert.inoc.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = nfix.cols,
-                    labels = c("Inoculated",
-                               "Uninoculated")) +
+                    labels = c("Uninoculated",
+                               "Inoculated")) +
   scale_color_manual(values = nfix.cols,
-                     labels = c("Inoculated",
-                                "Uninoculated")) +
+                     labels = c("Uninoculated",
+                                "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 20), breaks = seq(0, 20, 5)) +
   labs(x = "Soil N fertilization (ppm)",
@@ -1356,8 +1356,8 @@ tbio.fert.inoc.plot
 ##########################################################################
 ## Ncost regression line prep
 ##########################################################################
-df$ncost[c(32, 39, 101, 102, 104)] <- NA
-df$ncost[c(39, 104)] <- NA
+df$ncost[c(100, 101)] <- NA
+df$ncost[c(38, 103)] <- NA
 df$ncost[32] <- NA
 
 ncost <- lmer(ncost ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
@@ -1421,11 +1421,11 @@ ncost.fert.inoc.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = nfix.cols,
-                    labels = c("Inoculated",
-                               "Uninoculated")) +
+                    labels = c("Uninoculated",
+                               "Inoculated")) +
   scale_color_manual(values = nfix.cols,
-                     labels = c("Inoculated",
-                                "Uninoculated")) +
+                     labels = c("Uninoculated",
+                                "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 20), breaks = seq(0, 20, 5)) +
   labs(x = "Soil N fertilization (ppm)",
@@ -1442,7 +1442,7 @@ ncost.fert.inoc.plot
 ## Root nodule biomass regression line prep
 ##########################################################################
 df$nodule.biomass[df$nod.root.ratio > 0.05 & df$inoc == "no.inoc"] <- NA
-df$nodule.biomass[81] <- NA
+df$nodule.biomass[80] <- NA
 
 nod <- lmer(sqrt(nodule.biomass) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 test(emtrends(nod, ~co2, "n.trt"))
@@ -1496,27 +1496,24 @@ nod.co2.plot
 nod.fert.inoc.plot <- ggplot(data = df,
                              aes(x = n.trt,
                                  y = nodule.biomass,
-                                 fill = factor(inoc, 
-                                               levels = c("inoc", "no.inoc")))) +
+                                 fill = inoc)) +
   geom_jitter(size = 3, alpha = 0.75, shape = 21) +
   geom_smooth(data = nod.inoc.fert,
               aes(linetype = linetype, 
-                  color = factor(inoc, 
-                                 levels = c("inoc", "no.inoc")),
+                  color = inoc,
                   y = response), 
               size = 1.5, se = FALSE) +
   geom_ribbon(data = nod.inoc.fert,
-              aes(fill = factor(inoc, 
-                                levels = c("inoc", "no.inoc")), 
+              aes(fill = inoc, 
                   y = response, 
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = nfix.cols,
-                    labels = c("Inoculated",
-                               "Uninoculated")) +
+                    labels = c("Uninoculated",
+                               "Inoculated")) +
   scale_color_manual(values = nfix.cols,
-                     labels = c("Inoculated",
-                                "Uninoculated")) +
+                     labels = c("Uninoculated",
+                                "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(0, 0.6), breaks = seq(0, 0.6, 0.15)) +
   labs(x = "Soil N fertilization (ppm)",
@@ -1586,30 +1583,27 @@ nodroot.co2.plot
 nodroot.fert.inoc.plot <- ggplot(data = df,
                              aes(x = n.trt,
                                  y = nod.root.ratio,
-                                 fill = factor(inoc, 
-                                               levels = c("inoc", "no.inoc")))) +
+                                 fill = inoc)) +
   geom_jitter(size = 3, alpha = 0.75, shape = 21) +
   geom_smooth(data = nodroot.inoc.fert,
-              aes(color = factor(inoc, 
-                                 levels = c("inoc", "no.inoc")),
+              aes(color = inoc,
                   y = response), 
               size = 1.5, se = FALSE) +
   geom_ribbon(data = nodroot.inoc.fert,
-              aes(fill = factor(inoc, 
-                                levels = c("inoc", "no.inoc")), 
+              aes(fill = inoc,
                   y = response, 
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = nfix.cols,
-                    labels = c("Inoculated",
-                               "Uninoculated")) +
+                    labels = c("Uninoculated",
+                               "Inoculated")) +
   scale_color_manual(values = nfix.cols,
-                     labels = c("Inoculated",
-                                "Uninoculated")) +
+                     labels = c("Uninoculated",
+                                "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   scale_y_continuous(limits = c(-0.0001, 0.4), breaks = seq(0, 0.4, 0.1)) +
   labs(x = "Soil N fertilization (ppm)",
-       y = "Nodule biomass (g)",
+       y = "Nodule: root biomass",
        fill = "Inoculation", color = "Inoculation") +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),

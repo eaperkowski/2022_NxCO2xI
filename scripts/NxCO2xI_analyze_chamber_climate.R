@@ -63,12 +63,12 @@ aco2.hobo <- hobo.clim %>%
   mutate(co2.treat = "ambient")
 
 ggplot() +
-  geom_line(data = eco2, 
-            aes(x = date, y = temp.meas),
-            color = "red") +
   geom_line(data = eco2.hobo, 
             aes(x = date.time, y = air.temp),
             color = "blue") +
+  geom_line(data = eco2.hobo, 
+            aes(x = date.time, y = temp.set),
+            color = "red") +
   facet_wrap(~chamber)
 
 #############

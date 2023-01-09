@@ -18,13 +18,15 @@ df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv") %>%
   mutate(n.trt = as.numeric(n.trt),
          rd25.vcmax25 = rd25 / vcmax25,
          inoc = factor(inoc, levels = c("no.inoc", "inoc")),
-         co2 = factor(co2, levels = c("amb", "elv"))) %>%
-  filter(inoc == "inoc" | (inoc == "no.inoc" & nodule.biomass < 0.05))
+         co2 = factor(co2, levels = c("amb", "elv")), 
+         nod.root.ratio = nodule.biomass / root.biomass) %>%
+  filter(inoc == "inoc" | (inoc == "no.inoc" & nod.root.ratio < 0.05))
   ## filter all uninoculated pots that have nod biomass > 0.05 g;
   ## hard code inoc/co2 to make coefficients easier to understand
 
 df.removed <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv") %>%
-  dplyr::filter(inoc == "no.inoc" & nodule.biomass > 0.05)
+  mutate(nod.root.ratio = nodule.biomass / root.biomass) %>%
+  dplyr::filter(inoc == "no.inoc" & nod.root.ratio > 0.05)
 
 ##########################################################################
 ## Leaf nitrogen content (Narea)
@@ -49,39 +51,12 @@ r.squaredGLMM(narea)
 
 test(emtrends(narea, pairwise~co2, "n.trt")) 
 test(emtrends(narea, pairwise~inoc, "n.trt"))
-emmeans(narea, pairwise~inoc*co2)
+emmeans(narea, pairwise~co2*inoc*co2)
 
 # Individual effects
 emmeans(narea, pairwise~co2)
 emmeans(narea, pairwise~inoc)
 test(emtrends(narea, ~1, "n.trt"))
-
-
-##########################################################################
-## Marea (LMA)
-##########################################################################
-marea <- lmer(log(marea) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-
-# Check model assumptions
-qqnorm(residuals(marea))
-qqline(residuals(marea))
-densityPlot(residuals(marea))
-shapiro.test(residuals(marea))
-outlierTest(marea)
-
-# Model results
-summary(marea)
-Anova(marea)
-r.squaredGLMM(marea)
-
-# Post-hoc tests
-test(emtrends(marea, pairwise~co2, "n.trt")) 
-test(emtrends(marea, pairwise~inoc, "n.trt"))
-
-# Individual effects
-emmeans(marea, pairwise~co2, type = "response")
-emmeans(marea, pairwise~inoc)
-test(emtrends(marea, ~1, "n.trt"))
 
 ##########################################################################
 ## Nmass
@@ -110,6 +85,32 @@ emmeans(nmass, pairwise~inoc)
 test(emtrends(nmass, ~1, "n.trt"))
 
 ##########################################################################
+## Marea (LMA)
+##########################################################################
+marea <- lmer(log(marea) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+qqnorm(residuals(marea))
+qqline(residuals(marea))
+densityPlot(residuals(marea))
+shapiro.test(residuals(marea))
+outlierTest(marea)
+
+# Model results
+summary(marea)
+Anova(marea)
+r.squaredGLMM(marea)
+
+# Post-hoc tests
+test(emtrends(marea, pairwise~co2, "n.trt")) 
+test(emtrends(marea, pairwise~inoc, "n.trt"))
+
+# Individual effects
+emmeans(marea, pairwise~co2, type = "response")
+emmeans(marea, pairwise~inoc)
+test(emtrends(marea, ~1, "n.trt"))
+
+##########################################################################
 ## Chlorophyll content
 ##########################################################################
 chl.area <- lmer(chl.mmolm2 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
@@ -129,7 +130,6 @@ r.squaredGLMM(chl.area)
 # Post-hoc tests
 test(emtrends(chl.area, pairwise~inoc, "n.trt"))
 test(emtrends(chl.area, pairwise~co2, "n.trt")) 
-test(emtrends(chl.area, pairwise~co2*inoc, "n.trt"))
 emmeans(chl.area, pairwise~co2*inoc)
 
 # Individual effect of co2
@@ -156,7 +156,7 @@ Anova(vcmax)
 r.squaredGLMM(vcmax)
 
 # Pairwise comparisons
-test(emtrends(vcmax, ~inoc, "n.trt"))
+test(emtrends(vcmax, pairwise~inoc, "n.trt"))
 
 # Individual effect of CO2
 emmeans(vcmax, pairwise~co2)
@@ -182,7 +182,7 @@ Anova(jmax)
 r.squaredGLMM(jmax)
 
 # Pairwise comparisons
-test(emtrends(jmax, ~inoc, "n.trt"))
+test(emtrends(jmax, pairwise~inoc, "n.trt"))
 
 # Individual effects
 emmeans(jmax, pairwise~co2)
@@ -192,7 +192,7 @@ test(emtrends(jmax, ~1, "n.trt"))
 ##########################################################################
 ## Jmax25:Vcmax25
 ##########################################################################
-df$jmax25.vcmax25[101] <- NA
+df$jmax25.vcmax25[100] <- NA
 jvmax <- lmer(jmax25.vcmax25 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
@@ -218,37 +218,10 @@ emmeans(jvmax, pairwise~inoc)
 test(emtrends(jvmax, ~1, "n.trt"))
 
 ##########################################################################
-## Anet
-##########################################################################
-anet <- lmer(anet ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-
-# Check model assumptions
-plot(anet)
-qqnorm(residuals(anet))
-qqline(residuals(anet))
-densityPlot(residuals(anet))
-shapiro.test(residuals(anet))
-outlierTest(anet)
-
-# Model results
-summary(anet)
-Anova(anet)
-r.squaredGLMM(anet)
-
-# Pairwise comparisons
-test(emtrends(anet, ~inoc, "n.trt"))
-
-# Individual effects
-emmeans(anet, pairwise~co2)
-emmeans(anet, pairwise~inoc)
-test(emtrends(anet, ~1, "n.trt"))
-
-##########################################################################
 ## Rd25
 ##########################################################################
 df$rd25[df$rd25 < 0] <- NA
-
-df$rd25[c(19, 29, 34, 57)] <- NA
+df$rd25[c(29, 34, 56)] <- NA
 
 rd25 <- lmer(rd25 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
@@ -277,7 +250,7 @@ test(emtrends(rd25, ~1, "n.trt"))
 ##########################################################################
 ## gsw
 ##########################################################################
-df$gsw[70] <- NA
+df$gsw[69] <- NA
 gsw <- lmer(gsw ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
@@ -347,8 +320,7 @@ r.squaredGLMM(p.photo)
 
 # Pairwise comparisons
 test(emtrends(p.photo, pairwise~inoc, "n.trt"))
-test(emtrends(p.photo, pairwise~co2*inoc, "n.trt"))
-
+emmeans(p.photo, pairwise~co2*inoc)
 
 ## Individual effects
 emmeans(p.photo, pairwise~co2)
@@ -403,7 +375,9 @@ Anova(p.rub)
 r.squaredGLMM(p.rub)
 
 # Pairwise comparisons
+emmeans(p.rub, pairwise~co2*inoc)
 test(emtrends(p.rub, pairwise~inoc, "n.trt"))
+
 
 ## Individual effect
 emmeans(p.rub, pairwise~co2)
@@ -413,7 +387,7 @@ test(emtrends(p.rub, ~1, "n.trt"))
 ##########################################################################
 ## Proportion of N in bioenergetics
 ##########################################################################
-df$p.bioe[c(45)] <- NA
+df$p.bioe[c(41)] <- NA
 p.bioe <- lmer(p.bioe ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
@@ -440,7 +414,7 @@ test(emtrends(p.bioe, ~1, "n.trt"))
 ##########################################################################
 ## Proportion of N in light harvesting
 ##########################################################################
-df$p.lightharv[c(25, 39, 45)] <- NA
+df$p.lightharv[c(25, 38, 41)] <- NA
 p.light <- lmer(p.lightharv ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
@@ -468,7 +442,7 @@ test(emtrends(p.light, ~1, "n.trt"))
 ##########################################################################
 ## PNUE
 ##########################################################################
-df$pnue[45] <- NA
+df$pnue[41] <- NA
 pnue <- lmer(pnue ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
@@ -486,7 +460,6 @@ r.squaredGLMM(pnue)
 
 # Pairwise comparisons
 test(emtrends(pnue, ~inoc, "n.trt"))
-
 
 ## Individual effects
 emmeans(pnue, pairwise~co2)
@@ -539,7 +512,7 @@ r.squaredGLMM(narea.gs)
 test(emtrends(narea.gs, ~inoc, "n.trt"))
 
 ## Individual effects
-emmeans(narea.gs, pairwise~co2)
+emmeans(narea.gs, pairwise~co2, type = "response")
 emmeans(narea.gs, pairwise~inoc)
 test(emtrends(narea.gs, ~1, "n.trt"))
 
@@ -562,17 +535,71 @@ Anova(vcmax.gs)
 r.squaredGLMM(vcmax.gs)
 
 # Pairwise comparisons
-emmeans(vcmax.gs, pairwise~co2*inoc, 
-        type = "response")
+emmeans(vcmax.gs, pairwise~co2*inoc, type = "response")
 
 test(emtrends(vcmax.gs, ~1, "n.trt"))
 
+##########################################################################
+## Total leaf area
+##########################################################################
+tla <- lmer(tla ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(tla)
+qqnorm(residuals(tla))
+qqline(residuals(tla))
+densityPlot(residuals(tla))
+shapiro.test(residuals(tla))
+outlierTest(tla)
+
+# Model results
+summary(tla)
+Anova(tla)
+r.squaredGLMM(tla)
+
+# Pairwise comparisons
+test(emtrends(tla, pairwise~co2, "n.trt"))
+test(emtrends(tla, pairwise~inoc, "n.trt"))
+emmeans(tla, pairwise~co2*inoc)
+
+## Individual effects
+emmeans(tla, pairwise~co2)
+emmeans(tla, pairwise~inoc)
+test(emtrends(tla, ~1, "n.trt"))
+
+##########################################################################
+## Total biomass
+##########################################################################
+tbio <- lmer(sqrt(total.biomass) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(tbio)
+qqnorm(residuals(tbio))
+qqline(residuals(tbio))
+densityPlot(residuals(tbio))
+shapiro.test(residuals(tbio))
+outlierTest(tbio)
+
+# Model results
+summary(tbio)
+Anova(tbio)
+r.squaredGLMM(tbio)
+
+# Pairwise comparisons
+test(emtrends(tbio, pairwise~inoc, "n.trt"))
+test(emtrends(tbio, pairwise~co2, "n.trt"))
+emmeans(tbio, pairwise~co2*inoc)
+
+## Individual effects
+emmeans(tbio, pairwise~co2, type = "response")
+emmeans(tbio, pairwise~inoc)
+test(emtrends(tbio, ~1, "n.trt"))
 
 ##########################################################################
 ## Ncost
 ##########################################################################
-df$ncost[c(101, 102)] <- NA
-df$ncost[c(39, 104)] <- NA
+df$ncost[c(100, 101)] <- NA
+df$ncost[c(38, 103)] <- NA
 df$ncost[32] <- NA
 
 ncost <- lmer(ncost ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
@@ -635,9 +662,8 @@ test(emtrends(cbg, ~1, "n.trt"))
 ##########################################################################
 ## Whole plant nitrogen
 ##########################################################################
-df$wpn[c(93)] <- NA
-
-wpn <- lmer(wpn ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+df$wpn[c(92)] <- NA
+wpn <- lmer(sqrt(wpn) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
 plot(wpn)
@@ -661,66 +687,11 @@ emmeans(wpn, pairwise~co2, type = "response")
 emmeans(wpn, pairwise~inoc, type = "response")
 test(emtrends(wpn, ~1, "n.trt", regrid = "response"))
 
-##########################################################################
-## Total leaf area
-##########################################################################
-tla <- lmer(tla ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-
-# Check model assumptions
-plot(tla)
-qqnorm(residuals(tla))
-qqline(residuals(tla))
-densityPlot(residuals(tla))
-shapiro.test(residuals(tla))
-outlierTest(tla)
-
-# Model results
-summary(tla)
-Anova(tla)
-r.squaredGLMM(tla)
-
-# Pairwise comparisons
-test(emtrends(tla, pairwise~co2, "n.trt"))
-test(emtrends(tla, pairwise~inoc, "n.trt"))
-emmeans(tla, pairwise~co2*inoc)
-
-## Individual effects
-emmeans(tla, pairwise~co2)
-emmeans(tla, pairwise~inoc)
-test(emtrends(tla, ~1, "n.trt"))
-
-##########################################################################
-## Total biomass
-##########################################################################
-tbio <- lmer(total.biomass ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-
-# Check model assumptions
-plot(tbio)
-qqnorm(residuals(tbio))
-qqline(residuals(tbio))
-densityPlot(residuals(tbio))
-shapiro.test(residuals(tbio))
-outlierTest(tbio)
-
-# Model results
-summary(tbio)
-Anova(tbio)
-r.squaredGLMM(tbio)
-
-# Pairwise comparisons
-test(emtrends(tbio, pairwise~inoc, "n.trt"))
-test(emtrends(tbio, pairwise~co2, "n.trt"))
-emmeans(tbio, pairwise~co2*inoc)
-
-## Individual effects
-emmeans(tbio, pairwise~co2)
-emmeans(tbio, pairwise~inoc)
-test(emtrends(tbio, ~1, "n.trt"))
 
 ##########################################################################
 ## Root nodule biomass: root biomass
 ##########################################################################
-df$nodule.biomass[81] <- NA
+df$nodule.biomass[80] <- NA
 
 nod.bio <- lmer(sqrt(nodule.biomass) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
@@ -752,9 +723,6 @@ emmeans(nod.bio, ~inoc, "n.trt", at = list(n.trt = c(0, 630)))
 ##########################################################################
 ## Root nodule biomass: root biomass
 ##########################################################################
-df$nod.root.ratio <- df$nodule.biomass / df$root.biomass
-df$nod.root.ratio[df$nod.root.ratio > 0.05 & df$inoc == "no.inoc"] <- NA
-
 nod.root.ratio <- lmer(sqrt(nod.root.ratio) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
@@ -1056,8 +1024,8 @@ l.table <- data.frame(Anova(stomlim)) %>%
                             "<0.001", pval.l)) %>%
   arrange(treatment)
 
-table4 <- vcmax.table %>% full_join(jmax.table) %>% full_join(jvmax.table) %>%
-  full_join(rd25.table) %>% full_join(gsw.table) %>% full_join(l.table) %>%
+table4 <- vcmax.table %>% full_join(jmax.table) %>% full_join(rd25.table) %>%
+  full_join(jvmax.table) %>% full_join(gsw.table) %>% full_join(l.table) %>%
   replace(is.na(.), "-")
 write.csv(table4, file = "../working_drafts/tables/NxCO2xI_table2_gasEx.csv",
           row.names = FALSE)
@@ -1414,8 +1382,9 @@ tbio.table <- data.frame(Anova(tbio)) %>%
 
 
 
-table5 <- ncost.table %>% full_join(cbg.table) %>% full_join(wpn.table) %>%
-  full_join(tla.table) %>% full_join(tbio.table) %>%
+table5 <- tla.table %>%full_join(tbio.table) %>%
+  full_join(ncost.table) %>% full_join(cbg.table) %>% 
+  full_join(wpn.table) %>%
   replace(is.na(.), "-")
 write.csv(table5, file = "../working_drafts/tables/NxCO2xI_table5_WP.csv",
           row.names = FALSE)
