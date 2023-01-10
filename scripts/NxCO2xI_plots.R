@@ -16,13 +16,16 @@ df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv",
   mutate(n.trt = as.numeric(n.trt),
          rd25.vcmax25 = rd25 / vcmax25,
          inoc = factor(inoc, levels = c("no.inoc", "inoc")),
-         co2 = factor(co2, levels = c("amb", "elv"))) %>%
-  filter(inoc == "inoc" | (inoc == "no.inoc" & nodule.biomass < 0.05)) %>%
+         co2 = factor(co2, levels = c("amb", "elv")),
+         nod.root.ratio = nodule.biomass / root.biomass) %>%
+  filter(inoc == "inoc" | (inoc == "no.inoc" & nod.root.ratio < 0.05)) %>%
   unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE) 
 
 ## Add colorblind friendly palette
 nfix.cols <- c("#DDAA33", "#555555")
 co2.cols <- c("#004488", "#BB5566")
+
+full.cols <- c("#DDAA33", "#004488", "#BB5566", "#555555")
 
 ## Create blank plot as spacer plot
 blank.plot <- ggplot() + 
@@ -1449,82 +1452,48 @@ test(emtrends(nod, ~co2, "n.trt"))
 test(emtrends(nod, ~inoc, "n.trt"))
 
 ## Emmean fxns for regression lines + error ribbons
-nod.co2.fert <- data.frame(emmeans(nod, ~co2, "n.trt",
-                                     at = list(n.trt = seq(0, 630, 5)),
-                                     type = "response"))
-
-nod.inoc.fert <- data.frame(emmeans(nod, ~inoc, "n.trt",
-                                      at = list(n.trt = seq(0, 630, 5)),
-                                      type = "response")) %>%
-  mutate(linetype = ifelse(inoc == "no.inoc", "dashed", "solid"))
+nod.regline <- data.frame(emmeans(nod, ~co2*inoc, "n.trt",
+                                  at = list(n.trt = seq(0, 630, 5)),
+                                  type = "response")) %>%
+  mutate(co2.inoc = str_c(co2, "_", inoc),
+         linetype = ifelse(inoc == "no.inoc", "dashed", "solid"))
 
 ##########################################################################
 ## Root nodule biomass regression line prep
 ##########################################################################
-nod.co2.plot <- ggplot(data = df, 
+nod.plot <- ggplot(data = df, 
                          aes(x = n.trt, 
                              y = nodule.biomass,    
-                             fill = co2)) +
+                             fill = co2.inoc)) +
   geom_jitter(size = 3, alpha = 0.75, shape = 21) +
-  geom_smooth(data = nod.co2.fert,
-              aes(color = co2, y = response), 
+  geom_smooth(data = nod.regline,
+              aes(color = co2.inoc, y = response, linetype = linetype), 
               size = 1.5, se = FALSE) +
-  geom_ribbon(data = nod.co2.fert,
-              aes(fill = co2, y = response, 
+  geom_ribbon(data = nod.regline,
+              aes(fill = co2.inoc, y = response,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
-  scale_fill_manual(values = co2.cols,
-                    labels = c("Ambient",
-                               "Elevated")) +
-  scale_color_manual(values = co2.cols,
-                     labels = c("Ambient",
-                                "Elevated")) +
-  scale_y_continuous(limits = c(0, 0.6), breaks = seq(0, 0.6, 0.15)) +
+  scale_fill_manual(values = full.cols,
+                    labels = c("Ambient, inoculated",
+                               "Ambient, uninoculated",
+                               "Elevated, inoculated",
+                               "Elevated, uninoculated")) +
+  scale_color_manual(values = full.cols,
+                     labels = c("Ambient, inoculated",
+                                "Ambient, uninoculated",
+                                "Elevated, inoculated",
+                                "Elevated, uninoculated")) +
+  scale_y_continuous(limits = c(-0.01, 0.6), breaks = seq(0, 0.6, 0.15)) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   labs(x = "Soil N fertilization (ppm)",
        y = "Nodule biomass (g)",
-       fill = expression(bold("CO"["2"])), color = expression(bold("CO"["2"])),
-       shape = "Inoculation") +
+       fill = "Treatment", color = "Treatment") +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
         panel.border = element_rect(size = 1.25)) +
   guides(linetype = "none")
-nod.co2.plot
-
-
-nod.fert.inoc.plot <- ggplot(data = df,
-                             aes(x = n.trt,
-                                 y = nodule.biomass,
-                                 fill = inoc)) +
-  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
-  geom_smooth(data = nod.inoc.fert,
-              aes(linetype = linetype, 
-                  color = inoc,
-                  y = response), 
-              size = 1.5, se = FALSE) +
-  geom_ribbon(data = nod.inoc.fert,
-              aes(fill = inoc, 
-                  y = response, 
-                  ymin = lower.CL, ymax = upper.CL), 
-              size = 1.5, alpha = 0.25) +
-  scale_fill_manual(values = nfix.cols,
-                    labels = c("Uninoculated",
-                               "Inoculated")) +
-  scale_color_manual(values = nfix.cols,
-                     labels = c("Uninoculated",
-                                "Inoculated")) +
-  scale_linetype_manual(values = c("dashed", "solid")) +
-  scale_y_continuous(limits = c(0, 0.6), breaks = seq(0, 0.6, 0.15)) +
-  labs(x = "Soil N fertilization (ppm)",
-       y = "Nodule biomass (g)",
-       fill = "Inoculation", color = "Inoculation") +
-  theme_bw(base_size = 18) +
-  theme(axis.title = element_text(face = "bold"),
-        legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25)) +
-  guides(linetype = "none")
-nod.fert.inoc.plot
+nod.plot
 
 ##########################################################################
 ## Root nodule:root biomass regression line prep
@@ -1533,84 +1502,53 @@ df$nod.root.ratio <- df$nodule.biomass / df$root.biomass
 df$nod.root.ratio[df$nod.root.ratio > 0.05 & df$inoc == "no.inoc"] <- NA
 
 nodroot <- lmer(sqrt(nod.root.ratio) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-test(emtrends(nodroot, ~co2, "n.trt"))
+test(emtrends(nodroot, ~co2*inoc, "n.trt"))
 test(emtrends(nodroot, ~inoc, "n.trt"))
 
 ## Emmean fxns for regression lines + error ribbons
-nodroot.co2.fert <- data.frame(emmeans(nodroot, ~co2, "n.trt",
+nodroot.regline <- data.frame(emmeans(nodroot, ~co2*inoc, "n.trt",
                                    at = list(n.trt = seq(0, 630, 5)),
-                                   type = "response"))
-
-nodroot.inoc.fert <- data.frame(emmeans(nodroot, ~inoc, "n.trt",
-                                    at = list(n.trt = seq(0, 630, 5)),
-                                    type = "response"))
+                                   type = "response")) %>%
+  mutate(co2.inoc = str_c(co2, "_", inoc),
+         linetype = ifelse(inoc == "no.inoc", "dashed", "solid"))
 
 ##########################################################################
 ## Root nodule:root biomass regression line prep
 ##########################################################################
-nodroot.co2.plot <- ggplot(data = df, 
+nodroot.plot <- ggplot(data = df, 
                        aes(x = n.trt, 
                            y = nod.root.ratio,    
-                           fill = co2)) +
+                           fill = co2.inoc)) +
   geom_jitter(size = 3, alpha = 0.75, shape = 21) +
-  geom_smooth(data = nodroot.co2.fert,
-              aes(color = co2, y = response), 
+  geom_smooth(data = nodroot.regline,
+              aes(color = co2.inoc, y = response, linetype = linetype), 
               size = 1.5, se = FALSE) +
-  geom_ribbon(data = nodroot.co2.fert,
-              aes(fill = co2, y = response, 
+  geom_ribbon(data = nodroot.regline,
+              aes(fill = co2.inoc, y = response,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
-  scale_fill_manual(values = co2.cols,
-                    labels = c("Ambient",
-                               "Elevated")) +
-  scale_color_manual(values = co2.cols,
-                     labels = c("Ambient",
-                                "Elevated")) +
+  scale_fill_manual(values = full.cols,
+                    labels = c("Ambient, inoculated",
+                               "Ambient, uninoculated",
+                               "Elevated, inoculated",
+                               "Elevated, uninoculated")) +
+  scale_color_manual(values = full.cols,
+                     labels = c("Ambient, inoculated",
+                                "Ambient, uninoculated",
+                                "Elevated, inoculated",
+                                "Elevated, uninoculated")) +
   scale_y_continuous(limits = c(-0.0001, 0.4), breaks = seq(0, 0.4, 0.1)) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   labs(x = "Soil N fertilization (ppm)",
        y = "Nodule: root biomass",
-       fill = expression(bold("CO"["2"])), color = expression(bold("CO"["2"])),
+       fill = "Treatment", color = "Treatment",
        shape = "Inoculation") +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
         panel.border = element_rect(size = 1.25)) +
   guides(linetype = "none")
-nodroot.co2.plot
-
-
-nodroot.fert.inoc.plot <- ggplot(data = df,
-                             aes(x = n.trt,
-                                 y = nod.root.ratio,
-                                 fill = inoc)) +
-  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
-  geom_smooth(data = nodroot.inoc.fert,
-              aes(color = inoc,
-                  y = response), 
-              size = 1.5, se = FALSE) +
-  geom_ribbon(data = nodroot.inoc.fert,
-              aes(fill = inoc,
-                  y = response, 
-                  ymin = lower.CL, ymax = upper.CL), 
-              size = 1.5, alpha = 0.25) +
-  scale_fill_manual(values = nfix.cols,
-                    labels = c("Uninoculated",
-                               "Inoculated")) +
-  scale_color_manual(values = nfix.cols,
-                     labels = c("Uninoculated",
-                                "Inoculated")) +
-  scale_linetype_manual(values = c("dashed", "solid")) +
-  scale_y_continuous(limits = c(-0.0001, 0.4), breaks = seq(0, 0.4, 0.1)) +
-  labs(x = "Soil N fertilization (ppm)",
-       y = "Nodule: root biomass",
-       fill = "Inoculation", color = "Inoculation") +
-  theme_bw(base_size = 18) +
-  theme(axis.title = element_text(face = "bold"),
-        legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25)) +
-  guides(linetype = "none")
-nodroot.fert.inoc.plot
+nodroot.plot
 
 ##########################################################################
 ## %Ndfa
@@ -1627,7 +1565,6 @@ ndfa.plot <- ggplot(data = fake, aes(x=x,y=y)) +
   theme_bw(base_size = 18) +
   theme(panel.grid = element_blank(),
         panel.border = element_rect(size = 1.25))
-
 
 ##########################################################################
 ## Figure 1: leaf N plots
@@ -1744,22 +1681,10 @@ dev.off()
 ## Figure 6: nitrogen fixation plots
 ##########################################################################
 png("../working_drafts/figs/NxCO2xI_fig6_nFix.png",
-    height = 12, width = 12, units = "in", res = 600)
-ggarrange(ggarrange(nod.co2.plot, nodroot.co2.plot,
-                    ndfa.plot, ncol = 1, nrow = 3, 
-                    align = "hv", legend = "none", 
-                    labels = c("A", "C", "E"), font.label = list(size = 18)),
-          ggarrange(nod.fert.inoc.plot, nodroot.fert.inoc.plot, 
-                    ndfa.plot, ncol = 1, 
-                    nrow = 3, align = "hv", legend = "none",
-                    labels = c("B", "D", "F"), font.label = list(size = 18)), 
-          ggarrange(legend_blank_plot, legend_blank_plot, legend_blank_plot,
-                    legend_blank_plot, 
-                    legend_co2_plots, legend_fert_plots, 
-                    legend_blank_plot, legend_blank_plot, legend_blank_plot,
-                    legend_blank_plot,
-                    nrow = 10, align = "hv"),
-          ncol = 3, align = "hv", legend = "none", widths = c(0.4, 0.4, 0.2))
+    height = 12, width = 7, units = "in", res = 600)
+ggarrange(nod.plot, nodroot.plot, ndfa.plot, 
+          ncol = 1, nrow = 3, align = "hv", common.legend = TRUE,
+          legend = "right", labels = "AUTO", font.label = list(size = 18))
 dev.off()
 
 
