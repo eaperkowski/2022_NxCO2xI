@@ -246,6 +246,34 @@ emmeans(rd25, pairwise~co2)
 emmeans(rd25, pairwise~inoc)
 test(emtrends(rd25, ~1, "n.trt"))
 
+##########################################################################
+## Anet
+##########################################################################
+df$rd25[df$rd25 < 0] <- NA
+df$rd25[c(29, 34, 56)] <- NA
+
+anet <- lmer(anet ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(anet)
+qqnorm(residuals(anet))
+qqline(residuals(anet))
+densityPlot(residuals(anet))
+shapiro.test(residuals(anet))
+outlierTest(anet)
+
+# Model results
+summary(anet)
+Anova(anet)
+r.squaredGLMM(anet)
+
+# Pairwise comparisons
+test(emtrends(anet, pairwise~inoc, "n.trt"))
+
+# Individual effects
+emmeans(rd25, pairwise~co2)
+emmeans(rd25, pairwise~inoc)
+test(emtrends(rd25, ~1, "n.trt"))
 
 ##########################################################################
 ## gsw
@@ -770,6 +798,33 @@ emmeans(nod.root.ratio, ~inoc, "n.trt", at = list(n.trt = c(0, 630)))
 # r.squaredGLMM(ndfa)
 
 # Pairwise comparisons
+
+##########################################################################
+## BVR
+##########################################################################
+bvr <- lmer(sqrt(bvr) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(bvr)
+qqnorm(residuals(bvr))
+qqline(residuals(bvr))
+densityPlot(residuals(bvr))
+shapiro.test(residuals(bvr))
+outlierTest(bvr)
+
+# Model results
+summary(bvr)
+Anova(bvr)
+r.squaredGLMM(bvr)
+
+# Pairwise comparisons
+test(emtrends(bvr, ~co2, "n.trt"))
+test(emtrends(bvr, ~inoc, "n.trt"))
+
+# Individual effects
+test(emtrends(bvr, ~1, "n.trt"))
+emmeans(bvr, ~co2)
+emmeans(bvr, ~inoc)
 
 ##########################################################################
 ## Table 1: Leaf N content
