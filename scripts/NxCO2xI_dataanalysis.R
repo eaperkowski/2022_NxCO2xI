@@ -595,6 +595,11 @@ emmeans(tla, pairwise~co2)
 emmeans(tla, pairwise~inoc)
 test(emtrends(tla, ~1, "n.trt"))
 
+## Does inoculation stimulate TLA under low soil N?
+emmeans(tbio, pairwise~inoc*co2, "n.trt", type = "response",
+        at = list(n.trt = c(0,35,70,105,140,210,280,350,630)))
+
+
 ##########################################################################
 ## Total biomass
 ##########################################################################
@@ -622,6 +627,11 @@ emmeans(tbio, pairwise~co2*inoc)
 emmeans(tbio, pairwise~co2, type = "response")
 emmeans(tbio, pairwise~inoc)
 test(emtrends(tbio, ~1, "n.trt"))
+
+## Does inoculation stimulate total biomass under low soil N?
+emmeans(tbio, pairwise~inoc*co2, "n.trt", type = "response",
+        at = list(n.trt = c(0,280, 350, 630)))
+
 
 ##########################################################################
 ## Ncost
@@ -658,6 +668,13 @@ emmeans(ncost, pairwise~co2*inoc)
 emmeans(ncost, pairwise~co2)
 emmeans(ncost, pairwise~inoc)
 test(emtrends(ncost, ~1, "n.trt"))
+
+
+## Does inoculation stimulate whole plant nitrogen uptake under low soil N?
+test(emmeans(ncost, pairwise~co2*inoc, "n.trt", 
+             at = list(n.trt = c(0,35,70,105,140,210,280,350,630))))
+
+
 
 ##########################################################################
 ## Belowground carbon biomass
@@ -715,6 +732,8 @@ emmeans(wpn, pairwise~co2, type = "response")
 emmeans(wpn, pairwise~inoc, type = "response")
 test(emtrends(wpn, ~1, "n.trt", regrid = "response"))
 
+## Does inoculation stimulate whole plant nitrogen uptake under low soil N?
+test(emmeans(wpn, pairwise~inoc, "n.trt", at = list(n.trt = c(0,35,70,105,140,210,280,350,630))))
 
 ##########################################################################
 ## Root nodule biomass: root biomass
@@ -747,6 +766,11 @@ test(emtrends(nod.bio, ~1, "n.trt"))
 
 # Percent change in inoculated pots
 emmeans(nod.bio, ~inoc, "n.trt", at = list(n.trt = c(0, 630)))
+
+## Does inoculation stimulate under low soil N?
+emmeans(nod.bio, pairwise~inoc, "n.trt", type = "response",
+        at = list(n.trt = c(0,35,70,105,140,210,280,350,630)))
+
 
 ##########################################################################
 ## Root nodule biomass: root biomass
