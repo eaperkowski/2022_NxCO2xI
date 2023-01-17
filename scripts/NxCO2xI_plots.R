@@ -42,45 +42,45 @@ narea <- lmer(narea ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 test(emtrends(narea, ~inoc*co2, "n.trt"))
 
 ## Emmean fxns for regression lines + error ribbons
-narea.co2.fert <- data.frame(emmeans(narea, ~co2, "n.trt",
+narea.regline <- data.frame(emmeans(narea, ~co2*inoc, "n.trt",
                                      at = list(n.trt = seq(0, 630, 5)),
-                                     type = "response"))
-
-narea.inoc.fert <- data.frame(emmeans(narea, ~inoc, "n.trt",
-                                      at = list(n.trt = seq(0, 630, 5)),
-                                      type = "response"))
+                                     type = "response")) %>%
+  mutate(co2.inoc = str_c(co2, "_", inoc))
 
 ##########################################################################
 ## Narea plot
 ##########################################################################
-narea.co2.plot <- ggplot(data = df, 
-                         aes(x = n.trt, 
-                             y = narea,    
-                             fill = co2)) +
+narea.plot <- ggplot(data = df, 
+                     aes(x = n.trt, 
+                         y = narea,    
+                         fill = co2.inoc)) +
   geom_jitter(size = 3, alpha = 0.75, shape = 21) +
-  geom_smooth(data = narea.co2.fert,
-              aes(color = co2, y = emmean), 
+  geom_smooth(data = narea.regline,
+              aes(color = co2.inoc, y = emmean), 
               size = 1.5, se = FALSE) +
-  geom_ribbon(data = narea.co2.fert,
-              aes(fill = co2, y = emmean, 
+  geom_ribbon(data = narea.regline,
+              aes(fill = co2.inoc, y = emmean, 
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
-  scale_fill_manual(values = co2.cols,
-                    labels = c("Ambient",
-                               "Elevated")) +
-  scale_color_manual(values = co2.cols,
-                     labels = c("Ambient",
-                                "Elevated")) +
+  scale_fill_manual(values = full.cols,
+                    labels = c("Ambient, inoculated",
+                               "Ambient, uninoculated",
+                               "Elevated, inoculated",
+                               "Elevated, uninoculated")) +
+  scale_color_manual(values = full.cols,
+                     labels = c("Ambient, inoculated",
+                                "Ambient, uninoculated",
+                                "Elevated, inoculated",
+                                "Elevated, uninoculated")) +
   scale_y_continuous(limits = c(0, 3.24), breaks = seq(0, 3.2, 0.8)) +
   labs(x = "Soil N fertilization (ppm)",
        y = expression(bold(italic("N")["area"]*" (gN m"^"-2"*")")),
-       fill = expression(bold("CO"["2"])), color = expression(bold("CO"["2"])),
-       shape = "Inoculation") +
+       fill = "Treatment", color = "Treatment") +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
         panel.border = element_rect(size = 1.25))
-narea.co2.plot
+narea.plot
 
 
 narea.fert.inoc.plot <- ggplot(data = df,
@@ -1553,18 +1553,51 @@ nodroot.plot
 ##########################################################################
 ## %Ndfa
 ##########################################################################
-fake <- data.frame(x = seq(0,630,1), y = seq(0,630,1))
-label <- data.frame(x = 315, y = 0.5, text = "placeholder for %Ndfa figure")
+df$ndfa[c(38, 85, 101, 103)] <- NA
+ndfa <- lmer(sqrt(ndfa) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+test(emtrends(ndfa, ~co2*inoc, "n.trt"))
 
-ndfa.plot <- ggplot(data = fake, aes(x=x,y=y)) +
-  geom_text(data = label, aes(label=text), fontface = "bold", size = 5) +
-  scale_x_continuous(limits = c(0, 650), breaks = seq(0,600,200)) +
-  scale_y_continuous(limits = c(0,1), breaks = seq(0,1,0.25)) +
-  labs(x = expression(bold("Soil N fertilization (ppm)")),
-       y = expression(bold("%N"["dfa"]))) +
+## Emmean fxns for regression lines + error ribbons
+ndfa.regline <- data.frame(emmeans(ndfa, ~co2*inoc, "n.trt",
+                                      at = list(n.trt = seq(0, 630, 5)),
+                                      type = "response")) %>%
+  mutate(co2.inoc = str_c(co2, "_", inoc),
+         linetype = ifelse(inoc == "no.inoc", "dashed", "solid"))
+
+ndfa.plot <- ggplot(data = df, 
+                    aes(x = n.trt, 
+                        y = ndfa,    
+                        fill = co2.inoc)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = ndfa.regline,
+              aes(color = co2.inoc, y = response, linetype = linetype), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = ndfa.regline,
+              aes(fill = co2.inoc, y = response,
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = full.cols,
+                    labels = c("Ambient, inoculated",
+                               "Ambient, uninoculated",
+                               "Elevated, inoculated",
+                               "Elevated, uninoculated")) +
+  scale_color_manual(values = full.cols,
+                     labels = c("Ambient, inoculated",
+                                "Ambient, uninoculated",
+                                "Elevated, inoculated",
+                                "Elevated, uninoculated")) +
+  scale_y_continuous(limits = c(0, 105), breaks = seq(0, 100, 25)) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold("%N"["dfa"])),
+       fill = "Treatment", color = "Treatment",
+       shape = "Inoculation") +
   theme_bw(base_size = 18) +
-  theme(panel.grid = element_blank(),
-        panel.border = element_rect(size = 1.25))
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25)) +
+  guides(linetype = "none")
+ndfa.plot
 
 ##########################################################################
 ## Figure 1: leaf N plots
@@ -1681,10 +1714,10 @@ dev.off()
 ## Figure 6: nitrogen fixation plots
 ##########################################################################
 png("../working_drafts/figs/NxCO2xI_fig6_nFix.png",
-    height = 12, width = 7, units = "in", res = 600)
+    height = 8, width = 12, units = "in", res = 600)
 ggarrange(nod.plot, nodroot.plot, ndfa.plot, 
-          ncol = 1, nrow = 3, align = "hv", common.legend = TRUE,
-          legend = "right", labels = "AUTO", font.label = list(size = 18))
+          ncol = 2, nrow = 2, align = "hv", common.legend = TRUE,
+          legend = "right", labels = c("(a)", "(b)", "(c)"), font.label = list(size = 18))
 dev.off()
 
 

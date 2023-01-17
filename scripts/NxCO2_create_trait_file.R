@@ -14,6 +14,7 @@ library(emmeans)
 biomass_area <- read.csv("../data_sheets/NxCO2_tla_biomass_data.csv")
 id <- read.csv("../data_sheets/NxCO2_id_datasheet.csv")
 photo <- read.csv("../data_sheets/NxCO2_photo_data.csv")
+isotopes <- read.csv("../data_sheets/NxCO2xI_isotope_data.csv")
 
 ###############################################################################
 ## Load propN functions
@@ -21,6 +22,8 @@ photo <- read.csv("../data_sheets/NxCO2_photo_data.csv")
 source("../../r_functions/propN_funcs.R")
 source("../../r_functions/stomatal_limitation.R")
 source("../../r_functions/calc_chi.R")
+source("../../r_functions/calc_beta.R")
+source("../../r_functions/calc_ndfa.R")
 
 ###############################################################################
 ## Chlorophyll content
@@ -131,6 +134,59 @@ names(focal.area)[1:2] <- c("id", "focal.area")
 focal.area$id <- gsub("_focal", "", focal.area$id)
 
 ###############################################################################
+## %Ndfa
+###############################################################################
+head(isotopes)
+
+df.15n <- isotopes %>%
+  separate(id, into = c("co2", "inoc", "n.trt", "rep"), remove = FALSE) %>%
+  unite("trt.combs", co2:n.trt, remove = FALSE) %>%
+  full_join(biomass_area, by = "id") %>%
+  dplyr::select(id:rep, leaf.d15n, nodule.biomass)
+
+# Isolate B value (individuals totally reliant on Nfixation)
+b.15n <- df.15n %>%
+  filter(trt.combs == "e_y_0" | trt.combs == "a_y_0") %>%
+  group_by(co2) %>%
+  summarize(B = mean(leaf.d15n, na.rm = TRUE))
+
+# Calculate ref.15N value for each CO2 x N combination for uninoculated pots
+ref.15n <- df.15n %>%
+  filter(inoc != "y" & nodule.biomass < 0.05) %>%
+  filter(id != "a_n_0_111") %>%
+  group_by(co2, n.trt) %>%
+  summarize(ref.15n = mean(leaf.d15n, na.rm = TRUE))
+
+d15n.merged <- df.15n %>%
+  full_join(b.15n) %>%
+  full_join(ref.15n)
+
+ndfa <- d15n.merged %>%
+  mutate(ndfa = calc_ndfa(ref.15n = ref.15n, 
+                          sample.15n = leaf.d15n, B = B),
+         ndfa = ifelse(ndfa > 100, 
+                       100, 
+                       ifelse(ndfa < 0, 0, ndfa))) %>%
+  dplyr::select(id, leaf.d15n, ndfa)
+
+
+###############################################################################
+## Calculate beta
+###############################################################################
+beta <- isotopes %>%
+  dplyr::select(id, leaf.d13c) %>%
+  separate(id, into = c("co2", "inoc", "n.trt", "rep"), remove = FALSE) %>%
+  mutate(calc_chi_c3(leaf.d13c = leaf.d13c, air = -8)[2],
+         temp = ifelse(co2 == "e", 21.5, 21.3),
+         rh = ifelse(co2 == "e", 51.6, 50.3),
+         co2_num = ifelse(co2 == "e", 989, 439),
+         vpd = RHtoVPD(RH = rh, TdegC = temp)) %>%
+  mutate(beta = calc_beta(chi = chi, temp = temp, vpd = vpd * 1000, 
+                          ca = co2_num, z = 976)) %>%
+  dplyr::select(id, beta)
+
+
+###############################################################################
 ## Compile data files into single file for analyses/figs
 ###############################################################################
 compile_df <- id %>%
@@ -140,6 +196,9 @@ compile_df <- id %>%
   full_join(chlorophyll) %>%
   full_join(chl.leaf.area) %>%
   full_join(photo) %>%
+  full_join(isotopes) %>%
+  full_join(ndfa) %>%
+  full_join(beta) %>%
   separate(id, into = c("co2", "inoc", "n.trt", "rep"), remove = FALSE) %>%
   mutate(rep = str_pad(rep, width = 3, side = "left", pad = "0"),
          
@@ -158,10 +217,12 @@ compile_df <- id %>%
          
          ## Nitrogen-water use tradeoffs
          pnue = anet / (narea / 14),
+         calc_chi_c3(leaf.d13c = leaf.d13c, air = -8)[2],
          iwue = anet / gsw,
-         #chi = calc_chi_c3(leaf.d13c = leaf.d13c, air = NA),
          narea.gs = narea / gsw,
          vcmax.gs = vcmax25 / gsw,
+         narea.chi = narea / chi,
+         vcmax.chi = vcmax25 / chi,
          
          ## stomatal limitation
          stomlim = stomatal_limitation(A_net = anet, Vcmax = vcmax25, leaf.temp = tleaf,
@@ -192,15 +253,15 @@ compile_df <- id %>%
          nodule.biomass = ifelse(inoc == "n" & is.na(nodule.biomass),
                                  0, nodule.biomass)) %>%
   arrange(rep) %>%
-  select(-tla.full, -notes) %>%
+  dplyr::select(-tla.full, -notes) %>%
   mutate(across(.cols = c(nmass.focal:chlB.ugml,
                           marea:ncost),
          round, digits = 4)) %>%
   mutate(co2 = ifelse(co2 == "a", "amb", "elv"),
-         inoc = ifelse(inoc == "n", "no.inoc", "inoc"))
+         inoc = ifelse(inoc == "n", "no.inoc", "inoc")) %>%
+  as.data.frame()
 
-write.csv(compile_df,
-          "../data_sheets/NxCO2xI_compiled_datasheet.csv", row.names = FALSE)
+write_csv(compile_df, "../data_sheets/NxCO2xI_compiled_datasheet.csv")
 
 
 
