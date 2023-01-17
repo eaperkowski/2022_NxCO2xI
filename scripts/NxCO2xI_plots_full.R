@@ -966,6 +966,102 @@ ndfa.plot <- ggplot(data = df,
 ndfa.plot
 
 ##########################################################################
+## Exploratory: effects of treatment combos on beta
+##########################################################################
+beta <- lmer(log(beta) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+test(emtrends(beta, ~co2*inoc, "n.trt"))
+
+## Emmean fxns for regression lines + error ribbons
+beta.regline <- data.frame(emmeans(beta, ~co2*inoc, "n.trt",
+                                   at = list(n.trt = seq(0, 630, 5)),
+                                   type = "response")) %>%
+  mutate(co2.inoc = str_c(co2, "_", inoc),
+         linetype = ifelse(co2.inoc == "amb_inoc", "dashed", "solid"))
+
+beta.plot <- ggplot(data = df, 
+                    aes(x = chi, 
+                        y = narea,    
+                        fill = co2.inoc)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = beta.regline,
+              aes(color = co2.inoc, y = response, linetype = linetype), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = beta.regline,
+              aes(fill = co2.inoc, y = response,
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = full.cols,
+                    labels = c("Ambient, inoculated",
+                               "Ambient, uninoculated",
+                               "Elevated, inoculated",
+                               "Elevated, uninoculated")) +
+  scale_color_manual(values = full.cols,
+                     labels = c("Ambient, inoculated",
+                                "Ambient, uninoculated",
+                                "Elevated, inoculated",
+                                "Elevated, uninoculated")) +
+  scale_y_continuous(limits = c(0, 400), breaks = seq(0, 400, 100)) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(beta)),
+       fill = "Treatment", color = "Treatment",
+       shape = "Inoculation") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25)) +
+  guides(linetype = "none")
+beta.plot
+
+##########################################################################
+## Exploratory: effects of treatment combos on beta
+##########################################################################
+beta <- lmer(log(beta) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+test(emtrends(beta, ~co2*inoc, "n.trt"))
+
+## Emmean fxns for regression lines + error ribbons
+beta.regline <- data.frame(emmeans(beta, ~co2*inoc, "n.trt",
+                                   at = list(n.trt = seq(0, 630, 5)),
+                                   type = "response")) %>%
+  mutate(co2.inoc = str_c(co2, "_", inoc),
+         linetype = ifelse(co2.inoc == "amb_inoc", "dashed", "solid"))
+
+beta.plot <- ggplot(data = df, 
+                    aes(x = n.trt, 
+                        y = beta,    
+                        fill = co2.inoc)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = beta.regline,
+              aes(color = co2.inoc, y = response, linetype = linetype), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = beta.regline,
+              aes(fill = co2.inoc, y = response,
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = full.cols,
+                    labels = c("Ambient, inoculated",
+                               "Ambient, uninoculated",
+                               "Elevated, inoculated",
+                               "Elevated, uninoculated")) +
+  scale_color_manual(values = full.cols,
+                     labels = c("Ambient, inoculated",
+                                "Ambient, uninoculated",
+                                "Elevated, inoculated",
+                                "Elevated, uninoculated")) +
+  scale_y_continuous(limits = c(0, 400), breaks = seq(0, 400, 100)) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(beta)),
+       fill = "Treatment", color = "Treatment",
+       shape = "Inoculation") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25)) +
+  guides(linetype = "none")
+beta.plot
+
+##########################################################################
 ## Figure 1: leaf N plots
 ##########################################################################
 png("../working_drafts/figs/NxCO2xI_fig1_leafN.png",
