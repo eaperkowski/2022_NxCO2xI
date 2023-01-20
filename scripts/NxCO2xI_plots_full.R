@@ -1078,10 +1078,10 @@ dev.off()
 png("../working_drafts/figs/NxCO2xI_fig2_photo.png",
     height = 12, width = 12, units = "in", res = 600)
 ggarrange(vcmax25.plot, jmax25.plot, jvmax25.plot, 
-          rd25.plot, gsw.plot, l.plot,
+          rd25.plot, gsw.plot,
           ncol = 2, nrow = 3, align = "hv", legend = "right",
-          common.legend = TRUE, 
-          labels = c("(a)", "(b)", "(c)", "(d)","(e)", "(f)"))
+          common.legend = TRUE, font.label = list(size = 18), 
+          labels = c("(a)", "(b)", "(c)", "(d)","(e)"))
 dev.off()
 
 ##########################################################################

@@ -8,8 +8,8 @@ library(plantecophys)
 ###############################################################################
 ## Import files
 ###############################################################################
-co2.response.wk7 <- read.csv("../data_sheets/NxCO2_co2_resp_wk7.csv")
-rd.wk7 <- read.csv("../data_sheets/NxCO2_rd_wk7.csv")
+co2.response.wk6 <- read.csv("../data_sheets/NxCO2_co2_resp_wk6.csv")
+rd.wk6 <- read.csv("../data_sheets/NxCO2_rd_wk7.csv")
 
 # For creating unique ID list
 biomass_area <- read.csv("../data_sheets/NxCO2_tla_biomass_data.csv")
@@ -26,13 +26,13 @@ source("/Users/eaperkowski/git/r_functions/stomatal_limitation.R")
 ###############################################################################
 ## Prep data frame to fit A/Ci curves
 ###############################################################################
-aci.prep <- co2.response.wk7 %>%
+aci.prep <- co2.response.wk6 %>%
   group_by(id) %>%
   dplyr::select(id, machine, A, Ci, Ca, gsw, 
                 CO2_s,	CO2_r,	H2O_s,	H2O_r,
                 Qin, VPDleaf, Flow,	Tair,	Tleaf) %>%
   arrange(id) %>%
-  left_join(rd.wk7, by = "id") %>%
+  left_join(rd.wk6, by = "id") %>%
   dplyr::select(-week, -tLeaf) %>%
   group_by(id) %>%
   mutate(keep.row = "yes") %>%
@@ -117,7 +117,8 @@ plot(e_y_35_6)
 aci.coefs[6,] <- c(id = "e_y_35_6", t(coef(e_y_35_6)))
 
 
-e_y_35_7 <- aci.prep %>% filter(keep.row == "yes" & id == "e_y_35_7") %>%
+e_y_35_7 <- aci.prep %>% filter(keep.row == "yes" & 
+                                  id == "e_y_35_7" & CO2_r < 870) %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
