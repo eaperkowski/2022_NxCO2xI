@@ -14,7 +14,9 @@ library(emmeans)
 biomass_area <- read.csv("../data_sheets/NxCO2_tla_biomass_data.csv")
 id <- read.csv("../data_sheets/NxCO2_id_datasheet.csv")
 photo <- read.csv("../data_sheets/NxCO2_photo_data.csv")
+photo.wk6 <- read.csv("../data_sheets/NxCO2_photo_data_wk6.csv")
 isotopes <- read.csv("../data_sheets/NxCO2xI_isotope_data.csv")
+
 
 ###############################################################################
 ## Load propN functions
@@ -185,7 +187,6 @@ beta <- isotopes %>%
                           ca = co2_num, z = 976)) %>%
   dplyr::select(id, beta)
 
-
 ###############################################################################
 ## Compile data files into single file for analyses/figs
 ###############################################################################
@@ -196,6 +197,7 @@ compile_df <- id %>%
   full_join(chlorophyll) %>%
   full_join(chl.leaf.area) %>%
   full_join(photo) %>%
+  full_join(photo.wk6) %>%
   full_join(isotopes) %>%
   full_join(ndfa) %>%
   full_join(beta) %>%

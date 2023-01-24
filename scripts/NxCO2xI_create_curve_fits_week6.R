@@ -61,7 +61,8 @@ plot(e_y_0_1)
 aci.coefs <- data.frame(id = "e_y_0_1", t(coef(e_y_0_1)))
 
 
-e_y_0_2 <- aci.prep %>% filter(keep.row == "yes" & id == "e_y_0_2") %>%
+e_y_0_2 <- aci.prep %>% filter(keep.row == "yes" & id == "e_y_0_2")  %>%
+  mutate(A = A/2) %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
@@ -118,7 +119,8 @@ aci.coefs[6,] <- c(id = "e_y_35_6", t(coef(e_y_35_6)))
 
 
 e_y_35_7 <- aci.prep %>% filter(keep.row == "yes" & 
-                                  id == "e_y_35_7" & CO2_r < 870) %>%
+                                  id == "e_y_35_7" & CO2_r < 870)  %>%
+  mutate(A = A/2) %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
@@ -129,7 +131,8 @@ plot(e_y_35_7)
 aci.coefs[7,] <- c(id = "e_y_35_7", t(coef(e_y_35_7)))
 
 
-e_y_35_8 <- aci.prep %>% filter(keep.row == "yes" & id == "e_y_35_8") %>%
+e_y_35_8 <- aci.prep %>% filter(keep.row == "yes" & id == "e_y_35_8")  %>%
+  mutate(A = A/2) %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
@@ -185,7 +188,8 @@ plot(e_y_70_12)
 aci.coefs[12,] <- c(id = "e_y_70_12", t(coef(e_y_70_12)))
 
 
-e_y_105_13 <- aci.prep %>% filter(keep.row == "yes" & id == "e_y_105_13") %>%
+e_y_105_13 <- aci.prep %>% filter(keep.row == "yes" & id == "e_y_105_13")  %>%
+  mutate(A = A/2) %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
@@ -356,7 +360,7 @@ e_y_280_28 <- aci.prep %>% filter(keep.row == "yes" & id == "e_y_280_28") %>%
                          Ci = "Ci",
                          PPFD = "Qin", 
                          Rd = "rd25"),
-         fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
+         fitTPU = TRUE, Tcorrect = FALSE, useRd = FALSE)
 plot(e_y_280_28)
 aci.coefs[28,] <- c(id = "e_y_280_28", t(coef(e_y_280_28)))
 
@@ -382,7 +386,8 @@ plot(e_y_350_30)
 aci.coefs[30,] <- c(id = "e_y_350_30", t(coef(e_y_350_30)))
 
 
-e_y_350_31 <- aci.prep %>% filter(keep.row == "yes" & id == "e_y_350_31") %>%
+e_y_350_31 <- aci.prep %>% filter(keep.row == "yes" & id == "e_y_350_31")  %>%
+  mutate(A = A/2) %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
@@ -393,7 +398,8 @@ plot(e_y_350_31)
 aci.coefs[31,] <- c(id = "e_y_350_31", t(coef(e_y_350_31)))
 
 
-e_y_350_32 <- aci.prep %>% filter(keep.row == "yes" & id == "e_y_350_32") %>%
+e_y_350_32 <- aci.prep %>% filter(keep.row == "yes" & id == "e_y_350_32")  %>%
+  mutate(A = A/2) %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
@@ -425,6 +431,7 @@ aci.coefs[34,] <- c(id = "e_y_630_34", t(coef(e_y_630_34)))
 
 
 e_y_630_35 <- aci.prep %>% filter(keep.row == "yes" & id == "e_y_630_35") %>%
+  mutate(A = A/2) %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
@@ -447,7 +454,7 @@ aci.coefs[36,] <- c(id = "e_y_630_36", t(coef(e_y_630_36)))
 #######################################
 # Elevated CO2 non-inoculated
 #######################################
-e_n_0_37 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_0_37") %>%
+e_n_0_37 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_0_37" & A > 4) %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
@@ -479,17 +486,18 @@ e_n_0_39 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_0_39") %>%
 plot(e_n_0_39)
 aci.coefs[39,] <- c(id = "e_n_0_39", t(coef(e_n_0_39)))
 
-e_n_0_40 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_0_40") %>%
+e_n_0_40 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_0_40" & A > 2) %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
                          PPFD = "Qin", 
                          Rd = "rd25"),
-         fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
+         fitTPU = TRUE, Tcorrect = FALSE, useRd = FALSE)
 plot(e_n_0_40)
 aci.coefs[40,] <- c(id = "e_n_0_40", t(coef(e_n_0_40)))
 
-e_n_35_41 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_35_41") %>%
+e_n_35_41 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_35_41")  %>%
+  mutate(A = A/2) %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
@@ -505,7 +513,7 @@ e_n_35_42 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_35_42") %>%
                          Ci = "Ci",
                          PPFD = "Qin",
                          Rd = "rd25"),
-         fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
+         fitTPU = TRUE, Tcorrect = FALSE, useRd = FALSE)
 plot(e_n_35_42)
 aci.coefs[42,] <- c(id = "e_n_35_42", t(coef(e_n_35_42)))
 
@@ -526,11 +534,12 @@ e_n_35_44 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_35_44") %>%
                          Ci = "Ci",
                          PPFD = "Qin", 
                          Rd = "rd25"),
-         fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
+         fitTPU = TRUE, Tcorrect = FALSE, useRd = FALSE)
 plot(e_n_35_44)
 aci.coefs[44,] <- c(id = "e_n_35_44", t(coef(e_n_35_44)))
 
-e_n_70_45 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_70_45") %>%
+e_n_70_45 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_70_45")  %>%
+  mutate(A = A/2) %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
@@ -546,7 +555,7 @@ e_n_70_46 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_70_46") %>%
                          Ci = "Ci",
                          PPFD = "Qin", 
                          Rd = "rd25"),
-         fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
+         fitTPU = TRUE, Tcorrect = FALSE, useRd = FALSE)
 plot(e_n_70_46)
 aci.coefs[46,] <- c(id = "e_n_70_46", t(coef(e_n_70_46)))
 
@@ -577,7 +586,7 @@ e_n_105_49 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_105_49") %>%
                          Ci = "Ci",
                          PPFD = "Qin", 
                          Rd = "rd25"),
-         fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
+         fitTPU = TRUE, Tcorrect = FALSE, useRd = FALSE)
 plot(e_n_105_49)
 aci.coefs[49,] <- c(id = "e_n_105_49", t(coef(e_n_105_49)))
 
@@ -590,10 +599,10 @@ e_n_105_50 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_105_50") %>%
                          Rd = "rd25"),
          fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
 plot(e_n_105_50)
-aci.coefs[50,] <- c(id = "e_n_105_50", t(coef(e_n_105_50)))
+aci.coefs[50,] <- c(id = "e_n_105_50", NA, NA, NA, NA)
 
 
-e_n_105_51 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_105_51") %>%
+e_n_105_51 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_105_61") %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
@@ -657,13 +666,14 @@ plot(e_n_140_56)
 aci.coefs[56,] <- c(id = "e_n_140_56", t(coef(e_n_140_56)))
 
 
-e_n_210_57 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_210_57" & Ci < 800) %>%
+e_n_210_57 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_210_57") %>%
+  mutate(A = A/2) %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
                          PPFD = "Qin", 
                          Rd = "rd25"),
-         fitTPU = TRUE, Tcorrect = FALSE)
+         fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
 plot(e_n_210_57)
 aci.coefs[57,] <- c(id = "e_n_210_57", t(coef(e_n_210_57)))
 
@@ -673,7 +683,7 @@ e_n_210_58 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_210_58") %>%
                          Ci = "Ci",
                          PPFD = "Qin", 
                          Rd = "rd25"),
-         fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
+         fitTPU = TRUE, Tcorrect = FALSE, useRd = FALSE)
 plot(e_n_210_58)
 aci.coefs[58,] <- c(id = "e_n_210_58", t(coef(e_n_210_58)))
 
@@ -711,7 +721,7 @@ plot(e_n_280_61)
 aci.coefs[61,] <- c(id = "e_n_280_61", t(coef(e_n_280_61)))
 
 
-e_n_280_62 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_280_62") %>%
+e_n_280_62 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_280_62" & A > 2.5) %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
@@ -728,7 +738,7 @@ e_n_280_63 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_280_63") %>%
                          Ci = "Ci",
                          PPFD = "Qin", 
                          Rd = "rd25"),
-         fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
+         fitTPU = TRUE, Tcorrect = FALSE, useRd = FALSE)
 plot(e_n_280_63)
 aci.coefs[63,] <- c(id = "e_n_280_63", t(coef(e_n_280_63)))
 
@@ -743,19 +753,20 @@ e_n_280_64 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_280_64") %>%
 plot(e_n_280_64)
 aci.coefs[64,] <- c(id = "e_n_280_64", t(coef(e_n_280_64)))
 
-e_n_350_65 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_350_65" & 
-                                    A < 30) %>%
+e_n_350_65 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_350_65")  %>%
+  mutate(A = A/2) %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
                          PPFD = "Qin", 
                          Rd = "rd25"),
-         fitTPU = TRUE, Tcorrect = FALSE)
+         fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
 plot(e_n_350_65)
 aci.coefs[65,] <- c(id = "e_n_350_65", t(coef(e_n_350_65)))
 
 
-e_n_350_66 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_350_66") %>%
+e_n_350_66 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_350_66")  %>%
+  mutate(A = A/2) %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
@@ -771,7 +782,7 @@ e_n_350_67 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_350_67") %>%
                          Ci = "Ci",
                          PPFD = "Qin", 
                          Rd = "rd25"),
-         fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
+         fitTPU = TRUE, Tcorrect = FALSE, useRd = FALSE)
 plot(e_n_350_67)
 aci.coefs[67,] <- c(id = "e_n_350_67", t(coef(e_n_350_67)))
 
@@ -798,7 +809,8 @@ plot(e_n_630_69)
 aci.coefs[69,] <- c(id = "e_n_630_69", t(coef(e_n_630_69)))
 
 
-e_n_630_70 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_630_70") %>%
+e_n_630_70 <- aci.prep %>% filter(keep.row == "yes" & id == "e_n_630_70")  %>%
+  mutate(A = A/2) %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
@@ -976,10 +988,9 @@ a_y_105_86 <- aci.prep %>% filter(keep.row == "yes" & id == "a_y_105_86") %>%
                          Ci = "Ci",
                          PPFD = "Qin", 
                          Rd = "rd25"),
-         fitTPU = TRUE, Tcorrect = FALSE)
+         fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
 plot(a_y_105_86)
 aci.coefs[86,] <- c(id = "a_y_105_86", t(coef(a_y_105_86)))
-aci.coefs[86,3] <- NA
 
 
 a_y_105_87 <- aci.prep %>% filter(keep.row == "yes" & id == "a_y_105_87") %>%
@@ -1133,7 +1144,7 @@ plot(a_y_280_100)
 aci.coefs[100,] <- c(id = "a_y_280_100", t(coef(a_y_280_100)))
 
 
-a_y_350_101 <- aci.prep %>% filter(keep.row == "yes" & id == "a_y_350_101_b") %>%
+a_y_350_101 <- aci.prep %>% filter(keep.row == "yes" & id == "a_y_350_101") %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
@@ -1241,7 +1252,7 @@ a_n_0_110 <- aci.prep %>% filter(keep.row == "yes" & id == "a_n_0_110") %>%
                          Ci = "Ci",
                          PPFD = "Qin", 
                          Rd = "rd25"),
-         fitTPU = TRUE, Tcorrect = FALSE)
+         fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
 plot(a_n_0_110)
 aci.coefs[110,] <- c(id = "a_n_0_110", t(coef(a_n_0_110)))
 
@@ -1252,7 +1263,7 @@ a_n_0_111 <- aci.prep %>% filter(keep.row == "yes" & id == "a_n_0_111") %>%
                          Ci = "Ci",
                          PPFD = "Qin",
                          Rd = "rd25"),
-         fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
+         fitTPU = TRUE, Tcorrect = FALSE, useRd = FALSE)
 plot(a_n_0_111)
 aci.coefs[111,] <- c(id = "a_n_0_111", t(coef(a_n_0_111)))
 
@@ -1276,7 +1287,7 @@ a_n_35_113 <- aci.prep %>% filter(keep.row == "yes" & id == "a_n_35_113") %>%
                          Rd = "rd25"),
          fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
 plot(a_n_35_113)
-aci.coefs[113,] <- c(id = "a_n_35_113", t(coef(a_n_35_113)))
+aci.coefs[113,] <- c(id = "a_n_35_113", NA, NA, NA, NA)
 
 
 a_n_35_114 <- aci.prep %>% filter(keep.row == "yes" & id == "a_n_35_114") %>%
@@ -1298,7 +1309,7 @@ a_n_35_115 <- aci.prep %>% filter(keep.row == "yes" & id == "a_n_35_115") %>%
                          Rd = "rd25"),
          fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
 plot(a_n_35_115)
-aci.coefs[115,] <- c(id = "a_n_35_115", t(coef(a_n_35_115)))
+aci.coefs[115,] <- c(id = "a_n_35_115", NA, NA, NA, NA)
 
 
 a_n_35_116 <- aci.prep %>% filter(keep.row == "yes" & id == "a_n_35_116") %>%
@@ -1576,7 +1587,7 @@ plot(a_n_350_140)
 aci.coefs[140,] <- c(id = "a_n_350_140", t(coef(a_n_350_140)))
 
 
-a_n_630_141 <- aci.prep %>% filter(keep.row == "yes" & id == "a_n_630_141_b") %>%
+a_n_630_141 <- aci.prep %>% filter(keep.row == "yes" & id == "a_n_630_141") %>%
   fitaci(varnames = list(ALEAF = "A",
                          Tleaf = "Tleaf",
                          Ci = "Ci",
@@ -1631,7 +1642,8 @@ aci.coefs$TPU <- as.numeric(aci.coefs$TPU)
 aci.coefs[, c(2:5)] <- round(aci.coefs[, c(2:5)], digits = 3)
 
 aci.fits <- aci.coefs %>% left_join(aci.temps) %>%
-  mutate(vcmax25 = temp_standardize(Vcmax, "Vcmax", standard.to = 25,
+  mutate(Jmax = ifelse(Jmax > 300, NA, Jmax),
+         vcmax25 = temp_standardize(Vcmax, "Vcmax", standard.to = 25,
                                     tLeaf = Tleaf, tGrow = 22.5),
          jmax25 = temp_standardize(Jmax, "Jmax", standard.to = 25,
                                    tLeaf = Tleaf, tGrow = 22.5),
@@ -1645,16 +1657,25 @@ anet <- aci.prep %>%
   summarize(anet = mean(A),
             gsw = mean(gsw),
             ci.ca = mean(Ci) / mean(Ca)) %>%
-  filter(id != "a_n_630_141" & id != "a_y_280_100" & id != "a_y_350_101") %>%
-  mutate(id = ifelse(id == "a_n_630_141_b", "a_n_630_141", id),
-         id = ifelse(id == "a_y_280_100_b", "a_y_280_100", id),
-         id = ifelse(id == "a_y_350_101_b", "a_y_350_101", id))
+  mutate(id = ifelse(id == "e_n_105_61", "e_n_105_51", id))
 
 
 photo.data <- anet %>% full_join(aci.fits) %>% 
   mutate_if(is.numeric, round, 3) %>%
-  select(id, tleaf, anet,  gsw, ci.ca, vcmax25, jmax25, jmax25.vcmax25, rd25, tpu)
+  mutate(jmax25 = ifelse(jmax25 > 300, NA, jmax25),
+         jmax25) %>%
+  select(id, tleaf, anet,  gsw, ci.ca, vcmax25, jmax25, 
+         jmax25.vcmax25, rd25, tpu) %>%
+  filter (id != "e_y_35_7_b") %>%
+  setNames(c(names(.)[1], paste0(names(.)[-1],"_wk6")))
 
-write.csv(photo.data, "../data_sheets/NxCO2_photo_data.csv", row.names = FALSE)
+write.csv(photo.data, "../data_sheets/NxCO2_photo_data_wk6.csv", row.names = FALSE)
+
+full.df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv") %>%
+  full_join(photo.data)
+
+write.csv(full.df, "../data_sheets/NxCO2xI_compiled_datasheet.csv", row.names = FALSE)
+
+
 
 
