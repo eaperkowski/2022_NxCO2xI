@@ -3,6 +3,7 @@ library(ggplot2)
 library(car)
 library(emmeans)
 library(ggpubr)
+library(lme4)
 
 # Load compiled datasheet
 df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv", 
@@ -30,90 +31,28 @@ blank.plot <- ggplot() +
 
 
 ######################################################################
-## Belowground carbon biomass
+## Are week 6 Vcmax25 and Jmax values different from week 7?
 ######################################################################
-cbg <- lmer(cbg ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-test(emtrends(cbg, ~co2, "n.trt"))
-test(emtrends(cbg, ~inoc, "n.trt"))
+## Week 6 Vcmax25
+vcmax.week <- lmer(vcmax25_wk6 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+shapiro.test(residuals(vcmax.week))
+summary(vcmax.week)
+Anova(vcmax.week)
+emmeans(vcmax.week, pairwise~co2)
 
-## Emmean fxns for regression lines + error ribbons
-cbg.co2.fert <- data.frame(emmeans(cbg, ~co2, "n.trt",
-                                     at = list(n.trt = seq(0, 630, 5)),
-                                     type = "response"))
-
-cbg.inoc.fert <- data.frame(emmeans(cbg, ~inoc, "n.trt",
-                                      at = list(n.trt = seq(0, 630, 5)),
-                                      type = "response"))
-
-##########################################################################
-## cbg plot
-##########################################################################
-cbg.co2.plot <- ggplot(data = df, 
-                         aes(x = n.trt, 
-                             y = cbg,    
-                             fill = co2)) +
-  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
-  geom_smooth(data = cbg.co2.fert,
-              aes(color = co2, y = emmean), 
-              size = 1.5, se = FALSE) +
-  geom_ribbon(data = cbg.co2.fert,
-              aes(fill = co2, y = emmean, 
-                  ymin = lower.CL, ymax = upper.CL), 
-              size = 1.5, alpha = 0.25) +
-  scale_fill_manual(values = co2.cols,
-                    labels = c("Ambient",
-                               "Elevated")) +
-  scale_color_manual(values = co2.cols,
-                     labels = c("Ambient",
-                                "Elevated")) +
-  scale_y_continuous(limits = c(0, 5), breaks = seq(0, 5, 1)) +
-  scale_linetype_manual(values = c("dashed", "solid")) +
-  labs(x = "Soil N fertilization (ppm)",
-       y = expression(bold(italic("C")["bg"]*" (gC)")),
-       fill = expression(bold("CO"["2"])), color = expression(bold("CO"["2"])),
-       shape = "Inoculation") +
-  theme_bw(base_size = 18) +
-  theme(axis.title = element_text(face = "bold"),
-        legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25)) +
-  guides(linetype = "none")
-cbg.co2.plot
+emmeans(vcmax.week, ~1, "n.trt", at = list(n.trt = c(0, 630)))
+emmeans(vcmax.week, pairwise~inoc)
 
 
-cbg.fert.inoc.plot <- ggplot(data = df,
-                               aes(x = n.trt,
-                                   y = cbg,
-                                   fill = inoc)) +
-  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
-  geom_smooth(data = cbg.inoc.fert,
-              aes(color = inoc, y = emmean), 
-              size = 1.5, se = FALSE) +
-  geom_ribbon(data = cbg.inoc.fert,
-              aes(fill = inoc, y = emmean, 
-                  ymin = lower.CL, ymax = upper.CL), 
-              size = 1.5, alpha = 0.25) +
-  scale_fill_manual(values = nfix.cols,
-                    labels = c("Uninoculated",
-                               "Inoculated")) +
-  scale_color_manual(values = nfix.cols,
-                     labels = c("Uninoculated",
-                                "Inoculated")) +
-  scale_linetype_manual(values = c("dashed", "solid")) +
-  scale_y_continuous(limits = c(0, 4), breaks = seq(0, 4, 1)) +
-  labs(x = "Soil N fertilization (ppm)",
-       y = expression(bold(italic("C")["bg"]*" (gC)")),
-       fill = "Inoculation", color = "Inoculation") +
-  theme_bw(base_size = 18) +
-  theme(axis.title = element_text(face = "bold"),
-        legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25)) +
-  guides(linetype = "none")
-cbg.fert.inoc.plot
+## Week 6 Jmax25
+jmax.week <- lmer(jmax25_wk6 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+shapiro.test(residuals(jmax.week))
+summary(jmax.week)
+Anova(jmax.week)
 
-
-
-
-
+emmeans(jmax.week, pairwise~co2)
+emmeans(jmax.week, ~1, "n.trt", at = list(n.trt = c(0, 630)))
+emmeans(jmax.week, pairwise~inoc)
 
 ######################################################################
 ## BVR

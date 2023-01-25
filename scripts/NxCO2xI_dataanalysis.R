@@ -162,6 +162,10 @@ emmeans(vcmax, pairwise~co2)
 emmeans(vcmax, pairwise~inoc)
 test(emtrends(vcmax, ~1, "n.trt"))
 
+# Percent change for study limitation section
+emmeans(vcmax, ~1, "n.trt", at = list(n.trt = c(0, 630)))
+
+
 ##########################################################################
 ## Jmax25
 ##########################################################################
@@ -187,6 +191,9 @@ test(emtrends(jmax, pairwise~inoc, "n.trt"))
 emmeans(jmax, pairwise~co2)
 emmeans(jmax, pairwise~inoc)
 test(emtrends(jmax, ~1, "n.trt"))
+
+# Percent change for study limitation section
+emmeans(jmax, ~1, "n.trt", at = list(n.trt = c(0, 630)))
 
 ##########################################################################
 ## Jmax25:Vcmax25
