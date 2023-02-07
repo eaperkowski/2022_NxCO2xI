@@ -4,6 +4,7 @@ library(car)
 library(emmeans)
 library(ggpubr)
 library(lme4)
+library(tidyverse)
 
 # Load compiled datasheet
 df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv", 
@@ -14,7 +15,7 @@ df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv",
          co2 = factor(co2, levels = c("amb", "elv")),
          nod.root.ratio = nodule.biomass / root.biomass) %>%
   filter(inoc == "inoc" | (inoc == "no.inoc" & nod.root.ratio < 0.05)) %>%
-  unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE) 
+  tidyr::unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE) 
 
 ## Add colorblind friendly palette
 nfix.cols <- c("#DDAA33", "#555555")
@@ -28,7 +29,6 @@ blank.plot <- ggplot() +
   theme(panel.background = element_rect(color = "white",
                                         fill = "white"),
         panel.border = element_rect(color = "white"))
-
 
 ######################################################################
 ## Are week 6 Vcmax25 and Jmax values different from week 7?
@@ -55,12 +55,41 @@ emmeans(jmax.week, ~1, "n.trt", at = list(n.trt = c(0, 630)))
 emmeans(jmax.week, pairwise~inoc)
 
 ######################################################################
-## BVR
+## BVR analyses
 ######################################################################
 bvr <- lmer(bvr ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-test(emtrends(nodroot, ~co2, "n.trt"))
-test(emtrends(nodroot, ~inoc, "n.trt"))
+test(emtrends(bvr, ~co2, "n.trt"))
+test(emtrends(bvr, ~inoc, "n.trt"))
 
+bvr.coefs <- data.frame(summary(bvr)$coefficient) %>%
+  mutate(treatment = row.names(.),
+         coef = format(Estimate, scientific = TRUE, digits = 3)) %>%
+  dplyr::select(treatment, coef) %>%
+  dplyr::mutate(treatment = c("(Intercept)", "co2", "inoc", "n.trt", "co2:inoc", "co2:n.trt",
+                              "inoc:n.trt", "co2:inoc:n.trt")) %>%
+  mutate(coef = ifelse(coef <0.001 & coef >= 0,
+                             "<0.001", coef)) %>%
+  print(., row.names = FALSE)
+
+bvr.table <- data.frame(Anova(bvr)) %>%
+  mutate(treatment = row.names(.),
+         Chisq = round(Chisq, 3),
+         P_value = ifelse(Pr..Chisq. < 0.001, "<0.001",
+                                round(Pr..Chisq., 3))) %>%
+  full_join(bvr.coefs) %>%
+  mutate(treatment = factor(
+    treatment, levels = c("(Intercept)", "co2", "inoc", "n.trt", 
+                          "co2:inoc", "co2:n.trt",
+                          "inoc:n.trt", "co2:inoc:n.trt"))) %>%
+  dplyr::select(treatment, df = Df, coef, Chisq, P_value) %>%
+  arrange(treatment) %>%
+  replace(is.na(.), "-")
+
+write.csv(bvr.table, "../working_drafts/tables/NxCO2xI_tableS3_bvr.csv", row.names = FALSE)
+
+######################################################################
+## BVR plot
+######################################################################
 ## Emmean fxns for regression lines + error ribbons
 bvr.regline <- data.frame(emmeans(bvr, ~co2*inoc, "n.trt",
                                   at = list(n.trt = seq(0, 630, 5)),
@@ -106,18 +135,23 @@ bvr.plot <- ggplot(data = df,
   guides(linetype = "none")
 bvr.plot
 
+png("../working_drafts/figs/NxCO2xI_FigS2_bvr.png",
+    width = 8, height = 4.5, units = 'in', res = 600)
+bvr.plot
+dev.off()
+
 ######################################################################
 ## Evidence against rolling rest of chlorophyll leaves
 ######################################################################
 narea.comp <- ggplot(data = df, aes(x = narea, y = narea.chl)) +
-  geom_point(size = 4, aes(fill = co2, shape =  inoc)) +
+  geom_point(size = 4, aes(fill = co2, shape =  inoc), alpha = 0.75) +
   geom_abline(slope = 1, intercept = 0, size = 1) +
   stat_cor(label.y = 3) +
   stat_regline_equation(label.y = 2.8) +
   scale_shape_manual(values = c(21, 22),
                      labels = c("inoculated",
-                                "not inoculated")) +
-  scale_fill_manual(values = c("red", "blue"),
+                                "uninoculated")) +
+  scale_fill_manual(values = c("#004488", "#BB5566"),
                     labels = c("ambient", "elevated")) +
   scale_x_continuous(limits = c(0,3), breaks = seq(0, 3, 1)) +
   scale_y_continuous(limits = c(0,3), breaks = seq(0, 3, 1)) +
@@ -130,14 +164,14 @@ narea.comp <- ggplot(data = df, aes(x = narea, y = narea.chl)) +
 
 marea.comp <- ggplot(data = subset(df, marea.chl < 100), 
        aes(x = marea, y = marea.chl)) +
-  geom_point(size = 4, aes(fill = co2, shape =  inoc)) +
+  geom_point(size = 4, aes(fill = co2, shape =  inoc), alpha = 0.75) +
   geom_abline(slope = 1, intercept = 0, size = 1) +
   stat_cor(label.y = 100) +
   stat_regline_equation(label.y = 95) +
   scale_shape_manual(values = c(21, 22),
                      labels = c("inoculated",
-                                "not inoculated")) +
-  scale_fill_manual(values = c("red", "blue"),
+                                "unnoculated")) +
+  scale_fill_manual(values = c("#004488", "#BB5566"),
                     labels = c("ambient", "elevated")) +
   scale_x_continuous(limits = c(25, 100), breaks = seq(25, 100, 25)) +
   scale_y_continuous(limits = c(25, 100), breaks = seq(25, 100, 25)) +
@@ -149,14 +183,14 @@ marea.comp <- ggplot(data = subset(df, marea.chl < 100),
   theme_bw(base_size = 18)
 
 nmass.comp <- ggplot(data = df, aes(x = nmass.focal, y = nmass.chl)) +
-  geom_point(size = 4, aes(fill = co2, shape =  inoc)) +
+  geom_point(size = 4, aes(fill = co2, shape =  inoc), alpha = 0.75) +
   geom_abline(slope = 1, intercept = 0, size = 1) +
   stat_cor(label.y = 0.075) +
   stat_regline_equation(label.y = 0.070) +
   scale_shape_manual(values = c(21, 22),
                      labels = c("inoculated",
-                                "not inoculated")) +
-  scale_fill_manual(values = c("red", "blue"),
+                                "uninoculated")) +
+  scale_fill_manual(values = c("#004488", "#BB5566"),
                     labels = c("ambient", "elevated")) +
   scale_x_continuous(limits = c(0, 0.075), breaks = seq(0, 0.075, 0.025)) +
   scale_y_continuous(limits = c(0, 0.075), breaks = seq(0, 0.075, 0.025)) +
@@ -168,9 +202,9 @@ nmass.comp <- ggplot(data = df, aes(x = nmass.focal, y = nmass.chl)) +
   theme_bw(base_size = 20)
 
 png("../working_drafts/figs/NxCO2xI_leafN_chl_comps.png",
-    width = 10, height = 8, units = 'in', res = 600)
+    width = 12, height = 8, units = 'in', res = 600)
 ggarrange(narea.comp, nmass.comp, marea.comp,
           common.legend = TRUE, legend = "right",
-          align = "hv", labels = "AUTO")
+          align = "hv", labels = c("(a)", "(b)", "(c)"))
 dev.off()
 
