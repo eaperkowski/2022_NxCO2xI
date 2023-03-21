@@ -16,6 +16,7 @@ id <- read.csv("../data_sheets/NxCO2_id_datasheet.csv")
 photo <- read.csv("../data_sheets/NxCO2_photo_data.csv")
 photo.wk6 <- read.csv("../data_sheets/NxCO2_photo_data_wk6.csv")
 isotopes <- read.csv("../data_sheets/NxCO2xI_isotope_data.csv")
+d13c.air <- read.csv("../data_sheets/NxCO2xI_d13c_air.csv")
 
 
 ###############################################################################
@@ -26,6 +27,17 @@ source("../../r_functions/stomatal_limitation.R")
 source("../../r_functions/calc_chi.R")
 source("../../r_functions/calc_beta.R")
 source("../../r_functions/calc_ndfa.R")
+
+###############################################################################
+## Calculate d13C in air between the two CO2 treatments
+###############################################################################
+d13c_air <- d13c.air %>%
+  separate(id, into = c("name", "chamber", "co2", "rep")) %>%
+  group_by(co2) %>%
+  summarize(d13c.air = mean(d13c_air),
+            co2.ppm = mean(co2_ppm)) %>%
+  select(co2_cat = co2, everything()) %>%
+  data.frame()
 
 ###############################################################################
 ## Chlorophyll content
@@ -175,17 +187,25 @@ ndfa <- d15n.merged %>%
 ###############################################################################
 ## Calculate beta
 ###############################################################################
+head(isotopes)
+
+d13c_air$co2_cat <- as.double(d13c_air$co2_cat)
+
+
 beta <- isotopes %>%
   dplyr::select(id, leaf.d13c) %>%
   separate(id, into = c("co2", "inoc", "n.trt", "rep"), remove = FALSE) %>%
-  mutate(calc_chi_c3(leaf.d13c = leaf.d13c, air = -8)[2],
-         temp = ifelse(co2 == "e", 21.5, 21.3),
+  mutate(temp = ifelse(co2 == "e", 21.5, 21.3),
          rh = ifelse(co2 == "e", 51.6, 50.3),
+         co2_cat = ifelse(co2 == "e", 1000, 420),
          co2_num = ifelse(co2 == "e", 989, 439),
          vpd = RHtoVPD(RH = rh, TdegC = temp)) %>%
+  full_join(d13c_air) %>%
+  select(-co2.ppm) %>%
+  mutate(chi = calc_chi_c3(leaf.d13c = leaf.d13c, air = d13c.air)) %>%
   mutate(beta = calc_beta(chi = chi, temp = temp, vpd = vpd * 1000, 
-                          ca = co2_num, z = 976)) %>%
-  dplyr::select(id, beta)
+                          ca = co2_num, z = 976)$beta) %>%
+  dplyr::select(id, chi, beta)
 
 ###############################################################################
 ## Compile data files into single file for analyses/figs
@@ -219,7 +239,6 @@ compile_df <- id %>%
          
          ## Nitrogen-water use tradeoffs
          pnue = anet / (narea / 14),
-         calc_chi_c3(leaf.d13c = leaf.d13c, air = -8)[2],
          iwue = anet / gsw,
          narea.gs = narea / gsw,
          vcmax.gs = vcmax25 / gsw,

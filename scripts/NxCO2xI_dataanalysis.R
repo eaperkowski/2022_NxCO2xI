@@ -498,6 +498,33 @@ emmeans(pnue, pairwise~inoc)
 test(emtrends(pnue, ~1, "n.trt"))
 
 ##########################################################################
+## chi
+##########################################################################
+chi <- lmer(chi ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(chi)
+qqnorm(residuals(chi))
+qqline(residuals(chi))
+densityPlot(residuals(chi))
+shapiro.test(residuals(chi))
+outlierTest(chi)
+
+# Model results
+summary(chi)
+Anova(chi)
+r.squaredGLMM(chi)
+
+# Pairwise comparisons
+test(emtrends(chi, ~inoc*co2, "n.trt"))
+
+
+## Individual effect of n.trt on iWUE
+test(emtrends(chi, ~1, "n.trt"))
+emmeans(chi, pairwise~inoc)
+emmeans(chi, pairwise~co2)
+
+##########################################################################
 ## iWUE
 ##########################################################################
 iwue <- lmer(iwue ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
@@ -519,7 +546,6 @@ r.squaredGLMM(iwue)
 
 ## Individual effect of n.trt on iWUE
 test(emtrends(iwue, ~1, "n.trt"))
-## Increasing soil N fertilization increases iWUE (interesting!!!!!)
 
 ##########################################################################
 ## Narea:gs
@@ -677,8 +703,6 @@ test(emtrends(ncost, ~1, "n.trt"))
 test(emmeans(ncost, pairwise~co2*inoc, "n.trt", 
              at = list(n.trt = c(0,35,70,105,140,210,280,350,630))))
 
-
-
 ##########################################################################
 ## Belowground carbon biomass
 ##########################################################################
@@ -833,6 +857,65 @@ test(emtrends(ndfa, ~1, "n.trt"))
 emmeans(ndfa, pairwise~inoc)
 
 ##########################################################################
+## beta
+##########################################################################
+beta <- lmer(log(beta) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(beta)
+qqnorm(residuals(beta))
+qqline(residuals(beta))
+densityPlot(residuals(beta))
+shapiro.test(residuals(beta))
+outlierTest(beta)
+
+# Model results
+summary(beta)
+Anova(beta)
+r.squaredGLMM(beta)
+
+# Pairwise comparisons
+test(emtrends(beta, pairwise~inoc*co2, "n.trt"))
+test(emtrends(beta, pairwise~co2, "n.trt"))
+emmeans(beta, pairwise~inoc*co2)
+
+
+## Individual effect of n.trt on iWUE
+test(emtrends(beta, ~1, "n.trt"))
+emmeans(beta, pairwise~inoc)
+emmeans(beta, pairwise~co2)
+
+##########################################################################
+## beta ~ Ncost
+##########################################################################
+beta.ncost <- lmer(log(beta) ~ co2 * inoc * ncost + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(beta.ncost)
+qqnorm(residuals(beta.ncost))
+qqline(residuals(beta.ncost))
+densityPlot(residuals(beta.ncost))
+shapiro.test(residuals(beta.ncost))
+outlierTest(beta)
+
+# Model results
+summary(beta.ncost)
+Anova(beta.ncost)
+r.squaredGLMM(beta.ncost)
+
+# Pairwise comparisons
+test(emtrends(beta.ncost, pairwise~inoc*co2, "n.trt"))
+test(emtrends(beta.ncost, pairwise~co2, "n.trt"))
+emmeans(beta.ncost, pairwise~inoc*co2)
+
+
+## Individual effect of n.trt on iWUE
+test(emtrends(beta.ncost, ~1, "ncost"))
+emmeans(beta.ncost, pairwise~inoc)
+emmeans(beta.ncost, pairwise~co2)
+
+
+##########################################################################
 ## BVR
 ##########################################################################
 bvr <- lmer(sqrt(bvr) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
@@ -858,6 +941,31 @@ test(emtrends(bvr, ~inoc, "n.trt"))
 test(emtrends(bvr, ~1, "n.trt"))
 emmeans(bvr, ~co2)
 emmeans(bvr, ~inoc)
+
+##########################################################################
+## Structural equation model
+##########################################################################
+library(piecewiseSEM)
+library(nlme)
+
+df$co2 <- ifelse(df$co2 == "elv", "1", "0")
+head(df)
+
+test <- psem(
+  jvmax <- lme(jmax25.vcmax25 ~ vcmax25 + jmax25 + (1|rack:co2), data = df, 
+               na.action = na.omit),
+  vcmax <- lme(vcmax25 ~ narea + (1|rack:co2), data = df, 
+               na.action = na.omit),
+  jmax <- lme(jmax25 ~ narea + (1|rack:co2), data = df, 
+               na.action = na.omit),
+  narea <- lme(narea ~ chi + (1|rack:co2), data = df, 
+               na.action = na.omit),
+  chi <- lme(chi ~ co2 + beta + (1|rack:co2), 
+             data = df,  na.action = na.omit))
+
+
+
+
 
 ##########################################################################
 ## Table 1: Leaf N content
