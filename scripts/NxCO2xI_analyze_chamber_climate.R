@@ -133,12 +133,36 @@ par.chamber <- data.frame(percent = seq(0, 100, 10),
                           ch5 = c(0, 112, 233, 344, 466, 581, 649, 744, 926, 1061, 1295),
                           ch6 = c(0, 107, 222, 328, 444, 552, 616, 706, 879, 1006, 1228))
 
-summary(lm(ch1 ~ percent, data = par.chamber))
-summary(lm(ch2 ~ percent, data = par.chamber))
-summary(lm(ch3 ~ percent, data = par.chamber))
-summary(lm(ch4 ~ percent, data = par.chamber))
-summary(lm(ch5 ~ percent, data = par.chamber))
-summary(lm(ch6 ~ percent, data = par.chamber))
+par.chamber_long <- par.chamber %>%
+  pivot_longer(cols = ch1:ch6, names_to = "chamber", values_to = "par")
+
+ggplot(data = subset(par.chamber_long, percent < 50), aes(x = percent, y = par)) +
+  geom_point(aes(color = chamber), size = 3) +
+  geom_smooth(method = 'lm', se = TRUE) +
+  stat_poly_eq(parse=T, aes(label = ..eq.label..), formula=y~x)
+
+ggplot(data = subset(par.chamber_long, percent > 50), aes(x = percent, y = log(par))) +
+  geom_point(aes(color = chamber), size = 3) +
+  geom_smooth(method = 'lm', se = TRUE) +
+  stat_poly_eq(parse=T, aes(label = ..eq.label..), formula=y~x)
+
+
+par.lm.0to50percent <- lm(par ~ percent, data = subset(par.chamber_long, percent < 50))
+par.lm.50to100percent <- lm(log(par) ~ percent, data = subset(par.chamber_long, percent > 50))
+
+emmeans(par.lm.0to50percent, ~percent, at = list(percent = c(0, 25, 50)))
+emmeans(par.lm.50to100percent, ~percent, type = "response",
+        at = list(percent = c(75, 100)))
+
+
+
+ch1.par %>% full_join(ch2.par) %>% full_join(ch3.par) %>% 
+  full_join(ch4.par) %>% full_join(ch5.par) %>% full_join(ch6.par) %>%
+  group_by(percent) %>%
+  summarize(par.mean = mean(emmean, na.rm = TRUE),
+            par.sd = sd(emmean, na.rm = TRUE))
+  
+
 
 # Mean and standard deviation for maximum PAR
 mean(as.numeric(par.chamber[11, c(2:7)]))

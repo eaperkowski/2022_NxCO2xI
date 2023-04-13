@@ -146,8 +146,9 @@ dev.off()
 narea.comp <- ggplot(data = df, aes(x = narea, y = narea.chl)) +
   geom_point(size = 4, aes(fill = co2, shape =  inoc), alpha = 0.75) +
   geom_abline(slope = 1, intercept = 0, size = 1) +
-  stat_cor(label.y = 3) +
-  stat_regline_equation(label.y = 2.8) +
+  stat_poly_eq(formula = y ~ x,
+               aes(label = paste0("atop(", ..eq.label.., ",", ..rr.label.., ")")),
+               parse = TRUE, coef.digits = 4) +
   scale_shape_manual(values = c(21, 22),
                      labels = c("inoculated",
                                 "uninoculated")) +
@@ -157,7 +158,7 @@ narea.comp <- ggplot(data = df, aes(x = narea, y = narea.chl)) +
   scale_y_continuous(limits = c(0,3), breaks = seq(0, 3, 1)) +
   labs(x = expression("N"["area"]*" (gN m"^"-2"*")"),
        y = expression("N"["area_chl"]*" (gN m"^"-2"*")"),
-       fill = expression("CO"[2]*" treatment"),
+       fill = expression("CO"[2]),
        shape = "Inoculation") +
   guides(fill = guide_legend(override.aes = list(shape = 21))) +
   theme_bw(base_size = 20)
@@ -166,8 +167,9 @@ marea.comp <- ggplot(data = subset(df, marea.chl < 100),
        aes(x = marea, y = marea.chl)) +
   geom_point(size = 4, aes(fill = co2, shape =  inoc), alpha = 0.75) +
   geom_abline(slope = 1, intercept = 0, size = 1) +
-  stat_cor(label.y = 100) +
-  stat_regline_equation(label.y = 95) +
+  stat_poly_eq(formula = y ~ x,
+               aes(label = paste0("atop(", ..eq.label.., ",", ..rr.label.., ")")),
+               parse = TRUE, coef.digits = 4) +
   scale_shape_manual(values = c(21, 22),
                      labels = c("inoculated",
                                 "unnoculated")) +
@@ -185,8 +187,9 @@ marea.comp <- ggplot(data = subset(df, marea.chl < 100),
 nmass.comp <- ggplot(data = df, aes(x = nmass.focal, y = nmass.chl)) +
   geom_point(size = 4, aes(fill = co2, shape =  inoc), alpha = 0.75) +
   geom_abline(slope = 1, intercept = 0, size = 1) +
-  stat_cor(label.y = 0.075) +
-  stat_regline_equation(label.y = 0.070) +
+  stat_poly_eq(formula = y ~ x,
+               aes(label = paste0("atop(", ..eq.label.., ",", ..rr.label.., ")")),
+               parse = TRUE, coef.digits = 3) +
   scale_shape_manual(values = c(21, 22),
                      labels = c("inoculated",
                                 "uninoculated")) +
