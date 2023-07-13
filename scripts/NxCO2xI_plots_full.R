@@ -1099,20 +1099,22 @@ dev.off()
 ##########################################################################
 png("../working_drafts/figs/NxCO2xI_fig5_wholePlant.png",
     height = 8, width = 12, units = "in", res = 600)
-ggarrange(tla.plot, tbio.plot, ncost.plot,
+ggarrange(tla.plot, tbio.plot, ncost.plot, ndfa.plot,
           ncol = 2, nrow = 2, align = "hv", legend = "right",
-          labels = c("(a)", "(b)", "(c)"), common.legend = TRUE,
+          labels = c("(a)", "(b)", "(c)", "(d)"), common.legend = TRUE,
           font.label = list(size = 18))
 dev.off()
 
 ##########################################################################
-## Figure 5: nitrogen fixation plots
+## Figure SX: nitrogen fixation plots
 ##########################################################################
-png("../working_drafts/figs/NxCO2xI_fig6_nFix.png",
-    height = 8, width = 12, units = "in", res = 600)
-ggarrange(nod.plot, nodroot.plot, ndfa.plot, 
-          ncol = 2, nrow = 2, align = "hv", common.legend = TRUE,
-          legend = "right", labels = c("(a)", "(b)", "(c)"), font.label = list(size = 18))
+png("../working_drafts/figs/NxCO2xI_figS3_nFix.png",
+    height = 4, width = 12, units = "in", res = 600)
+ggarrange(nod.plot, nodroot.plot,
+          align = "hv", common.legend = TRUE,
+          nrow = 1, ncol = 2,
+          legend = "right", labels = c("(a)", "(b)"), 
+          font.label = list(size = 18))
 dev.off()
 
 
