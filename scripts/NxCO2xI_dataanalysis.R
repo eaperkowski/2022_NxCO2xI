@@ -511,16 +511,14 @@ shapiro.test(residuals(chi))
 outlierTest(chi)
 
 # Model results
-format(summary(chi), )
-
-
 format(summary(chi)$coefficient, scientific = TRUE, digits = 3)
 Anova(chi)
 r.squaredGLMM(chi)
 
 # Pairwise comparisons
 test(emtrends(chi, pairwise~inoc*co2, "n.trt"))
-
+test(emtrends(chi, pairwise~inoc, "n.trt"))
+test(emtrends(chi, pairwise~co2, "n.trt"))
 
 ## Individual effect of n.trt on iWUE
 test(emtrends(chi, ~1, "n.trt"))

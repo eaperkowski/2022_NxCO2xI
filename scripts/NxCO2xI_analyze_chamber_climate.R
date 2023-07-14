@@ -61,7 +61,6 @@ eco2.hobo <- hobo.clim %>%
 aco2.hobo <- hobo.clim %>% 
   filter(date.time > "2022-08-14" & date.time < "2022-10-01")  %>%
   mutate(co2.treat = "ambient")
-
 ggplot() +
   geom_line(data = eco2.hobo, 
             aes(x = date.time, y = air.temp),
@@ -70,6 +69,68 @@ ggplot() +
             aes(x = date.time, y = temp.set),
             color = "red") +
   facet_wrap(~chamber)
+
+
+eco2.hobo.all <- eco2.hobo %>%
+  group_by(date.time) %>%
+  summarize(temp.mean = mean(air.temp),
+            temp.sd = sd(air.temp))
+
+aco2.hobo.all <- aco2.hobo %>%
+  group_by(date.time) %>%
+  summarize(temp.mean = mean(air.temp),
+            temp.sd = sd(air.temp))
+
+
+ggplot() +
+  geom_line(data = eco2.hobo.all, 
+            aes(x = date.time, y = temp.mean),
+            size = 2) +
+  geom_ribbon(data = eco2.hobo.all,
+              aes(x = date.time, 
+                  ymin = temp.mean - temp.sd,
+                  ymax = temp.mean + temp.sd))
+  
+  
+
+hobo_merged <- eco2.hobo.all %>%
+  full_join(aco2.hobo.all) %>%
+  mutate(temp.mean = ifelse(date > ))
+
+temp.plot <- ggplot(data = subset(hobo_merged, temp.mean < 26 & 
+                                    temp.mean > 15)) +
+  geom_line(aes(x = date.time, y = temp.mean), size = 1)
+
+
+
+
+
+eco2.plot <- ggplot() +
+  geom_line(data = eco2.hobo, 
+            aes(x = date.time, y = air.temp, 
+                color = factor(chamber))) +
+  geom_line(data = eco2.hobo.all, 
+            aes(x = date.time, y = temp.mean),
+            size = 2) +
+  scale_y_continuous(limits = c(0, 30, 5)) +
+  scale_color_brewer(palette = "Spectral") +
+  theme_bw()
+
+aco2.plot <- ggplot() +
+  geom_line(data = aco2.hobo, 
+            aes(x = date.time, y = air.temp, 
+                color = factor(chamber))) +
+  scale_y_continuous(limits = c(0, 30, 5)) +
+  geom_line(data = aco2.hobo.all, 
+            aes(x = date.time, y = temp.mean),
+            size = 2) +
+  scale_color_brewer(palette = "Spectral") +
+  theme_bw()
+
+
+
+ggarrange(aco2.plot, eco2.plot, ncol = 2, common.legend = TRUE)
+
 
 #############
 ## Filter chamber.clim to dates of experiment, tack on 
@@ -133,8 +194,17 @@ par.chamber <- data.frame(percent = seq(0, 100, 10),
                           ch5 = c(0, 112, 233, 344, 466, 581, 649, 744, 926, 1061, 1295),
                           ch6 = c(0, 107, 222, 328, 444, 552, 616, 706, 879, 1006, 1228))
 
+
+
+
+
+
 par.chamber_long <- par.chamber %>%
   pivot_longer(cols = ch1:ch6, names_to = "chamber", values_to = "par")
+
+
+
+
 
 ggplot(data = subset(par.chamber_long, percent < 50), aes(x = percent, y = par)) +
   geom_point(aes(color = chamber), size = 3) +
@@ -154,15 +224,11 @@ emmeans(par.lm.0to50percent, ~percent, at = list(percent = c(0, 25, 50)))
 emmeans(par.lm.50to100percent, ~percent, type = "response",
         at = list(percent = c(75, 100)))
 
-
-
 ch1.par %>% full_join(ch2.par) %>% full_join(ch3.par) %>% 
   full_join(ch4.par) %>% full_join(ch5.par) %>% full_join(ch6.par) %>%
   group_by(percent) %>%
   summarize(par.mean = mean(emmean, na.rm = TRUE),
             par.sd = sd(emmean, na.rm = TRUE))
-  
-
 
 # Mean and standard deviation for maximum PAR
 mean(as.numeric(par.chamber[11, c(2:7)]))
