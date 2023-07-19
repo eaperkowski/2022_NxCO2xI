@@ -385,6 +385,58 @@ chlarea.int.plot
 ## Vcmax regression line prep
 ##########################################################################
 ## Copy removed outliers and lmer fxn
+anet <- lmer(anet ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+Anova(anet)
+test(emtrends(anet, ~co2*inoc, "n.trt"))
+
+## Emmean fxns for regression lines + error ribbons
+anet.regline <- data.frame(emmeans(anet, ~co2*inoc, "n.trt",
+                                      at = list(n.trt = seq(0, 630, 5)),
+                                      type = "response")) %>%
+  mutate(co2.inoc = str_c(co2, "_", inoc),
+         linetype = ifelse(co2.inoc == "amb_inoc", "dashed", "solid"))
+
+##########################################################################
+## Anet plot
+##########################################################################
+anet.plot <- ggplot(data = df, 
+                       aes(x = n.trt, 
+                           y = anet,    
+                           fill = co2.inoc)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = anet.regline,
+              aes(color = co2.inoc, y = emmean, linetype = linetype), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = anet.regline,
+              aes(fill = co2.inoc, y = emmean, 
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = full.cols,
+                    labels = c("Ambient, inoculated",
+                               "Ambient, uninoculated",
+                               "Elevated, inoculated",
+                               "Elevated, uninoculated")) +
+  scale_color_manual(values = full.cols,
+                     labels = c("Ambient, inoculated",
+                                "Ambient, uninoculated",
+                                "Elevated, inoculated",
+                                "Elevated, uninoculated")) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_y_continuous(limits = c(0, 30), breaks = seq(0, 30, 10)) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("A")["net"]*" ("*mu*"mol m"^"-2"*" s"^"-1"*")")),
+       fill = "Treatment", color = "Treatment") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25)) +
+  guides(linetype = "none")
+anet.plot
+
+##########################################################################
+## Vcmax regression line prep
+##########################################################################
+## Copy removed outliers and lmer fxn
 vcmax25 <- lmer(vcmax25 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 test(emtrends(vcmax25, ~co2*inoc, "n.trt"))
 
@@ -590,62 +642,10 @@ rd25.plot <- ggplot(data = df,
   guides(linetype = "none")
 rd25.plot
 
-##########################################################################
-## gsw regression line prep
-##########################################################################
-df$gsw[69] <- NA
-
-gsw <- lmer(gsw ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-test(emtrends(gsw, ~co2*inoc, "n.trt"))
-
-## Emmean fxns for regression lines + error ribbons
-gsw.regline <- data.frame(emmeans(gsw, ~co2*inoc, "n.trt",
-                                   at = list(n.trt = seq(0, 630, 5)),
-                                   type = "response")) %>%
-  mutate(co2.inoc = str_c(co2, "_", inoc),
-         linetype = ifelse(co2.inoc == "elv_no.inoc" |
-                             co2.inoc == "amb_inoc", "dashed", "solid"))
-
-##########################################################################
-## gsw plot
-##########################################################################
-gsw.plot <- ggplot(data = df, 
-                    aes(x = n.trt, 
-                        y = gsw,    
-                        fill = co2.inoc)) +
-  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
-  geom_smooth(data = gsw.regline,
-              aes(linetype = linetype, color = co2.inoc, y = emmean), 
-              size = 1.5, se = FALSE) +
-  geom_ribbon(data = gsw.regline,
-              aes(fill = co2.inoc, y = emmean, 
-                  ymin = lower.CL, ymax = upper.CL), 
-              size = 1.5, alpha = 0.25) +
-  scale_fill_manual(values = full.cols,
-                    labels = c("Ambient, inoculated",
-                               "Ambient, uninoculated",
-                               "Elevated, inoculated",
-                               "Elevated, uninoculated")) +
-  scale_color_manual(values = full.cols,
-                     labels = c("Ambient, inoculated",
-                                "Ambient, uninoculated",
-                                "Elevated, inoculated",
-                                "Elevated, uninoculated")) +
-  scale_y_continuous(limits = c(0, 0.6), breaks = seq(0, 0.6, 0.15)) +
-  scale_linetype_manual(values = c("dashed", "solid")) +
-  labs(x = "Soil N fertilization (ppm)",
-       y = expression(bold(italic("g")["sw"]*" (mol m"^"-2"*" s"^"-1"*")")),
-       fill = "Treatment", color = "Treatment") +
-  theme_bw(base_size = 18) +
-  theme(axis.title = element_text(face = "bold"),
-        legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25)) +
-  guides(linetype = "none")
-gsw.plot
 
 
 ##########################################################################
-## gsw regression line prep
+## chi regression line prep
 ##########################################################################
 chi <- lmer(chi ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 test(emtrends(chi, ~co2*inoc, "n.trt"))
@@ -658,7 +658,7 @@ chi.regline <- data.frame(emmeans(chi, ~co2*inoc, "n.trt",
          linetype = ifelse(co2.inoc == "amb_inoc", "dashed", "solid"))
 
 ##########################################################################
-## gsw plot
+## chi plot
 ##########################################################################
 chi.plot <- ggplot(data = df, 
                    aes(x = n.trt, 
@@ -1169,8 +1169,8 @@ dev.off()
 ##########################################################################
 png("../working_drafts/figs/NxCO2xI_fig2_photo.png",
     height = 12, width = 12, units = "in", res = 600)
-ggarrange(vcmax25.plot, jmax25.plot, jvmax25.plot, 
-          rd25.plot, gsw.plot, chi.plot,
+ggarrange(anet.plot, rd25.plot, vcmax25.plot, jmax25.plot,
+          jvmax25.plot, chi.plot,
           ncol = 2, nrow = 3, align = "hv", legend = "right",
           common.legend = TRUE, font.label = list(size = 18), 
           labels = c("(a)", "(b)", "(c)", "(d)", "(e)", "(f)"))

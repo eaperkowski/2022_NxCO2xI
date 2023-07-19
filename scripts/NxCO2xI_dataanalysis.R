@@ -47,7 +47,6 @@ Anova(narea)
 r.squaredGLMM(narea)
 
 # Post-hoc tests
-# Interaction between CO2 and n.trt
 test(emtrends(narea, pairwise~co2, "n.trt")) 
 test(emtrends(narea, pairwise~inoc, "n.trt"))
 emmeans(narea, pairwise~co2*inoc*co2)
@@ -266,7 +265,7 @@ shapiro.test(residuals(anet))
 outlierTest(anet)
 
 # Model results
-summary(anet)
+format(summary(anet)$coefficient, scientific = TRUE, digits = 3)
 Anova(anet)
 r.squaredGLMM(anet)
 
@@ -274,9 +273,9 @@ r.squaredGLMM(anet)
 test(emtrends(anet, pairwise~inoc, "n.trt"))
 
 # Individual effects
-emmeans(rd25, pairwise~co2)
-emmeans(rd25, pairwise~inoc)
-test(emtrends(rd25, ~1, "n.trt"))
+emmeans(anet, pairwise~co2)
+emmeans(anet, pairwise~inoc)
+test(emtrends(anet, ~1, "n.trt"))
 
 ##########################################################################
 ## gsw
