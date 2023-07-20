@@ -723,8 +723,7 @@ r.squaredGLMM(cbg)
 
 # Pairwise comparisons
 test(emtrends(cbg, pairwise~inoc, "n.trt"))
-test(emtrends(cbg, pairwise~co2, "n.trt"))
-emmeans(cbg, pairwise~co2*inoc, type = "response")
+cld(emmeans(cbg, pairwise~co2*inoc, type = "response"))
 
 ## Individual effects
 emmeans(cbg, pairwise~co2, type = "response")

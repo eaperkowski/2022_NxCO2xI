@@ -682,7 +682,7 @@ chi.plot <- ggplot(data = df,
                                 "Ambient, uninoculated",
                                 "Elevated, inoculated",
                                 "Elevated, uninoculated")) +
-  scale_y_continuous(limits = c(0.398, 0.8), breaks = seq(0.4, 0.8, 0.2)) +
+  scale_y_continuous(limits = c(0.398, 0.8), breaks = seq(0.4, 0.8, 0.1)) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   labs(x = "Soil N fertilization (ppm)",
        y = expression(bold(chi)),
@@ -995,6 +995,96 @@ ncost.plot <- ggplot(data = df,
 ncost.plot
 
 ##########################################################################
+## Ncost regression line prep
+##########################################################################
+cbg <- lmer(log(cbg) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+test(emtrends(cbg, ~co2*inoc, "n.trt"))
+
+## Emmean fxns for regression lines + error ribbons
+cbg.regline <- data.frame(emmeans(cbg, ~co2*inoc, "n.trt",
+                                    at = list(n.trt = seq(0, 630, 5)),
+                                    type = "response")) %>%
+  mutate(co2.inoc = str_c(co2, "_", inoc))
+
+##########################################################################
+## Ncost plot
+##########################################################################
+cbg.plot <- ggplot(data = df, aes(x = n.trt, y = cbg, fill = co2.inoc)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = cbg.regline, aes(color = co2.inoc, y = response), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = cbg.regline, aes(fill = co2.inoc, y = response, 
+                                      ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = full.cols,
+                    labels = c("Ambient, inoculated",
+                               "Ambient, uninoculated",
+                               "Elevated, inoculated",
+                               "Elevated, uninoculated")) +
+  scale_color_manual(values = full.cols,
+                     labels = c("Ambient, inoculated",
+                                "Ambient, uninoculated",
+                                "Elevated, inoculated",
+                                "Elevated, uninoculated")) +
+  scale_y_continuous(limits = c(0, 6), breaks = seq(0, 6, 2)) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("C")["bg"]*" (gC)")),
+       fill = "Treatment", color = "Treatment",
+       shape = "Inoculation") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25)) +
+  guides(linetype = "none")
+cbg.plot
+
+##########################################################################
+## Nwp regression line prep
+##########################################################################
+nwp <- lmer(sqrt(wpn) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+test(emtrends(nwp, ~co2*inoc, "n.trt"))
+
+## Emmean fxns for regression lines + error ribbons
+nwp.regline <- data.frame(emmeans(nwp, ~co2*inoc, "n.trt",
+                                  at = list(n.trt = seq(0, 630, 5)),
+                                  type = "response")) %>%
+  mutate(co2.inoc = str_c(co2, "_", inoc))
+
+##########################################################################
+## Nwp plot
+##########################################################################
+nwp.plot <- ggplot(data = df, aes(x = n.trt, y = wpn, fill = co2.inoc)) +
+  geom_jitter(size = 3, alpha = 0.75, shape = 21) +
+  geom_smooth(data = nwp.regline, aes(color = co2.inoc, y = response), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = nwp.regline, aes(fill = co2.inoc, y = response, 
+                                      ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = full.cols,
+                    labels = c("Ambient, inoculated",
+                               "Ambient, uninoculated",
+                               "Elevated, inoculated",
+                               "Elevated, uninoculated")) +
+  scale_color_manual(values = full.cols,
+                     labels = c("Ambient, inoculated",
+                                "Ambient, uninoculated",
+                                "Elevated, inoculated",
+                                "Elevated, uninoculated")) +
+  scale_y_continuous(limits = c(0, 0.6), breaks = seq(0, 0.6, 0.2)) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("N")["wp"]*" (gN)")),
+       fill = "Treatment", color = "Treatment",
+       shape = "Inoculation") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25)) +
+  guides(linetype = "none")
+nwp.plot
+
+##########################################################################
 ## Root nodule biomass regression line prep
 ##########################################################################
 df$nodule.biomass[df$nod.root.ratio > 0.05 & df$inoc == "no.inoc"] <- NA
@@ -1198,11 +1288,11 @@ ggarrange(tla.plot, tbio.plot, ncost.plot, ndfa.plot,
 dev.off()
 
 ##########################################################################
-## Figure SX: nitrogen fixation plots
+## Figure S3: nitrogen fixation plots
 ##########################################################################
-png("../working_drafts/figs/NxCO2xI_figS5_nFix.png",
+png("../working_drafts/figs/NxCO2xI_figS3_ncost_comps.png",
     height = 4, width = 12, units = "in", res = 600)
-ggarrange(nod.plot, nodroot.plot,
+ggarrange(cbg.plot, nwp.plot,
           align = "hv", common.legend = TRUE,
           nrow = 1, ncol = 2,
           legend = "right", labels = c("(a)", "(b)"), 
@@ -1211,28 +1301,28 @@ dev.off()
 
 
 ##########################################################################
-## Figure S3: figure showing NxCO2 interaction for leaf N content
+## Figure S4: figure showing NxCO2 interaction for leaf N content
 ##########################################################################
-png("../working_drafts/figs/NxCO2xI_figS3_leafN_CO2_N_int.png",
+png("../working_drafts/figs/NxCO2xI_figS4_leafN_CO2_N_int.png",
     height = 7, width = 10, units = "in", res = 600)
-ggarrange(narea.int.plot, nmass.int.plot, marea.int.plot, chlarea.int.plot, 
+ggarrange(narea.int.plot, nmass.int.plot, marea.int.plot, 
           ncol = 2, nrow = 2, align = "hv", legend = "right",
-          common.legend = TRUE, labels = c("(a)", "(b)", "(c)", "(d)"),
+          common.legend = TRUE, labels = c("(a)", "(b)", "(c)"),
           font.label = list(size = 18))
 dev.off()
 
 ##########################################################################
-## Figure S4: figure showing NxCO2 interaction for pstructure
+## Figure S5: figure showing NxCO2 interaction for pstructure
 ##########################################################################
-png("../working_drafts/figs/NxCO2xI_figS4_pstr_CO2_N_int.png",
+png("../working_drafts/figs/NxCO2xI_figS5_pstr_CO2_N_int.png",
     height = 4, width = 6, units = "in", res = 600)
 pstr.int.plot
 dev.off()
 
 ##########################################################################
-## Figure S5: nitrogen fixation plots
+## Figure S6: nitrogen fixation plots
 ##########################################################################
-png("../working_drafts/figs/NxCO2xI_figS5_nFix.png",
+png("../working_drafts/figs/NxCO2xI_figS6_nFix.png",
     height = 4, width = 12, units = "in", res = 600)
 ggarrange(nod.plot, nodroot.plot,
           align = "hv", common.legend = TRUE,
