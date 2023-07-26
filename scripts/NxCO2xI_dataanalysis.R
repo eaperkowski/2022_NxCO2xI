@@ -49,7 +49,7 @@ r.squaredGLMM(narea)
 # Post-hoc tests
 test(emtrends(narea, pairwise~co2, "n.trt")) 
 test(emtrends(narea, pairwise~inoc, "n.trt"))
-emmeans(narea, pairwise~co2*inoc*co2)
+cld(emmeans(narea, pairwise~co2*inoc))
 
 # Individual effects
 emmeans(narea, pairwise~co2)
