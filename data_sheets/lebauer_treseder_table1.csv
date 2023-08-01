@@ -1,0 +1,9 @@
+﻿biome,eff.size,lower.ci,upper.ci
+overall,1.29,1.22,1.35
+temp.forest,1.19,1.11,1.28
+trop.forest,1.6,1.3,1.97
+tundra,1.35,1.12,1.64
+trop.grassland,1.26,1.04,1.54
+desert,1.11,0.8,1.55
+temp.grassland,1.53,1.37,1.71
+wetland,1.16,1,1.34

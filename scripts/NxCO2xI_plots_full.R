@@ -25,8 +25,7 @@ df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv",
                                       "amb_inoc", "amb_no.inoc")))
 
 ## Add colorblind friendly palette
-nfix.cols <- c("#DDAA33", "#555555")
-co2.cols <- c("#004488", "#BB5566")
+co2.cols <- c("#2166ac", "#b2182b")
 full.cols <- c("#b2182b", "#f4a582", "#2166ac", "#92c5d3")
 
 ## Create blank plot as spacer plot
@@ -513,6 +512,46 @@ vcmax25.plot <- ggplot(data = df,
 vcmax25.plot
 
 ##########################################################################
+## Vcmax CO2xN interaction regression line prep
+##########################################################################
+test(emtrends(vcmax25, pairwise~co2, "n.trt"))
+
+vcmax25.int.regline <- data.frame(emmeans(vcmax25, ~co2, "n.trt",
+                                      at = list(n.trt = seq(0, 630, 5)),
+                                      type = "response"))
+
+##########################################################################
+## Vcmax CO2xN interaction plot
+##########################################################################
+vcmax25.int.plot <- ggplot(data = df, 
+                       aes(x = n.trt, y = vcmax25, fill = co2)) +
+  geom_jitter(aes(shape = inoc), size = 3, alpha = 0.75, width = 5) +
+  geom_smooth(data = vcmax25.int.regline,
+              aes(color = co2, y = emmean), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = vcmax25.int.regline,
+              aes(fill = co2, y = emmean, 
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_color_manual(values = co2.cols,
+                     labels = c("Ambient",  "Elevated")) +
+  scale_fill_manual(values = co2.cols,
+                    labels = c("Ambient",  "Elevated")) +
+  scale_shape_manual(values = c(21, 24), 
+                     labels = c("Uninoculated", "Inoculated")) +
+  scale_y_continuous(limits = c(0, 150), breaks = seq(0, 150, 50)) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("V")["cmax25"]*" ("*mu*"mol m"^"-2"*" s"^"-1"*")")),
+       fill = expression(bold("CO"["2"])),
+       color = expression(bold("CO"["2"])),
+       shape = "Inoculation") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25))
+vcmax25.int.plot
+
+##########################################################################
 ## Jmax regression line prep
 ##########################################################################
 jmax25 <- lmer(jmax25 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
@@ -567,6 +606,46 @@ jmax25.plot <- ggplot(data = df,
 jmax25.plot
 
 ##########################################################################
+## Jmax CO2xN interaction regression line prep
+##########################################################################
+test(emtrends(jmax25, pairwise~co2, "n.trt"))
+
+jmax25.int.regline <- data.frame(emmeans(jmax25, ~co2, "n.trt",
+                                          at = list(n.trt = seq(0, 630, 5)),
+                                          type = "response"))
+
+##########################################################################
+## Jmax CO2xN interaction plot
+##########################################################################
+jmax25.int.plot <- ggplot(data = df, 
+                           aes(x = n.trt, y = jmax25, fill = co2)) +
+  geom_jitter(aes(shape = inoc), size = 3, alpha = 0.75, width = 5) +
+  geom_smooth(data = jmax25.int.regline,
+              aes(color = co2, y = emmean), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = jmax25.int.regline,
+              aes(fill = co2, y = emmean, 
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_color_manual(values = co2.cols,
+                     labels = c("Ambient",  "Elevated")) +
+  scale_fill_manual(values = co2.cols,
+                    labels = c("Ambient",  "Elevated")) +
+  scale_shape_manual(values = c(21, 24), 
+                     labels = c("Uninoculated", "Inoculated")) +
+  scale_y_continuous(limits = c(0, 240), breaks = seq(0, 240, 60)) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("J")["max25"]*" ("*mu*"mol m"^"-2"*" s"^"-1"*")")),
+       fill = expression(bold("CO"["2"])),
+       color = expression(bold("CO"["2"])),
+       shape = "Inoculation") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25))
+jmax25.int.plot
+
+##########################################################################
 ## Jmax25:Vcmax25 regression line prep
 ##########################################################################
 df$jmax25.vcmax25[100] <- NA
@@ -584,7 +663,7 @@ jvmax25.regline <- data.frame(emmeans(jvmax25, ~co2*inoc, "n.trt",
                                       "amb_inoc", "amb_no.inoc")))
 
 ##########################################################################
-## Jmax plot
+## Jmax:Vcmax plot
 ##########################################################################
 jvmax25.plot <- ggplot(data = df,
                        aes(x = n.trt, y = jmax25.vcmax25, fill = co2.inoc)) +
@@ -620,6 +699,46 @@ jvmax25.plot <- ggplot(data = df,
   guides(linetype = "none", shape = "none",
          fill = guide_legend(override.aes = list(shape = c(24, 21, 24, 21))))
 jvmax25.plot
+
+##########################################################################
+## Jmax:Vcmax CO2xN interaction regression line prep
+##########################################################################
+test(emtrends(jvmax25, pairwise~co2, "n.trt"))
+
+jvmax25.int.regline <- data.frame(emmeans(jvmax25, ~co2, "n.trt",
+                                         at = list(n.trt = seq(0, 630, 5)),
+                                         type = "response"))
+
+##########################################################################
+## Jmax:Vcmax CO2xN interaction plot
+##########################################################################
+jvmax25.int.plot <- ggplot(data = df, 
+                          aes(x = n.trt, y = jmax25.vcmax25, fill = co2)) +
+  geom_jitter(aes(shape = inoc), size = 3, alpha = 0.75, width = 5) +
+  geom_smooth(data = jvmax25.int.regline,
+              aes(color = co2, y = emmean), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = jvmax25.int.regline,
+              aes(fill = co2, y = emmean, 
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_color_manual(values = co2.cols,
+                     labels = c("Ambient",  "Elevated")) +
+  scale_fill_manual(values = co2.cols,
+                    labels = c("Ambient",  "Elevated")) +
+  scale_shape_manual(values = c(21, 24), 
+                     labels = c("Uninoculated", "Inoculated")) +
+  scale_y_continuous(limits = c(1.4, 2.2), breaks = seq(1.4, 2.2, 0.2)) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("J")["max25"]*":"*italic("V")["cmax25"])),
+       fill = expression(bold("CO"["2"])),
+       color = expression(bold("CO"["2"])),
+       shape = "Inoculation") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25))
+jvmax25.int.plot
 
 ##########################################################################
 ## Rd25 regression line prep
@@ -935,6 +1054,46 @@ tla.plot <- ggplot(data = df, aes(x = n.trt, y = tla, fill = co2.inoc)) +
 tla.plot
 
 ##########################################################################
+## TLA CO2xN interaction regression line prep
+##########################################################################
+test(emtrends(tla, pairwise~co2, "n.trt"))
+
+tla.int.regline <- data.frame(emmeans(tla, ~co2, "n.trt",
+                                          at = list(n.trt = seq(0, 630, 5)),
+                                          type = "response"))
+
+##########################################################################
+## TLA CO2xN interaction plot
+##########################################################################
+tla.int.plot <- ggplot(data = df, 
+                           aes(x = n.trt, y = tla, fill = co2)) +
+  geom_jitter(aes(shape = inoc), size = 3, alpha = 0.75, width = 5) +
+  geom_smooth(data = tla.int.regline,
+              aes(color = co2, y = emmean), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = tla.int.regline,
+              aes(fill = co2, y = emmean, 
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_color_manual(values = co2.cols,
+                     labels = c("Ambient",  "Elevated")) +
+  scale_fill_manual(values = co2.cols,
+                    labels = c("Ambient",  "Elevated")) +
+  scale_shape_manual(values = c(21, 24), 
+                     labels = c("Uninoculated", "Inoculated")) +
+  scale_y_continuous(limits = c(0, 1200), breaks = seq(0, 1200, 300)) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold("Total leaf area (cm"^"2"*")")),
+       fill = expression(bold("CO"["2"])),
+       color = expression(bold("CO"["2"])),
+       shape = "Inoculation") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25))
+tla.int.plot
+
+##########################################################################
 ## Total biomass regression line prep
 ##########################################################################
 tbio <- lmer(total.biomass ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
@@ -987,6 +1146,45 @@ tbio.plot <- ggplot(data = df,
          fill = guide_legend(override.aes = list(shape = c(24, 21, 24, 21))))
 tbio.plot
 
+##########################################################################
+## Total biomass CO2xN interaction regression line prep
+##########################################################################
+test(emtrends(tbio, pairwise~co2, "n.trt"))
+
+tbio.int.regline <- data.frame(emmeans(tbio, ~co2, "n.trt",
+                                      at = list(n.trt = seq(0, 630, 5)),
+                                      type = "response"))
+
+##########################################################################
+## Total biomass CO2xN interaction plot
+##########################################################################
+tbio.int.plot <- ggplot(data = df, 
+                       aes(x = n.trt, y = total.biomass, fill = co2)) +
+  geom_jitter(aes(shape = inoc), size = 3, alpha = 0.75, width = 5) +
+  geom_smooth(data = tbio.int.regline,
+              aes(color = co2, y = emmean), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = tbio.int.regline,
+              aes(fill = co2, y = emmean, 
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_color_manual(values = co2.cols,
+                     labels = c("Ambient",  "Elevated")) +
+  scale_fill_manual(values = co2.cols,
+                    labels = c("Ambient",  "Elevated")) +
+  scale_shape_manual(values = c(21, 24), 
+                     labels = c("Uninoculated", "Inoculated")) +
+  scale_y_continuous(limits = c(0, 20), breaks = seq(0, 20, 5)) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = "Total biomass (g)",
+       fill = expression(bold("CO"["2"])),
+       color = expression(bold("CO"["2"])),
+       shape = "Inoculation") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25))
+tbio.int.plot
 
 ##########################################################################
 ## Ncost regression line prep
@@ -1045,6 +1243,46 @@ ncost.plot <- ggplot(data = df, aes(x = n.trt, y = ncost, fill = co2.inoc)) +
   guides(linetype = "none", shape = "none",
          fill = guide_legend(override.aes = list(shape = c(24, 21, 24, 21))))
 ncost.plot
+
+##########################################################################
+## Ncost CO2xN interaction regression line prep
+##########################################################################
+test(emtrends(ncost, pairwise~co2, "n.trt"))
+
+ncost.int.regline <- data.frame(emmeans(ncost, ~co2, "n.trt",
+                                       at = list(n.trt = seq(0, 630, 5)),
+                                       type = "response"))
+
+##########################################################################
+## Total biomass CO2xN interaction plot
+##########################################################################
+ncost.int.plot <- ggplot(data = df, 
+                        aes(x = n.trt, y = ncost, fill = co2)) +
+  geom_jitter(aes(shape = inoc), size = 3, alpha = 0.75, width = 5) +
+  geom_smooth(data = ncost.int.regline,
+              aes(color = co2, y = emmean), 
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = ncost.int.regline,
+              aes(fill = co2, y = emmean, 
+                  ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_color_manual(values = co2.cols,
+                     labels = c("Ambient",  "Elevated")) +
+  scale_fill_manual(values = co2.cols,
+                    labels = c("Ambient",  "Elevated")) +
+  scale_shape_manual(values = c(21, 24), 
+                     labels = c("Uninoculated", "Inoculated")) +
+  scale_y_continuous(limits = c(0, 20), breaks = seq(0, 20, 5)) +
+  labs(x = "Soil N fertilization (ppm)",
+       y = expression(bold(italic("N")["cost"]*" (gC gN"^"-1"*")")),
+       fill = expression(bold("CO"["2"])),
+       color = expression(bold("CO"["2"])),
+       shape = "Inoculation") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25))
+ncost.int.plot
 
 ##########################################################################
 ## Ncost regression line prep
@@ -1403,5 +1641,49 @@ ggarrange(nod.plot, nodroot.plot,
           nrow = 1, ncol = 2,
           legend = "right", labels = c("(a)", "(b)"), 
           font.label = list(size = 18))
+dev.off()
+
+##########################################################################
+## ESA talk figure: Vcmax and Jmax
+##########################################################################
+png("../working_drafts/figs/NxCO2xI_ESAtalk_photo.png",
+    height = 4.5, width = 12, units = "in", res = 600)
+ggarrange(vcmax25.int.plot, jmax25.int.plot,
+          align = "hv", common.legend = TRUE,
+          nrow = 1, ncol = 2,
+          legend = "right", labels = c("(a)", "(b)"), 
+          font.label = list(size = 18))
+dev.off()
+
+##########################################################################
+## ESA talk figure: Jmax:Vcmax
+##########################################################################
+png("../working_drafts/figs/NxCO2xI_ESAtalk_jvmax.png",
+    height = 4.5, width = 7, units = "in", res = 600)
+ggarrange(jvmax25.int.plot,
+          align = "hv", common.legend = TRUE,
+          nrow = 1, ncol = 1,
+          legend = "right", labels = c("(a)"), 
+          font.label = list(size = 18))
+dev.off()
+
+##########################################################################
+## ESA talk figure: whole plant traits
+##########################################################################
+png("../working_drafts/figs/NxCO2xI_ESAtalk_wholePlant.png",
+    height = 4.5, width = 12, units = "in", res = 600)
+ggarrange(tla.int.plot, tbio.int.plot,
+          align = "hv", common.legend = TRUE,
+          nrow = 1, ncol = 2,
+          legend = "right", labels = c("(a)", "(b)"), 
+          font.label = list(size = 18))
+dev.off()
+
+##########################################################################
+## ESA talk figure: cost of acquiring nitrogen
+##########################################################################
+png("../working_drafts/figs/NxCO2xI_ESAtalk_ncost.png",
+    height = 4.5, width = 7, units = "in", res = 600)
+ncost.int.plot
 dev.off()
 
