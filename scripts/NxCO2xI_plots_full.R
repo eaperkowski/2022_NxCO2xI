@@ -26,6 +26,7 @@ df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv",
 
 ## Add colorblind friendly palette
 co2.cols <- c("#2166ac", "#b2182b")
+co2.cols <- c("#2166ac", "#b2182b")
 full.cols <- c("#b2182b", "#f4a582", "#2166ac", "#92c5d3")
 
 ## Create blank plot as spacer plot
@@ -548,8 +549,46 @@ vcmax25.int.plot <- ggplot(data = df,
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25))
+        panel.border = element_rect(size = 1.25)) +
+  guides(fill = guide_legend(override.aes = list(shape = 21)))
 vcmax25.int.plot
+
+##########################################################################
+## Vcmax CO2xI interaction plot
+##########################################################################
+vcmax.inoc.pairwise <- cld(emmeans(vcmax25, ~co2*inoc)) %>% data.frame() %>%
+  mutate(.group = trimws(.group, "both"),
+         .group = c("b", "a", "d", "c"),
+         co2.inoc = str_c(co2, "_", inoc))
+
+vcmax.inoc.cols <- c("#2166ac", "#b2182b", "#92c5d3", "#f4a582")
+
+vcmax.inoc.plot <- ggplot(data = df, 
+       aes(x = inoc, y = vcmax25, 
+           fill = factor(co2.inoc, levels = c("amb_inoc", "elv_inoc",
+                                              "amb_no.inoc", "elv_no.inoc")))) +
+  geom_boxplot() +
+  geom_text(data = vcmax.inoc.pairwise, 
+            aes(y = 150, label = .group), 
+            position = position_dodge(width = 0.75),
+            size = 5, fontface = "bold") +
+  geom_jitter(position = position_jitterdodge(dodge.width = 0.75,
+                                              jitter.width = 0.25),
+              shape = 21) +
+  scale_fill_manual(values = vcmax.inoc.cols,
+                    labels = c("", "", "   Ambient", "   Elevated")) +
+  scale_x_discrete(labels = c("Uninoculated", "Inoculated")) +
+  scale_y_continuous(limits = c(0, 150), breaks = seq(0, 150, 50)) +
+  labs(x = "Inoculation",
+       y = expression(bold(italic("V")["cmax25"]*" ("*mu*"mol m"^"-2"*" s"^"-1"*")")),
+       fill = expression(bold("CO"["2"]))) +
+  guides(fill = guide_legend(nrow = 2, bycol = T)) +
+  theme_bw(base_size = 18) +
+  theme(legend.title = element_text(face = "bold"),
+        legend.spacing.x = unit(0, "cm"),
+        axis.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25))
+vcmax.inoc.plot
 
 ##########################################################################
 ## Jmax regression line prep
@@ -642,7 +681,8 @@ jmax25.int.plot <- ggplot(data = df,
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25))
+        panel.border = element_rect(size = 1.25)) +
+  guides(fill = guide_legend(override.aes = list(shape = 21)))
 jmax25.int.plot
 
 ##########################################################################
@@ -739,6 +779,44 @@ jvmax25.int.plot <- ggplot(data = df,
         legend.title = element_text(face = "bold"),
         panel.border = element_rect(size = 1.25))
 jvmax25.int.plot
+
+
+##########################################################################
+## Jmax:Vcmax CO2xI interaction plot
+##########################################################################
+jvmax.inoc.pairwise <- cld(emmeans(jvmax25, ~co2*inoc)) %>% data.frame() %>%
+  mutate(.group = trimws(.group, "both"),
+         .group = c("c", "a", "ab", "b"),
+         co2.inoc = str_c(co2, "_", inoc))
+
+vcmax.inoc.cols <- c("#2166ac", "#b2182b", "#92c5d3", "#f4a582")
+
+jvmax.inoc.plot <- ggplot(data = df, 
+                          aes(x = inoc, y = jmax25.vcmax25, 
+                              fill = factor(co2.inoc, levels = c("amb_inoc", "elv_inoc",
+                                                                 "amb_no.inoc", "elv_no.inoc")))) +
+  geom_boxplot() +
+  geom_text(data = jvmax.inoc.pairwise, 
+            aes(y = 2.2, label = .group), 
+            position = position_dodge(width = 0.75),
+            size = 5, fontface = "bold") +
+  geom_jitter(position = position_jitterdodge(dodge.width = 0.75,
+                                              jitter.width = 0.25),
+              shape = 21) +
+  scale_fill_manual(values = vcmax.inoc.cols,
+                    labels = c("", "", "   Ambient", "   Elevated")) +
+  scale_x_discrete(labels = c("Uninoculated", "Inoculated")) +
+  scale_y_continuous(limits = c(1.4, 2.2), breaks = seq(1.4, 2.2, 0.2)) +
+  labs(x = "Inoculation",
+       y = expression(bold(italic("J")["max25"]*":"*italic("V")["cmax25"])),
+       fill = expression(bold("CO"["2"]))) +
+  guides(fill = guide_legend(nrow = 2, bycol = T)) +
+  theme_bw(base_size = 18) +
+  theme(legend.title = element_text(face = "bold"),
+        legend.spacing.x = unit(0, "cm"),
+        axis.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25))
+jvmax.inoc.plot
 
 ##########################################################################
 ## Rd25 regression line prep
@@ -1185,6 +1263,41 @@ tbio.int.plot <- ggplot(data = df,
         legend.title = element_text(face = "bold"),
         panel.border = element_rect(size = 1.25))
 tbio.int.plot
+
+##########################################################################
+## Total biomass CO2xI interaction plot
+##########################################################################
+tbio.inoc.pairwise <- cld(emmeans(tbio, ~co2*inoc)) %>% data.frame() %>%
+  mutate(.group = trimws(.group, "both"),
+         .group = c("a", "c", "b", "d"),
+         co2.inoc = str_c(co2, "_", inoc))
+
+tbio.inoc.plot <- ggplot(data = df, 
+                          aes(x = inoc, y = total.biomass, 
+                              fill = factor(co2.inoc, levels = c("amb_inoc", "elv_inoc",
+                                                                 "amb_no.inoc", "elv_no.inoc")))) +
+  geom_boxplot() +
+  geom_text(data = tbio.inoc.pairwise, 
+            aes(y = 21, label = .group), 
+            position = position_dodge(width = 0.75),
+            size = 5, fontface = "bold") +
+  geom_jitter(position = position_jitterdodge(dodge.width = 0.75,
+                                              jitter.width = 0.25),
+              shape = 21) +
+  scale_fill_manual(values = vcmax.inoc.cols,
+                    labels = c("", "", "   Ambient", "   Elevated")) +
+  scale_x_discrete(labels = c("Uninoculated", "Inoculated")) +
+  scale_y_continuous(limits = c(0, 21), breaks = seq(0, 20, 5)) +
+  labs(x = "Inoculation",
+       y = "Total biomass (g)",
+       fill = expression(bold("CO"["2"]))) +
+  guides(fill = guide_legend(nrow = 2, bycol = T)) +
+  theme_bw(base_size = 18) +
+  theme(legend.title = element_text(face = "bold"),
+        legend.spacing.x = unit(0, "cm"),
+        axis.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25))
+tbio.inoc.plot
 
 ##########################################################################
 ## Ncost regression line prep
@@ -1647,11 +1760,30 @@ dev.off()
 ## ESA talk figure: Vcmax and Jmax
 ##########################################################################
 png("../working_drafts/figs/NxCO2xI_ESAtalk_photo.png",
-    height = 4.5, width = 12, units = "in", res = 600)
+    height = 4.5, width = 10, units = "in", res = 600)
 ggarrange(vcmax25.int.plot, jmax25.int.plot,
-          align = "hv", common.legend = TRUE,
+          align = "hv",
           nrow = 1, ncol = 2,
-          legend = "right", labels = c("(a)", "(b)"), 
+          legend = "none", labels = c("(a)", "(b)"), 
+          font.label = list(size = 18))
+dev.off()
+
+png("../working_drafts/figs/NxCO2xI_ESAtalk_photo_inoc.png",
+    height = 4.5, width = 10, units = "in", res = 600)
+ggarrange(vcmax.inoc.plot, vcmax.inoc.plot,
+          align = "hv",
+          nrow = 1, ncol = 2,
+          legend = "none", labels = c("(a)", "(b)"), 
+          font.label = list(size = 18))
+dev.off()
+
+
+png("../working_drafts/figs/NxCO2xI_ESAtalk_photo2.png",
+    height = 4.5, width = 10, units = "in", res = 600)
+ggarrange(vcmax25.plot, jmax25.plot,
+          align = "hv", 
+          nrow = 1, ncol = 2,
+          legend = "none", labels = c("(a)", "(b)"), 
           font.label = list(size = 18))
 dev.off()
 
@@ -1659,11 +1791,18 @@ dev.off()
 ## ESA talk figure: Jmax:Vcmax
 ##########################################################################
 png("../working_drafts/figs/NxCO2xI_ESAtalk_jvmax.png",
-    height = 4.5, width = 7, units = "in", res = 600)
-ggarrange(jvmax25.int.plot,
-          align = "hv", common.legend = TRUE,
-          nrow = 1, ncol = 1,
-          legend = "right", labels = c("(a)"), 
+    height = 4.5, width = 10, units = "in", res = 600)
+ggarrange(jvmax25.int.plot, jvmax25.int.plot,
+          align = "hv", nrow = 1, ncol = 2,
+          legend = "none", labels = c("(a)", "(b)"), 
+          font.label = list(size = 18))
+dev.off()
+
+png("../working_drafts/figs/NxCO2xI_ESAtalk_jvmax_inoc.png",
+    height = 4.5, width = 10, units = "in", res = 600)
+ggarrange(jvmax.inoc.plot, jvmax.inoc.plot,
+          align = "hv", nrow = 1, ncol = 2,
+          legend = "none", labels = c("(a)", "(b)"), 
           font.label = list(size = 18))
 dev.off()
 
@@ -1671,13 +1810,35 @@ dev.off()
 ## ESA talk figure: whole plant traits
 ##########################################################################
 png("../working_drafts/figs/NxCO2xI_ESAtalk_wholePlant.png",
-    height = 4.5, width = 12, units = "in", res = 600)
+    height = 4.5, width = 10, units = "in", res = 600)
 ggarrange(tla.int.plot, tbio.int.plot,
+          align = "hv", 
+          nrow = 1, ncol = 2,
+          legend = "none", labels = c("(a)", "(b)"), 
+          font.label = list(size = 18))
+dev.off()
+
+png("../working_drafts/figs/NxCO2xI_ESAtalk_wholePlant_inoc.png",
+    height = 4.5, width = 10, units = "in", res = 600)
+ggarrange(tbio.inoc.plot, tbio.inoc.plot,
+          align = "hv", 
+          nrow = 1, ncol = 2,
+          legend = "none", labels = c("(a)", "(b)"), 
+          font.label = list(size = 18))
+dev.off()
+
+
+
+png("../working_drafts/figs/NxCO2xI_ESAtalk_wholePlant2.png",
+    height = 4.5, width = 12, units = "in", res = 600)
+ggarrange(tla.plot, tbio.plot,
           align = "hv", common.legend = TRUE,
           nrow = 1, ncol = 2,
           legend = "right", labels = c("(a)", "(b)"), 
           font.label = list(size = 18))
 dev.off()
+
+
 
 ##########################################################################
 ## ESA talk figure: cost of acquiring nitrogen

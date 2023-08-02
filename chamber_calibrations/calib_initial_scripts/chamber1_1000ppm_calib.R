@@ -45,7 +45,7 @@ licor <- licorData("../calib_initial_files/chamber1_1000ppm_licor") %>%
   unite(col = "date", date:hhmmss..5, sep = " ") %>%
   mutate(date = strptime(as.POSIXct(date), format = "%Y-%m-%d %H:%M:%S", 
                          tz = "America/Chicago")) %>%
-  select(date, id, machine, CO2_r, CO2_s, Tair, Tleaf, 
+  dplyr::select(date, id, machine, CO2_r, CO2_s, Tair, Tleaf, 
          Txchg, TleafEB, RHcham, Qamb_out) %>%
   filter(date > "2022-06-03 11:00:00")
 
