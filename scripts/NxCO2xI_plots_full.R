@@ -6,6 +6,7 @@ library(lme4)
 library(emmeans)
 library(tidyverse)
 library(ggpubr)
+library(multcomp)
 
 # Turn off digit rounding in emmean args
 emm_options(opt.digits = FALSE)
@@ -65,15 +66,15 @@ narea.plot <- ggplot(data = df, aes(x = n.trt, y = narea, fill = co2.inoc)) +
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_color_manual(values = full.cols,
-                     labels = c("Elevated, inoculated",
-                                "Elevated, uninoculated",
-                                "Ambient, inoculated",
-                                "Ambient, uninoculated")) +
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_fill_manual(values = full.cols,
-                    labels = c("Elevated, inoculated",
-                               "Elevated, uninoculated",
-                               "Ambient, inoculated",
-                               "Ambient, uninoculated")) +
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_shape_manual(values = c(21, 24), 
                      labels = c("Uninoculated", "Inoculated")) +
   scale_y_continuous(limits = c(0, 3.24), breaks = seq(0, 3.2, 0.8)) +
@@ -158,15 +159,15 @@ nmass.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_color_manual(values = full.cols,
-                     labels = c("Elevated, inoculated",
-                                "Elevated, uninoculated",
-                                "Ambient, inoculated",
-                                "Ambient, uninoculated")) +
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_fill_manual(values = full.cols,
-                    labels = c("Elevated, inoculated",
-                               "Elevated, uninoculated",
-                               "Ambient, inoculated",
-                               "Ambient, uninoculated")) +
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_shape_manual(values = c(21, 24), 
                      labels = c("Uninoculated", "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -249,15 +250,15 @@ marea.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_color_manual(values = full.cols,
-                     labels = c("Elevated, inoculated",
-                                "Elevated, uninoculated",
-                                "Ambient, inoculated",
-                                "Ambient, uninoculated")) +
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_fill_manual(values = full.cols,
-                    labels = c("Elevated, inoculated",
-                               "Elevated, uninoculated",
-                               "Ambient, inoculated",
-                               "Ambient, uninoculated")) +
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_shape_manual(values = c(21, 24), 
                      labels = c("Uninoculated", "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -339,15 +340,15 @@ chlarea.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_color_manual(values = full.cols,
-                     labels = c("Elevated, inoculated",
-                                "Elevated, uninoculated",
-                                "Ambient, inoculated",
-                                "Ambient, uninoculated")) +
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_fill_manual(values = full.cols,
-                    labels = c("Elevated, inoculated",
-                               "Elevated, uninoculated",
-                               "Ambient, inoculated",
-                               "Ambient, uninoculated")) +
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_shape_manual(values = c(21, 24), 
                      labels = c("Uninoculated", "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -434,15 +435,15 @@ anet.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_color_manual(values = full.cols,
-                     labels = c("Elevated, inoculated",
-                                "Elevated, uninoculated",
-                                "Ambient, inoculated",
-                                "Ambient, uninoculated")) +
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_fill_manual(values = full.cols,
-                    labels = c("Elevated, inoculated",
-                               "Elevated, uninoculated",
-                               "Ambient, inoculated",
-                               "Ambient, uninoculated")) +
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_shape_manual(values = c(21, 24), 
                      labels = c("Uninoculated", "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -477,6 +478,9 @@ vcmax25.regline <- data.frame(emmeans(vcmax25, ~co2*inoc, "n.trt",
 ##########################################################################
 ## Vcmax plot
 ##########################################################################
+inoc.labels <- c("Uninoculated", "Inoculated")
+names(inoc.labels) <- c("no.inoc", "inoc")
+
 vcmax25.plot <- ggplot(data = df, 
                        aes(x = n.trt, y = vcmax25, fill = co2.inoc)) +
   geom_jitter(aes(shape = inoc), size = 3, alpha = 0.75, width = 5) +
@@ -488,15 +492,15 @@ vcmax25.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_color_manual(values = full.cols,
-                     labels = c("Elevated, inoculated",
-                                "Elevated, uninoculated",
-                                "Ambient, inoculated",
-                                "Ambient, uninoculated")) +
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_fill_manual(values = full.cols,
-                    labels = c("Elevated, inoculated",
-                               "Elevated, uninoculated",
-                               "Ambient, inoculated",
-                               "Ambient, uninoculated")) +
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_shape_manual(values = c(21, 24), 
                      labels = c("Uninoculated", "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -504,10 +508,14 @@ vcmax25.plot <- ggplot(data = df,
   labs(x = "Soil N fertilization (ppm)",
        y = expression(bold(italic("V")["cmax25"]*" ("*mu*"mol m"^"-2"*" s"^"-1"*")")),
        fill = "Treatment", color = "Treatment") +
+  facet_grid(~inoc, labeller = labeller(inoc = inoc.labels)) +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25)) +
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0,
+        strip.background = element_blank(),
+        strip.text = element_text(face = "bold")) +
   guides(linetype = "none", shape = "none",
          fill = guide_legend(override.aes = list(shape = c(24, 21, 24, 21))))
 vcmax25.plot
@@ -549,7 +557,8 @@ vcmax25.int.plot <- ggplot(data = df,
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25)) +
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0) +
   guides(fill = guide_legend(override.aes = list(shape = 21)))
 vcmax25.int.plot
 
@@ -587,7 +596,8 @@ vcmax.inoc.plot <- ggplot(data = df,
   theme(legend.title = element_text(face = "bold"),
         legend.spacing.x = unit(0, "cm"),
         axis.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25))
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0)
 vcmax.inoc.plot
 
 ##########################################################################
@@ -620,15 +630,15 @@ jmax25.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_color_manual(values = full.cols,
-                     labels = c("Elevated, inoculated",
-                                "Elevated, uninoculated",
-                                "Ambient, inoculated",
-                                "Ambient, uninoculated")) +
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_fill_manual(values = full.cols,
-                    labels = c("Elevated, inoculated",
-                               "Elevated, uninoculated",
-                               "Ambient, inoculated",
-                               "Ambient, uninoculated")) +
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_shape_manual(values = c(21, 24), 
                      labels = c("Uninoculated", "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -639,7 +649,8 @@ jmax25.plot <- ggplot(data = df,
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25)) +
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0) +
   guides(linetype = "none", shape = "none",
          fill = guide_legend(override.aes = list(shape = c(24, 21, 24, 21))))
 jmax25.plot
@@ -681,7 +692,8 @@ jmax25.int.plot <- ggplot(data = df,
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25)) +
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0) +
   guides(fill = guide_legend(override.aes = list(shape = 21)))
 jmax25.int.plot
 
@@ -716,15 +728,15 @@ jvmax25.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_color_manual(values = full.cols,
-                     labels = c("Elevated, inoculated",
-                                "Elevated, uninoculated",
-                                "Ambient, inoculated",
-                                "Ambient, uninoculated")) +
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_fill_manual(values = full.cols,
-                    labels = c("Elevated, inoculated",
-                               "Elevated, uninoculated",
-                               "Ambient, inoculated",
-                               "Ambient, uninoculated")) +
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_shape_manual(values = c(21, 24), 
                      labels = c("Uninoculated", "Inoculated")) +
   scale_linetype_manual(values = c("dashed", "solid")) +
@@ -735,7 +747,8 @@ jvmax25.plot <- ggplot(data = df,
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25)) +
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0) +
   guides(linetype = "none", shape = "none",
          fill = guide_legend(override.aes = list(shape = c(24, 21, 24, 21))))
 jvmax25.plot
@@ -777,7 +790,8 @@ jvmax25.int.plot <- ggplot(data = df,
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25))
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0)
 jvmax25.int.plot
 
 
@@ -815,7 +829,8 @@ jvmax.inoc.plot <- ggplot(data = df,
   theme(legend.title = element_text(face = "bold"),
         legend.spacing.x = unit(0, "cm"),
         axis.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25))
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0)
 jvmax.inoc.plot
 
 ##########################################################################
@@ -851,15 +866,15 @@ rd25.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_color_manual(values = full.cols,
-                     labels = c("Elevated, inoculated",
-                                "Elevated, uninoculated",
-                                "Ambient, inoculated",
-                                "Ambient, uninoculated")) +
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_fill_manual(values = full.cols,
-                    labels = c("Elevated, inoculated",
-                               "Elevated, uninoculated",
-                               "Ambient, inoculated",
-                               "Ambient, uninoculated")) +
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_shape_manual(values = c(21, 24), 
                      labels = c("Uninoculated", "Inoculated")) +
   scale_y_continuous(limits = c(0, 6), breaks = seq(0, 6, 1.5)) +
@@ -870,7 +885,8 @@ rd25.plot <- ggplot(data = df,
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25)) +
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0) +
   guides(linetype = "none", shape = "none",
          fill = guide_legend(override.aes = list(shape = c(24, 21, 24, 21))))
 rd25.plot
@@ -904,16 +920,17 @@ chi.plot <- ggplot(data = df,
               aes(fill = co2.inoc, y = emmean, 
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
+  facet_grid(~inoc, labeller = labeller(inoc = inoc.labels)) +
   scale_color_manual(values = full.cols,
-                     labels = c("Elevated, inoculated",
-                                "Elevated, uninoculated",
-                                "Ambient, inoculated",
-                                "Ambient, uninoculated")) +
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_fill_manual(values = full.cols,
-                    labels = c("Elevated, inoculated",
-                               "Elevated, uninoculated",
-                               "Ambient, inoculated",
-                               "Ambient, uninoculated")) +
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_shape_manual(values = c(21, 24), 
                      labels = c("Uninoculated", "Inoculated")) +
   scale_y_continuous(limits = c(0.398, 0.8), breaks = seq(0.4, 0.8, 0.1)) +
@@ -924,7 +941,10 @@ chi.plot <- ggplot(data = df,
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25)) +
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0,
+        strip.background = element_blank(),
+        strip.text = element_text(face = "bold")) +
   guides(linetype = "none", shape = "none",
          fill = guide_legend(override.aes = list(shape = c(24, 21, 24, 21))))
 chi.plot
@@ -961,15 +981,15 @@ p.photo.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_color_manual(values = full.cols,
-                     labels = c("Elevated, inoculated",
-                                "Elevated, uninoculated",
-                                "Ambient, inoculated",
-                                "Ambient, uninoculated")) +
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_fill_manual(values = full.cols,
-                    labels = c("Elevated, inoculated",
-                               "Elevated, uninoculated",
-                               "Ambient, inoculated",
-                               "Ambient, uninoculated")) +
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_shape_manual(values = c(21, 24), 
                      labels = c("Uninoculated", "Inoculated")) +
   scale_y_continuous(limits = c(0, 0.8), breaks = seq(0, 0.8, 0.2)) +
@@ -980,7 +1000,8 @@ p.photo.plot <- ggplot(data = df,
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25)) +
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0) +
   guides(linetype = "none", shape = "none",
          fill = guide_legend(override.aes = list(shape = c(24, 21, 24, 21))))
 p.photo.plot
@@ -1015,15 +1036,15 @@ p.str.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_color_manual(values = full.cols,
-                     labels = c("Elevated, inoculated",
-                                "Elevated, uninoculated",
-                                "Ambient, inoculated",
-                                "Ambient, uninoculated")) +
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_fill_manual(values = full.cols,
-                    labels = c("Elevated, inoculated",
-                               "Elevated, uninoculated",
-                               "Ambient, inoculated",
-                               "Ambient, uninoculated")) +
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_shape_manual(values = c(21, 24), 
                      labels = c("Uninoculated", "Inoculated")) +
   scale_y_continuous(limits = c(0, 0.28), breaks = seq(0, 0.28, 0.07)) +
@@ -1034,7 +1055,8 @@ p.str.plot <- ggplot(data = df,
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25)) +
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0) +
   guides(linetype = "none", shape = "none",
          fill = guide_legend(override.aes = list(shape = c(24, 21, 24, 21))))
 p.str.plot
@@ -1075,7 +1097,8 @@ pstr.int.plot <- ggplot(data = df,
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25))
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0)
 pstr.int.plot
 
 ##########################################################################
@@ -1106,15 +1129,15 @@ tla.plot <- ggplot(data = df, aes(x = n.trt, y = tla, fill = co2.inoc)) +
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_color_manual(values = full.cols,
-                     labels = c("Elevated, inoculated",
-                                "Elevated, uninoculated",
-                                "Ambient, inoculated",
-                                "Ambient, uninoculated")) +
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_fill_manual(values = full.cols,
-                    labels = c("Elevated, inoculated",
-                               "Elevated, uninoculated",
-                               "Ambient, inoculated",
-                               "Ambient, uninoculated")) +
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_shape_manual(values = c(21, 24), 
                      labels = c("Uninoculated", "Inoculated")) +
   scale_y_continuous(limits = c(0, 1200), breaks = seq(0, 1200, 300)) +
@@ -1126,7 +1149,8 @@ tla.plot <- ggplot(data = df, aes(x = n.trt, y = tla, fill = co2.inoc)) +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25)) +
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0) +
   guides(linetype = "none", shape = "none",
          fill = guide_legend(override.aes = list(shape = c(24, 21, 24, 21))))
 tla.plot
@@ -1168,7 +1192,8 @@ tla.int.plot <- ggplot(data = df,
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25))
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0)
 tla.int.plot
 
 ##########################################################################
@@ -1200,15 +1225,15 @@ tbio.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_color_manual(values = full.cols,
-                     labels = c("Elevated, inoculated",
-                                "Elevated, uninoculated",
-                                "Ambient, inoculated",
-                                "Ambient, uninoculated")) +
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_fill_manual(values = full.cols,
-                    labels = c("Elevated, inoculated",
-                               "Elevated, uninoculated",
-                               "Ambient, inoculated",
-                               "Ambient, uninoculated")) +
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_shape_manual(values = c(21, 24), 
                      labels = c("Uninoculated", "Inoculated")) +
   scale_y_continuous(limits = c(0, 20), breaks = seq(0, 20, 5)) +
@@ -1219,7 +1244,8 @@ tbio.plot <- ggplot(data = df,
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25)) +
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0) +
   guides(linetype = "none", shape = "none",
          fill = guide_legend(override.aes = list(shape = c(24, 21, 24, 21))))
 tbio.plot
@@ -1261,7 +1287,8 @@ tbio.int.plot <- ggplot(data = df,
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25))
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0)
 tbio.int.plot
 
 ##########################################################################
@@ -1296,7 +1323,8 @@ tbio.inoc.plot <- ggplot(data = df,
   theme(legend.title = element_text(face = "bold"),
         legend.spacing.x = unit(0, "cm"),
         axis.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25))
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0)
 tbio.inoc.plot
 
 ##########################################################################
@@ -1332,15 +1360,15 @@ ncost.plot <- ggplot(data = df, aes(x = n.trt, y = ncost, fill = co2.inoc)) +
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_color_manual(values = full.cols,
-                     labels = c("Elevated, inoculated",
-                                "Elevated, uninoculated",
-                                "Ambient, inoculated",
-                                "Ambient, uninoculated")) +
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_fill_manual(values = full.cols,
-                    labels = c("Elevated, inoculated",
-                               "Elevated, uninoculated",
-                               "Ambient, inoculated",
-                               "Ambient, uninoculated")) +
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_shape_manual(values = c(21, 24), 
                      labels = c("Uninoculated", "Inoculated")) +
   scale_y_continuous(limits = c(0, 20), breaks = seq(0, 20, 5)) +
@@ -1352,7 +1380,8 @@ ncost.plot <- ggplot(data = df, aes(x = n.trt, y = ncost, fill = co2.inoc)) +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25)) +
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0) +
   guides(linetype = "none", shape = "none",
          fill = guide_legend(override.aes = list(shape = c(24, 21, 24, 21))))
 ncost.plot
@@ -1394,7 +1423,8 @@ ncost.int.plot <- ggplot(data = df,
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25))
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0)
 ncost.int.plot
 
 ##########################################################################
@@ -1423,15 +1453,15 @@ cbg.plot <- ggplot(data = df, aes(x = n.trt, y = cbg, fill = co2.inoc)) +
                                       ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_color_manual(values = full.cols,
-                     labels = c("Elevated, inoculated",
-                                "Elevated, uninoculated",
-                                "Ambient, inoculated",
-                                "Ambient, uninoculated")) +
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_fill_manual(values = full.cols,
-                    labels = c("Elevated, inoculated",
-                               "Elevated, uninoculated",
-                               "Ambient, inoculated",
-                               "Ambient, uninoculated")) +
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_shape_manual(values = c(21, 24), 
                      labels = c("Uninoculated", "Inoculated")) +
   scale_y_continuous(limits = c(0, 6), breaks = seq(0, 6, 2)) +
@@ -1443,7 +1473,8 @@ cbg.plot <- ggplot(data = df, aes(x = n.trt, y = cbg, fill = co2.inoc)) +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25)) +
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0) +
   guides(linetype = "none", shape = "none",
          fill = guide_legend(override.aes = list(shape = c(24, 21, 24, 21))))
 cbg.plot
@@ -1474,15 +1505,15 @@ nwp.plot <- ggplot(data = df, aes(x = n.trt, y = wpn, fill = co2.inoc)) +
                                       ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_color_manual(values = full.cols,
-                     labels = c("Elevated, inoculated",
-                                "Elevated, uninoculated",
-                                "Ambient, inoculated",
-                                "Ambient, uninoculated")) +
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_fill_manual(values = full.cols,
-                    labels = c("Elevated, inoculated",
-                               "Elevated, uninoculated",
-                               "Ambient, inoculated",
-                               "Ambient, uninoculated")) +
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_shape_manual(values = c(21, 24), 
                      labels = c("Uninoculated", "Inoculated")) +
   scale_y_continuous(limits = c(0, 0.6), breaks = seq(0, 0.6, 0.2)) +
@@ -1493,7 +1524,8 @@ nwp.plot <- ggplot(data = df, aes(x = n.trt, y = wpn, fill = co2.inoc)) +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
-        panel.border = element_rect(size = 1.25)) +
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0) +
   guides(linetype = "none", shape = "none",
          fill = guide_legend(override.aes = list(shape = c(24, 21, 24, 21))))
 nwp.plot
@@ -1532,15 +1564,15 @@ nod.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_color_manual(values = full.cols,
-                     labels = c("Elevated, inoculated",
-                                "Elevated, uninoculated",
-                                "Ambient, inoculated",
-                                "Ambient, uninoculated")) +
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_fill_manual(values = full.cols,
-                    labels = c("Elevated, inoculated",
-                               "Elevated, uninoculated",
-                               "Ambient, inoculated",
-                               "Ambient, uninoculated")) +
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_shape_manual(values = c(21, 24), 
                      labels = c("Uninoculated", "Inoculated")) +
   scale_y_continuous(limits = c(-0.01, 0.6), breaks = seq(0, 0.6, 0.15)) +
@@ -1590,15 +1622,15 @@ nodroot.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_color_manual(values = full.cols,
-                     labels = c("Elevated, inoculated",
-                                "Elevated, uninoculated",
-                                "Ambient, inoculated",
-                                "Ambient, uninoculated")) +
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_fill_manual(values = full.cols,
-                    labels = c("Elevated, inoculated",
-                               "Elevated, uninoculated",
-                               "Ambient, inoculated",
-                               "Ambient, uninoculated")) +
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_shape_manual(values = c(21, 24), 
                      labels = c("Uninoculated", "Inoculated")) +
   scale_y_continuous(limits = c(-0.0001, 0.4), breaks = seq(0, 0.4, 0.1)) +
@@ -1645,15 +1677,15 @@ ndfa.plot <- ggplot(data = df,
                   ymin = lower.CL, ymax = upper.CL), 
               size = 1.5, alpha = 0.25) +
   scale_color_manual(values = full.cols,
-                     labels = c("Elevated, inoculated",
-                                "Elevated, uninoculated",
-                                "Ambient, inoculated",
-                                "Ambient, uninoculated")) +
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_fill_manual(values = full.cols,
-                    labels = c("Elevated, inoculated",
-                               "Elevated, uninoculated",
-                               "Ambient, inoculated",
-                               "Ambient, uninoculated")) +
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
   scale_shape_manual(values = c(21, 24), 
                      labels = c("Uninoculated", "Inoculated")) +
   scale_y_continuous(limits = c(0, 105), breaks = seq(0, 100, 25)) +
@@ -1759,14 +1791,24 @@ dev.off()
 ##########################################################################
 ## ESA talk figure: Vcmax and Jmax
 ##########################################################################
-png("../working_drafts/figs/NxCO2xI_ESAtalk_photo.png",
+png("../working_drafts/figs/NxCO2xI_ESAtalk_vcmax_facet.png",
     height = 4.5, width = 10, units = "in", res = 600)
-ggarrange(vcmax25.int.plot, jmax25.int.plot,
-          align = "hv",
-          nrow = 1, ncol = 2,
-          legend = "none", labels = c("(a)", "(b)"), 
-          font.label = list(size = 18))
+vcmax25.plot
 dev.off()
+
+png("../working_drafts/figs/NxCO2xI_ESAtalk_chi_facet.png",
+    height = 4.5, width = 10, units = "in", res = 600)
+chi.plot
+dev.off()
+
+png("../working_drafts/figs/NxCO2xI_ESAtalk_vcmax_chi_facet.png",
+    height = 8, width = 10, units = "in", res = 600)
+ggarrange(vcmax25.plot, chi.plot,
+          align = "hv",
+          nrow = 2, ncol = 1, common.legend = TRUE,
+          legend = "right")
+dev.off()
+
 
 png("../working_drafts/figs/NxCO2xI_ESAtalk_photo_inoc.png",
     height = 4.5, width = 10, units = "in", res = 600)
