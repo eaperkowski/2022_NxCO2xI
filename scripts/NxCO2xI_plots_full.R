@@ -1238,6 +1238,7 @@ tbio.plot <- ggplot(data = df,
                      labels = c("Uninoculated", "Inoculated")) +
   scale_y_continuous(limits = c(0, 20), breaks = seq(0, 20, 5)) +
   scale_linetype_manual(values = c("dashed", "solid")) +
+  facet_grid(~inoc, labeller = labeller(inoc = inoc.labels)) +
   labs(x = "Soil N fertilization (ppm)",
        y = "Total biomass (g)",
        fill = "Treatment", color = "Treatment") +
@@ -1245,7 +1246,9 @@ tbio.plot <- ggplot(data = df,
   theme(axis.title = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
         panel.border = element_rect(size = 1.25),
-        legend.text.align = 0) +
+        legend.text.align = 0,
+        strip.background = element_blank(),
+        strip.text = element_text(face = "bold")) +
   guides(linetype = "none", shape = "none",
          fill = guide_legend(override.aes = list(shape = c(24, 21, 24, 21))))
 tbio.plot
@@ -1804,6 +1807,14 @@ dev.off()
 png("../working_drafts/figs/NxCO2xI_ESAtalk_vcmax_chi_facet.png",
     height = 8, width = 10, units = "in", res = 600)
 ggarrange(vcmax25.plot, chi.plot,
+          align = "hv",
+          nrow = 2, ncol = 1, common.legend = TRUE,
+          legend = "right")
+dev.off()
+
+png("../working_drafts/figs/NxCO2xI_ESAtalk_biomass_facet.png",
+    height = 8, width = 10, units = "in", res = 600)
+ggarrange(tbio.plot, tbio.plot,
           align = "hv",
           nrow = 2, ncol = 1, common.legend = TRUE,
           legend = "right")
