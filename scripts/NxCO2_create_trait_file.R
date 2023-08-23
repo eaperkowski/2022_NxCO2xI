@@ -202,7 +202,7 @@ beta <- isotopes %>%
          vpd = RHtoVPD(RH = rh, TdegC = temp)) %>%
   full_join(d13c_air) %>%
   select(-co2.ppm) %>%
-  mutate(chi = calc_chi_c3(leaf.d13c = leaf.d13c, air = d13c.air)) %>%
+  mutate(chi = calc_chi_c3(leaf.d13c = leaf.d13c, air = d13c.air)[[2]]) %>%
   mutate(beta = calc_beta(chi = chi, temp = temp, vpd = vpd * 1000, 
                           ca = co2_num, z = 976)$beta) %>%
   dplyr::select(id, chi, beta)
@@ -240,8 +240,6 @@ compile_df <- id %>%
          ## Nitrogen-water use tradeoffs
          pnue = anet / (narea / 14),
          iwue = anet / gsw,
-         narea.gs = narea / gsw,
-         vcmax.gs = vcmax25 / gsw,
          narea.chi = narea / chi,
          vcmax.chi = vcmax25 / chi,
          

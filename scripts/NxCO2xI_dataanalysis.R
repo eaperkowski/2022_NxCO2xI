@@ -136,6 +136,32 @@ emmeans(chl.area, pairwise~inoc)
 test(emtrends(chl.area, ~1, "n.trt"))
 
 ##########################################################################
+## Anet
+##########################################################################
+anet <- lmer(anet.growth ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(anet)
+qqnorm(residuals(anet))
+qqline(residuals(anet))
+densityPlot(residuals(anet))
+shapiro.test(residuals(anet))
+outlierTest(anet)
+
+# Model results
+format(summary(anet)$coefficient, scientific = TRUE, digits = 3)
+Anova(anet)
+r.squaredGLMM(anet)
+
+# Pairwise comparisons
+test(emtrends(anet, pairwise~inoc, "n.trt"))
+
+# Individual effects
+emmeans(anet, pairwise~co2)
+cld(emmeans(anet, pairwise~co2*inoc))
+test(emtrends(anet, ~1, "n.trt"))
+
+##########################################################################
 ## Vcmax25
 ##########################################################################
 vcmax <- lmer(vcmax25 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
@@ -250,32 +276,6 @@ test(emtrends(rd25, pairwise~inoc, "n.trt"))
 emmeans(rd25, pairwise~co2)
 emmeans(rd25, pairwise~inoc)
 test(emtrends(rd25, ~1, "n.trt"))
-
-##########################################################################
-## Anet
-##########################################################################
-anet <- lmer(anet ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-
-# Check model assumptions
-plot(anet)
-qqnorm(residuals(anet))
-qqline(residuals(anet))
-densityPlot(residuals(anet))
-shapiro.test(residuals(anet))
-outlierTest(anet)
-
-# Model results
-format(summary(anet)$coefficient, scientific = TRUE, digits = 3)
-Anova(anet)
-r.squaredGLMM(anet)
-
-# Pairwise comparisons
-test(emtrends(anet, pairwise~inoc, "n.trt"))
-
-# Individual effects
-emmeans(anet, pairwise~co2)
-emmeans(anet, pairwise~inoc)
-test(emtrends(anet, ~1, "n.trt"))
 
 ##########################################################################
 ## gsw
