@@ -19,7 +19,8 @@ df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv") %>%
          inoc = factor(inoc, levels = c("no.inoc", "inoc")),
          co2 = factor(co2, levels = c("amb", "elv")),
          co2.inoc = str_c(co2, "_", inoc),
-         nod.root.ratio = nodule.biomass / root.biomass) %>%
+         nod.root.ratio = nodule.biomass / root.biomass,
+         pnue.growth = anet.growth / (narea / 14)) %>%
   filter(inoc == "inoc" | (inoc == "no.inoc" & nod.root.ratio < 0.05))
   ## filter all uninoculated pots that have nod biomass > 0.05 g;
   ## hard code inoc/co2 to make coefficients easier to understand
@@ -109,36 +110,35 @@ emmeans(marea, pairwise~inoc)
 test(emtrends(marea, ~1, "n.trt"))
 
 ##########################################################################
-## Chlorophyll content
+## Chlarea
 ##########################################################################
-chl.area <- lmer(chl.mmolm2 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+chlarea <- lmer(chl.mmolm2 ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
-qqnorm(residuals(chl.area))
-qqline(residuals(chl.area))
-densityPlot(residuals(chl.area))
-shapiro.test(residuals(chl.area))
-outlierTest(chl.area)
+qqnorm(residuals(chlarea))
+qqline(residuals(chlarea))
+densityPlot(residuals(chlarea))
+shapiro.test(residuals(chlarea))
+outlierTest(chlarea)
 
 # Model results
-summary(chl.area)
-Anova(chl.area)
-r.squaredGLMM(chl.area)
+summary(chlarea)
+Anova(chlarea)
+r.squaredGLMM(chlarea)
 
 # Post-hoc tests
-test(emtrends(chl.area, pairwise~inoc, "n.trt"))
-test(emtrends(chl.area, pairwise~co2, "n.trt")) 
-emmeans(chl.area, pairwise~co2*inoc)
+test(emtrends(chlarea, pairwise~co2, "n.trt")) 
+test(emtrends(chlarea, pairwise~inoc, "n.trt"))
 
-# Individual effect of co2
-emmeans(chl.area, pairwise~co2)
-emmeans(chl.area, pairwise~inoc)
-test(emtrends(chl.area, ~1, "n.trt"))
+# Individual effects
+emmeans(chlarea, pairwise~co2, type = "response")
+emmeans(chlarea, pairwise~inoc)
+test(emtrends(chlarea, ~1, "n.trt"))
 
 ##########################################################################
-## Anet
+## Anet,420
 ##########################################################################
-anet <- lmer(anet.growth ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+anet <- lmer(anet ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
 
 # Check model assumptions
 plot(anet)
@@ -160,6 +160,33 @@ test(emtrends(anet, pairwise~inoc, "n.trt"))
 emmeans(anet, pairwise~co2)
 cld(emmeans(anet, pairwise~co2*inoc))
 test(emtrends(anet, ~1, "n.trt"))
+
+##########################################################################
+## Anet,growth
+##########################################################################
+anet.growth <- lmer(anet.growth ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(anet.growth)
+qqnorm(residuals(anet.growth))
+qqline(residuals(anet.growth))
+densityPlot(residuals(anet.growth))
+shapiro.test(residuals(anet.growth))
+outlierTest(anet.growth)
+
+# Model results
+format(summary(anet.growth)$coefficient, scientific = TRUE, digits = 3)
+Anova(anet.growth)
+r.squaredGLMM(anet.growth)
+
+# Pairwise comparisons
+cld(emmeans(anet.growth, pairwise~co2*inoc))
+test(emtrends(anet.growth, pairwise~inoc, "n.trt"))
+
+# Individual effects
+emmeans(anet.growth, pairwise~co2)
+cld(emmeans(anet.growth, pairwise~co2*inoc))
+test(emtrends(anet.growth, ~1, "n.trt"))
 
 ##########################################################################
 ## Vcmax25
@@ -276,6 +303,33 @@ test(emtrends(rd25, pairwise~inoc, "n.trt"))
 emmeans(rd25, pairwise~co2)
 emmeans(rd25, pairwise~inoc)
 test(emtrends(rd25, ~1, "n.trt"))
+
+##########################################################################
+## PNUE
+##########################################################################
+df$pnue.growth[41] <- NA
+
+pnue <- lmer(pnue.growth ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(pnue)
+qqnorm(residuals(pnue))
+qqline(residuals(pnue))
+densityPlot(residuals(pnue))
+shapiro.test(residuals(pnue))
+outlierTest(pnue)
+
+# Model results
+summary(pnue)
+Anova(pnue)
+r.squaredGLMM(pnue)
+
+# Pairwise comparisons
+test(emtrends(pnue, pairwise~co2, "n.trt"))
+test(emtrends(pnue, pairwise~inoc, "n.trt"))
+
+# Individual effects
+emmeans(pnue, pairwise~co2)
 
 ##########################################################################
 ## gsw
