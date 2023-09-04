@@ -36,7 +36,7 @@ d13c_air <- d13c.air %>%
   group_by(co2) %>%
   summarize(d13c.air = mean(d13c_air),
             co2.ppm = mean(co2_ppm)) %>%
-  select(co2_cat = co2, everything()) %>%
+  dplyr::select(co2_cat = co2, everything()) %>%
   data.frame()
 
 ###############################################################################
@@ -201,7 +201,7 @@ beta <- isotopes %>%
          co2_num = ifelse(co2 == "e", 989, 439),
          vpd = RHtoVPD(RH = rh, TdegC = temp)) %>%
   full_join(d13c_air) %>%
-  select(-co2.ppm) %>%
+  dplyr::select(-co2.ppm) %>%
   mutate(chi = calc_chi_c3(leaf.d13c = leaf.d13c, air = d13c.air)[[2]]) %>%
   mutate(beta = calc_beta(chi = chi, temp = temp, vpd = vpd * 1000, 
                           ca = co2_num, z = 976)$beta) %>%
@@ -239,7 +239,11 @@ compile_df <- id %>%
          
          ## Nitrogen-water use tradeoffs
          pnue = anet / (narea / 14),
+         pnue.growth = anet.growth / (narea / 14),
+         
          iwue = anet / gsw,
+         iwue.growth = anet.growth / gsw.growth,
+         
          narea.chi = narea / chi,
          vcmax.chi = vcmax25 / chi,
          

@@ -1635,7 +1635,7 @@ aci.fits <- aci.coefs %>% left_join(aci.temps) %>%
          jmax25 = temp_standardize(Jmax, "Jmax", standard.to = 25,
                                    tLeaf = Tleaf, tGrow = 22.5),
          jmax25.vcmax25 = jmax25 / vcmax25) %>%
-  select(id, tleaf = Tleaf, vcmax25, jmax25, jmax25.vcmax25, rd25 = Rd, tpu = TPU) %>%
+  dplyr::select(id, tleaf = Tleaf, vcmax25, jmax25, jmax25.vcmax25, rd25 = Rd, tpu = TPU) %>%
   mutate_if(is.numeric, round, 3)
 
 #####################################################################
@@ -1665,12 +1665,14 @@ agrowth_prep <- aci.prep %>%
 agrowth_amb <- agrowth_prep %>% filter(co2 == "a") %>%
   group_by(id) %>%
   filter(CO2_r > 419.5 & CO2_r < 420.5) %>%
-  summarize(anet.growth = mean(A))
+  summarize(anet.growth = mean(A),
+            gsw.growth = mean(gsw))
 
 agrowth_elv <- agrowth_prep %>% filter(co2 == "e") %>%
   group_by(id) %>%
   filter(CO2_r > 990 & CO2_r < 1010) %>%
-  summarize(anet.growth = mean(A))
+  summarize(anet.growth = mean(A),
+            gsw.growth = mean(gsw))
 agrowth <- agrowth_amb %>% full_join(agrowth_elv)
 
 #####################################################################
@@ -1678,7 +1680,7 @@ agrowth <- agrowth_amb %>% full_join(agrowth_elv)
 #####################################################################
 photo.data <- anet %>% full_join(agrowth) %>% full_join(aci.fits) %>% 
   mutate_if(is.numeric, round, 3) %>%
-  select(id, tleaf, anet, anet.growth, gsw, ci.ca, vcmax25, jmax25, jmax25.vcmax25, rd25, tpu)
+  dplyr::select(id, tleaf, anet, anet.growth, gsw, gsw.growth, ci.ca, vcmax25, jmax25, jmax25.vcmax25, rd25, tpu)
 
 #####################################################################
 # Write file

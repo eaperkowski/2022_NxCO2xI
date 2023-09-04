@@ -1666,6 +1666,54 @@ ndfa.plot <- ggplot(data = df,
 ndfa.plot
 
 ##########################################################################
+## chi-iwue regression line prep
+##########################################################################
+df$iwue.growth[c()] <- NA
+chi.iwue <- lmer(iwue.growth ~ chi + (1|rack:co2), data = df)
+test(emtrends(chi.iwue, ~1, "chi"))
+
+## Emmean fxns for regression lines + error ribbons
+chi.iwue.regline <- data.frame(emmeans(chi.iwue, ~1, "chi",
+                                       at = list(chi = seq(0.48, 0.75, 0.01))))
+
+##########################################################################
+## %Ndfa plot
+##########################################################################
+chi.iwue.plot <- ggplot(data = df, 
+                    aes(x = chi,  y = iwue.growth)) +
+  geom_point(aes(shape = inoc, fill = co2.inoc), size = 3, alpha = 0.75) +
+  geom_smooth(data = chi.iwue.regline, aes(y = emmean), 
+              size = 1.5, se = FALSE, color = "black") +
+  geom_ribbon(data = chi.iwue.regline,
+              aes(y = emmean, ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_color_manual(values = full.cols,
+                     labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                                expression("Elevated CO"["2"]*", uninoculated"),
+                                expression("Ambient CO"["2"]*", inoculated"),
+                                expression("Ambient CO"["2"]*", uninoculated"))) +
+  scale_fill_manual(values = full.cols,
+                    labels = c(expression("Elevated CO"["2"]*", inoculated"),
+                               expression("Elevated CO"["2"]*", uninoculated"),
+                               expression("Ambient CO"["2"]*", inoculated"),
+                               expression("Ambient CO"["2"]*", uninoculated"))) +
+  scale_shape_manual(values = c(21, 24), 
+                     labels = c("Uninoculated", "Inoculated")) +
+  scale_y_continuous(limits = c(0, 200), breaks = seq(0, 200, 50)) +
+  scale_x_continuous(limits = c(0.45, 0.8), breaks = seq(0.5, 0.8, 0.1)) +
+  labs(x = expression(bold(chi*" (unitless)")),
+       y = expression(bold("iWUE"["growth"]*" ("*mu*"mol mol"^"-1"*")")),
+       fill = "Treatment", color = "Treatment") +
+  theme_bw(base_size = 18) +
+  theme(legend.title = element_text(face = "bold"),
+        axis.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25),
+        legend.text.align = 0) +
+  guides(linetype = "none", shape = "none",
+         fill = guide_legend(override.aes = list(shape = c(24, 21, 24, 21))))
+chi.iwue.plot
+
+##########################################################################
 ## Figure 1: leaf N plots
 ##########################################################################
 png("../working_drafts/figs/NxCO2xI_fig1_leafN.png",
