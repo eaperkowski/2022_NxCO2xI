@@ -1727,22 +1727,23 @@ dev.off()
 ##########################################################################
 ## Figure 2: leaf physiology plots
 ##########################################################################
-png("../working_drafts/figs/NxCO2xI_fig2_photo.png",
-    height = 12, width = 12, units = "in", res = 600)
+png("../working_drafts/figs/NxCO2xI_fig2_photo_b.png",
+    height = 8, width = 16, units = "in", res = 600)
 ggarrange(anet.plot, anet.growth.plot, vcmax25.plot, jmax25.plot,
           jvmax25.plot, rd25.plot,
-          ncol = 2, nrow = 3, align = "hv", legend = "right",
+          ncol = 3, nrow = 2, align = "hv", legend = "right",
           common.legend = TRUE, font.label = list(size = 18), 
           labels = c("(a)", "(b)", "(c)", "(d)", "(e)", "(f)"))
 dev.off()
 
 ##########################################################################
-## Figure 3: PNUE/chi
+## Figure 2: leaf physiology plots
 ##########################################################################
 png("../working_drafts/figs/NxCO2xI_fig3_pnue.png",
     height = 4, width = 8, units = "in", res = 600)
 pnue.plot
 dev.off()
+
 
 ##########################################################################
 ## Figure 4: whole plant plots
