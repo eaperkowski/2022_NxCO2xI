@@ -50,7 +50,7 @@ r.squaredGLMM(narea)
 # Post-hoc tests
 test(emtrends(narea, pairwise~co2, "n.trt")) 
 test(emtrends(narea, pairwise~inoc, "n.trt"))
-cld(emmeans(narea, pairwise~co2*inoc))
+emmeans(narea, pairwise~co2*inoc)
 
 # Individual effects
 emmeans(narea, pairwise~co2)
@@ -180,7 +180,7 @@ Anova(anet.growth)
 r.squaredGLMM(anet.growth)
 
 # Pairwise comparisons
-cld(emmeans(anet.growth, pairwise~co2*inoc))
+emmeans(anet.growth, pairwise~co2*inoc)
 test(emtrends(anet.growth, pairwise~inoc, "n.trt"))
 
 # Individual effects
@@ -332,6 +332,36 @@ test(emtrends(pnue, pairwise~inoc, "n.trt"))
 emmeans(pnue, pairwise~co2)
 
 ##########################################################################
+## chi
+##########################################################################
+chi <- lmer(chi ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+
+# Check model assumptions
+plot(chi)
+qqnorm(residuals(chi))
+qqline(residuals(chi))
+densityPlot(residuals(chi))
+shapiro.test(residuals(chi))
+outlierTest(chi)
+
+# Model results
+summary(chi)
+Anova(chi)
+r.squaredGLMM(chi)
+
+# Pairwise comparisons
+test(emtrends(chi, pairwise~inoc*co2, "n.trt"))
+
+emmeans(chi, pairwise~inoc*co2)
+test(emtrends(chi, pairwise~inoc, "n.trt"))
+test(emtrends(chi, pairwise~co2, "n.trt"))
+
+## Individual effect of n.trt on chi
+test(emtrends(chi, ~1, "n.trt"))
+emmeans(chi, pairwise~inoc)
+emmeans(chi, pairwise~co2)
+
+##########################################################################
 ## stomatal limitation
 ##########################################################################
 stomlim <- lmer(stomlim ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
@@ -355,133 +385,6 @@ emmeans(stomlim, pairwise~co2*inoc)
 # Individual effects
 test(emtrends(stomlim, ~1, "n.trt"))
 emmeans(stomlim, pairwise~inoc)
-
-##########################################################################
-## PNUE
-##########################################################################
-df$pnue.growth[41] <- NA
-pnue <- lmer(pnue.growth ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-
-# Check model assumptions
-plot(pnue)
-qqnorm(residuals(pnue))
-qqline(residuals(pnue))
-densityPlot(residuals(pnue))
-shapiro.test(residuals(pnue))
-outlierTest(pnue)
-
-# Model results
-summary(pnue)
-Anova(pnue)
-r.squaredGLMM(pnue)
-
-# Pairwise comparisons
-test(emtrends(pnue, ~inoc, "n.trt"))
-
-## Individual effects
-emmeans(pnue, pairwise~co2)
-emmeans(pnue, pairwise~inoc)
-test(emtrends(pnue, ~1, "n.trt"))
-
-##########################################################################
-## chi
-##########################################################################
-chi <- lmer(chi ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-
-# Check model assumptions
-plot(chi)
-qqnorm(residuals(chi))
-qqline(residuals(chi))
-densityPlot(residuals(chi))
-shapiro.test(residuals(chi))
-outlierTest(chi)
-
-# Model results
-format(summary(chi)$coefficient, scientific = TRUE, digits = 3)
-Anova(chi)
-r.squaredGLMM(chi)
-
-# Pairwise comparisons
-test(emtrends(chi, pairwise~inoc*co2, "n.trt"))
-test(emtrends(chi, pairwise~inoc, "n.trt"))
-test(emtrends(chi, pairwise~co2, "n.trt"))
-
-## Individual effect of n.trt on iWUE
-test(emtrends(chi, ~1, "n.trt"))
-emmeans(chi, pairwise~inoc)
-emmeans(chi, pairwise~co2)
-
-##########################################################################
-## iWUE
-##########################################################################
-iwue <- lmer(iwue ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-
-# Check model assumptions
-plot(iwue)
-qqnorm(residuals(iwue))
-qqline(residuals(iwue))
-densityPlot(residuals(iwue))
-shapiro.test(residuals(iwue))
-outlierTest(iwue)
-
-# Model results
-summary(iwue)
-Anova(iwue)
-r.squaredGLMM(iwue)
-
-# Pairwise comparisons
-
-## Individual effect of n.trt on iWUE
-test(emtrends(iwue, ~1, "n.trt"))
-
-##########################################################################
-## Narea:gs
-##########################################################################
-narea.gs <- lmer(log(narea.gs) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-
-# Check model assumptions
-plot(narea.gs)
-qqnorm(residuals(narea.gs))
-qqline(residuals(narea.gs))
-densityPlot(residuals(narea.gs))
-shapiro.test(residuals(narea.gs))
-outlierTest(narea.gs)
-
-# Model results
-summary(narea.gs)
-Anova(narea.gs)
-r.squaredGLMM(narea.gs)
-
-# Pairwise comparisons
-test(emtrends(narea.gs, ~inoc, "n.trt"))
-
-## Individual effects
-emmeans(narea.gs, pairwise~co2, type = "response")
-emmeans(narea.gs, pairwise~inoc)
-test(emtrends(narea.gs, ~1, "n.trt"))
-
-##########################################################################
-## Vcmax:gs
-##########################################################################
-vcmax.gs <- lmer(log(vcmax.gs) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-
-# Check model assumptions
-plot(vcmax.gs)
-qqnorm(residuals(vcmax.gs))
-qqline(residuals(vcmax.gs))
-densityPlot(residuals(vcmax.gs))
-shapiro.test(residuals(vcmax.gs))
-outlierTest(vcmax.gs)
-
-# Model results
-summary(vcmax.gs)
-Anova(vcmax.gs)
-r.squaredGLMM(vcmax.gs)
-
-# Pairwise comparisons
-emmeans(vcmax.gs, pairwise~co2*inoc, type = "response")
-
-test(emtrends(vcmax.gs, ~1, "n.trt"))
 
 ##########################################################################
 ## Total leaf area
@@ -508,13 +411,12 @@ emmeans(tla, pairwise~co2*inoc)
 
 ## Individual effects
 emmeans(tla, pairwise~co2)
-emmeans(tla, pairwise~inoc)
-test(emtrends(tla, ~1, "n.trt"))
+emmeans(tla, pairwise~co2*inoc)
+test(emtrends(tla, pairwise~inoc, "n.trt"))
 
 ## Does inoculation stimulate TLA under low soil N?
-emmeans(tbio, pairwise~inoc*co2, "n.trt", type = "response",
+emmeans(tla, pairwise~inoc*co2, "n.trt", type = "response",
         at = list(n.trt = c(0,35,70,105,140,210,280,350,630)))
-
 
 ##########################################################################
 ## Total biomass
@@ -542,11 +444,12 @@ emmeans(tbio, pairwise~co2*inoc)
 ## Individual effects
 emmeans(tbio, pairwise~co2, type = "response")
 emmeans(tbio, pairwise~inoc)
+emmeans(tbio, pairwise~co2*inoc)
 test(emtrends(tbio, ~1, "n.trt"))
 
 ## Does inoculation stimulate total biomass under low soil N?
 emmeans(tbio, pairwise~inoc*co2, "n.trt", type = "response",
-        at = list(n.trt = c(0,280, 350, 630)))
+        at = list(n.trt = c(0, 35, 70, 105, 140, 210, 280, 350, 630)))
 
 
 ##########################################################################

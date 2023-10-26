@@ -38,7 +38,6 @@ blank.plot <- ggplot() +
                                         fill = "white"),
         panel.border = element_rect(color = "white"))
 
-
 ##########################################################################
 ## Narea regression line prep
 ##########################################################################
@@ -90,7 +89,6 @@ narea.plot <- ggplot(data = df, aes(x = n.trt, y = narea, fill = co2.inoc)) +
   guides(shape = "none",
          fill = guide_legend(override.aes = list(shape = c(24, 21, 24, 21))))
 narea.plot
-
 
 ##########################################################################
 ## Narea regression line prep
@@ -1008,6 +1006,7 @@ pnue.plot <- ggplot(data = df,
        fill = "Treatment", color = "Treatment") +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
+        axis.title.y = element_text(size = 15),
         legend.title = element_text(face = "bold"),
         panel.border = element_rect(size = 1.25),
         legend.text.align = 0) +
@@ -1063,6 +1062,7 @@ pnue.int.plot
 ## chi regression line prep
 ##########################################################################
 chi <- lmer(chi ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
+Anova(chi)
 test(emtrends(chi, ~co2*inoc, "n.trt"))
 
 ## Emmean fxns for regression lines + error ribbons
@@ -1103,7 +1103,7 @@ chi.plot <- ggplot(data = df,
   scale_y_continuous(limits = c(0.398, 0.8), breaks = seq(0.4, 0.8, 0.1)) +
   scale_linetype_manual(values = c("dashed", "solid")) +
   labs(x = "Soil N fertilization (ppm)",
-       y = expression(bold(chi)*" (unitless)"),
+       y = expression(bold(chi*" (unitless)")),
        fill = "Treatment", color = "Treatment") +
   theme_bw(base_size = 18) +
   theme(legend.title = element_text(face = "bold"),
@@ -1113,7 +1113,6 @@ chi.plot <- ggplot(data = df,
   guides(linetype = "none", shape = "none",
          fill = guide_legend(override.aes = list(shape = c(24, 21, 24, 21))))
 chi.plot
-
 
 ##########################################################################
 ## Total leaf area regression line prep
@@ -1718,7 +1717,6 @@ ndfa.plot <- ggplot(data = df,
          fill = guide_legend(override.aes = list(shape = c(24, 21, 24, 21))))
 ndfa.plot
 
-
 ##########################################################################
 ## BVR regression line prep
 ##########################################################################
@@ -1798,11 +1796,14 @@ ggarrange(anet.plot, anet.growth.plot, vcmax25.plot, jmax25.plot,
 dev.off()
 
 ##########################################################################
-## Figure 2: leaf physiology plots
+## Figure 3: nitrogen and water use efficiency plots
 ##########################################################################
-png("../working_drafts/figs/NxCO2xI_fig3_pnue.png",
-    height = 4, width = 8, units = "in", res = 600)
-pnue.plot
+png("../working_drafts/figs/NxCO2xI_fig3_resource_use.png",
+    height = 4, width = 12, units = "in", res = 600)
+ggarrange(pnue.plot, chi.plot,
+          ncol = 2, nrow = 1, align = "hv", legend = "right",
+          common.legend = TRUE, font.label = list(size = 18), 
+          labels = c("(a)", "(b)"))
 dev.off()
 
 ##########################################################################
