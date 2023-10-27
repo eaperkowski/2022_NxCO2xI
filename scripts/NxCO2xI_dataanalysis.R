@@ -415,8 +415,8 @@ emmeans(tla, pairwise~co2*inoc)
 test(emtrends(tla, pairwise~inoc, "n.trt"))
 
 ## Does inoculation stimulate TLA under low soil N?
-emmeans(tla, pairwise~inoc*co2, "n.trt", type = "response",
-        at = list(n.trt = c(0,35,70,105,140,210,280,350,630)))
+emmeans(tla, pairwise~co2, "n.trt", type = "response",
+        at = list(n.trt = c(0,630)))
 
 ##########################################################################
 ## Total biomass
@@ -448,9 +448,8 @@ emmeans(tbio, pairwise~co2*inoc)
 test(emtrends(tbio, ~1, "n.trt"))
 
 ## Does inoculation stimulate total biomass under low soil N?
-emmeans(tbio, pairwise~inoc*co2, "n.trt", type = "response",
-        at = list(n.trt = c(0, 35, 70, 105, 140, 210, 280, 350, 630)))
-
+emmeans(tbio, pairwise~co2, "n.trt", regrid = "response",
+        at = list(n.trt = c(0, 630)))
 
 ##########################################################################
 ## Ncost
