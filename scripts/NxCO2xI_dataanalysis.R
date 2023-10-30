@@ -415,7 +415,7 @@ emmeans(tla, pairwise~co2*inoc)
 test(emtrends(tla, pairwise~inoc, "n.trt"))
 
 ## Does inoculation stimulate TLA under low soil N?
-emmeans(tla, pairwise~co2, "n.trt", type = "response",
+emmeans(tla, pairwise~co2*inoc, "n.trt", type = "response",
         at = list(n.trt = c(0,630)))
 
 ##########################################################################
@@ -444,11 +444,11 @@ emmeans(tbio, pairwise~co2*inoc)
 ## Individual effects
 emmeans(tbio, pairwise~co2, type = "response")
 emmeans(tbio, pairwise~inoc)
-emmeans(tbio, pairwise~co2*inoc)
+cld(emmeans(tbio, pairwise~co2*inoc))
 test(emtrends(tbio, ~1, "n.trt"))
 
 ## Does inoculation stimulate total biomass under low soil N?
-emmeans(tbio, pairwise~co2, "n.trt", regrid = "response",
+emmeans(tbio, pairwise~inoc*co2, "n.trt", regrid = "response",
         at = list(n.trt = c(0, 630)))
 
 ##########################################################################
