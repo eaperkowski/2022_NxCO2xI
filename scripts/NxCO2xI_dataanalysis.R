@@ -608,7 +608,7 @@ r.squaredGLMM(nod.root.ratio)
 # Pairwise comparisons
 test(emtrends(nod.root.ratio, pairwise~inoc, "n.trt"))
 test(emtrends(nod.root.ratio, pairwise~co2, "n.trt"))
-emmeans(nod.root.ratio, pairwise~co2*inoc)
+emmeans(nod.root.ratio, pairwise~co2*inoc, type = "response")
 
 ## Individual effects
 emmeans(nod.root.ratio, pairwise~co2)
