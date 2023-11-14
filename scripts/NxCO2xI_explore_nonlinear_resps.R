@@ -3,16 +3,10 @@
 ##########################################################################
 # Libraries
 library(lme4)
-library(emmeans)
-library(car)
 library(tidyverse)
-library(MuMIn)
-library(multcomp)
-library(multcompView)
 library(nlme)
-
-# Turn off digit rounding in emmean args
-emm_options(opt.digits = FALSE)
+library(ggpubr)
+library(emmeans)
 
 # Read in compiled data file
 df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv") %>%
@@ -59,10 +53,14 @@ vcmax25.plot <- ggplot(data = subset(df, inoc == "no.inoc"),
               linewidth = 2, se = FALSE) +
   geom_smooth(data = vcmax.nls.amb.pred, aes(y = emmean), color = "#2166ac",
               linewidth = 2, se = FALSE) +
+  geom_text(aes(500, 5, label=(paste(expression(" y = "*frac("114.85 * x", "454.90 + x")*" + 24.07")))),
+                parse = TRUE, size = 3.5, color = "#b2182b") +
+  geom_text(aes(500, 30, label=(paste(expression("y = "*frac("127.47 * x", "114.01 + x")*" +  3.29")))),
+            parse = TRUE, size = 3.5, color = "#2166ac") +
   scale_fill_manual(values = c("#2166ac", "#b2182b"),
                      labels = c(expression("Ambient CO"["2"]),
                                 expression("Elevated CO"["2"]))) +
-  scale_y_continuous(limits = c(0, 150), breaks = seq(0, 150, 30)) +
+  scale_y_continuous(limits = c(0, 160), breaks = seq(0, 160, 40)) +
   labs(x = "Soil N fertilization (ppm)",
        y = expression(bold(italic("V")["cmax25"]*" ("*mu*"mol m"^"-2"*" s"^"-1"*")")),
        fill = expression(bold("CO"["2"]*" treatment"))) +
@@ -102,6 +100,10 @@ jmax25.plot <- ggplot(data = subset(df, inoc == "no.inoc"),
               linewidth = 2, se = FALSE) +
   geom_smooth(data = jmax.nls.amb.pred, aes(y = emmean), color = "#2166ac",
               linewidth = 2, se = FALSE) +
+  geom_text(aes(500, 7.5, label=(paste(expression(" y = "*frac("185.98 * x", "347.68 + x")*" + 46.28")))),
+            parse = TRUE, size = 3.5, color = "#b2182b") +
+  geom_text(aes(500, 45, label=(paste(expression("y = "*frac("207.27 * x", "96.47 + x")*"  +  9.81")))),
+            parse = TRUE, size = 3.5, color = "#2166ac") +
   scale_fill_manual(values = c("#2166ac", "#b2182b"),
                     labels = c(expression("Ambient CO"["2"]),
                                expression("Elevated CO"["2"]))) +
@@ -122,7 +124,8 @@ jmax25.plot
 png("../working_drafts/figs/NxCO2xI_photo_nonlinear.png", width = 12, 
     height = 4.5, units = "in", res = 600)
 ggarrange(vcmax25.plot, jmax25.plot, common.legend = TRUE, legend = "right",
-          labels = c("a", "b"))
+          labels = c("a", "b"), font.label = list(size = 18),
+          label.x = 0.2, label.y = 0.975)
 dev.off()
 
 
