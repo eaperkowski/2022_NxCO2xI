@@ -181,6 +181,19 @@ ndfa <- d15n.merged %>%
                        100, 
                        ifelse(ndfa < 0, 0, ndfa))) %>%
   dplyr::select(id, leaf.d15n, ndfa)
+  
+  
+  
+  
+  mutate(ndfa = calc_ndfa(ref.15n = ref.15n, 
+                          sample.15n = leaf.d15n, B = B))
+
+
+,
+         ndfa = ifelse(ndfa > 100, 
+                       100, 
+                       ifelse(ndfa < 0, 0, ndfa))) %>%
+  dplyr::select(id, leaf.d15n, ndfa)
 
 
 ###############################################################################
