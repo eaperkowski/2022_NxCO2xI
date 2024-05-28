@@ -618,90 +618,6 @@ test(emtrends(nod.root.ratio, ~1, "n.trt"))
 # Percent change in inoculated pots
 emmeans(nod.root.ratio, ~inoc, "n.trt", at = list(n.trt = c(0, 630)))
 
-##########################################################################
-## %Ndfa
-##########################################################################
-df$ndfa[c(38, 85, 101, 103)] <- NA
-
-ndfa <- lmer(sqrt(ndfa) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
- 
-# Check model assumptions
-plot(ndfa)
-qqnorm(residuals(ndfa))
-qqline(residuals(ndfa))
-densityPlot(residuals(ndfa))
-shapiro.test(residuals(ndfa))
-outlierTest(ndfa)
-
-# Model results
-summary(ndfa)
-Anova(ndfa)
-r.squaredGLMM(ndfa)
-
-# Pairwise comparisons
-test(emtrends(ndfa, ~inoc, "n.trt"))
-test(emtrends(ndfa, ~co2, "n.trt"))
-test(emtrends(ndfa, ~1, "n.trt"))
-emmeans(ndfa, pairwise~inoc)
-
-##########################################################################
-## beta
-##########################################################################
-beta <- lmer(log(beta) ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-
-# Check model assumptions
-plot(beta)
-qqnorm(residuals(beta))
-qqline(residuals(beta))
-densityPlot(residuals(beta))
-shapiro.test(residuals(beta))
-outlierTest(beta)
-
-# Model results
-summary(beta)
-Anova(beta)
-r.squaredGLMM(beta)
-
-# Pairwise comparisons
-test(emtrends(beta, pairwise~inoc*co2, "n.trt"))
-test(emtrends(beta, pairwise~co2, "n.trt"))
-emmeans(beta, pairwise~inoc*co2)
-
-
-## Individual effect of n.trt on iWUE
-test(emtrends(beta, ~1, "n.trt"))
-emmeans(beta, pairwise~inoc)
-emmeans(beta, pairwise~co2)
-
-##########################################################################
-## beta ~ Ncost
-##########################################################################
-beta.ncost <- lmer(log(beta) ~ co2 * inoc * ncost + (1|rack:co2), data = df)
-
-# Check model assumptions
-plot(beta.ncost)
-qqnorm(residuals(beta.ncost))
-qqline(residuals(beta.ncost))
-densityPlot(residuals(beta.ncost))
-shapiro.test(residuals(beta.ncost))
-outlierTest(beta)
-
-# Model results
-summary(beta.ncost)
-Anova(beta.ncost)
-r.squaredGLMM(beta.ncost)
-
-# Pairwise comparisons
-test(emtrends(beta.ncost, pairwise~inoc*co2, "n.trt"))
-test(emtrends(beta.ncost, pairwise~co2, "n.trt"))
-emmeans(beta.ncost, pairwise~inoc*co2)
-
-
-## Individual effect of n.trt on iWUE
-test(emtrends(beta.ncost, ~1, "ncost"))
-emmeans(beta.ncost, pairwise~inoc)
-emmeans(beta.ncost, pairwise~co2)
-
 
 ##########################################################################
 ## BVR
@@ -729,31 +645,6 @@ test(emtrends(bvr, ~inoc, "n.trt"))
 test(emtrends(bvr, ~1, "n.trt"))
 emmeans(bvr, ~co2)
 emmeans(bvr, ~inoc)
-
-##########################################################################
-## Structural equation model
-##########################################################################
-library(piecewiseSEM)
-library(nlme)
-
-df$co2 <- ifelse(df$co2 == "elv", "1", "0")
-head(df)
-
-test <- psem(
-  jvmax <- lme(jmax25.vcmax25 ~ vcmax25 + jmax25 + (1|rack:co2), data = df, 
-               na.action = na.omit),
-  vcmax <- lme(vcmax25 ~ narea + (1|rack:co2), data = df, 
-               na.action = na.omit),
-  jmax <- lme(jmax25 ~ narea + (1|rack:co2), data = df, 
-               na.action = na.omit),
-  narea <- lme(narea ~ chi + (1|rack:co2), data = df, 
-               na.action = na.omit),
-  chi <- lme(chi ~ co2 + beta + (1|rack:co2), 
-             data = df,  na.action = na.omit))
-
-
-
-
 
 ##########################################################################
 ## Table 1: Leaf N content

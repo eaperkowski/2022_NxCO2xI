@@ -1776,10 +1776,10 @@ bvr.plot
 ## Figure 1: leaf N plots
 ##########################################################################
 png("../working_drafts/figs/NxCO2xI_fig1_leafN.png",
-    height = 8, width = 12, units = "in", res = 600)
-ggarrange(narea.plot, nmass.plot, marea.plot, chlarea.plot, 
-          ncol = 2, nrow = 2, align = "hv", legend = "right",
-          common.legend = TRUE, labels = c("(a)", "(b)", "(c)", "(d)"),
+    height = 4, width = 12, units = "in", res = 600)
+ggarrange(narea.plot, chlarea.plot, 
+          ncol = 2, nrow = 1, align = "hv", legend = "right",
+          common.legend = TRUE, labels = c("(a)", "(b)"),
           font.label = list(size = 18))
 dev.off()
 
@@ -1787,12 +1787,22 @@ dev.off()
 ## Figure 2: leaf physiology plots
 ##########################################################################
 png("../working_drafts/figs/NxCO2xI_fig2_photo.png",
-    height = 12, width = 12, units = "in", res = 600)
+    height = 8, width = 12, units = "in", res = 600)
 ggarrange(anet.plot, anet.growth.plot, vcmax25.plot, jmax25.plot,
-          jvmax25.plot, rd25.plot,
-          ncol = 2, nrow = 3, align = "hv", legend = "right",
+          ncol = 2, nrow = 2, align = "hv", legend = "right",
           common.legend = TRUE, font.label = list(size = 18), 
           labels = c("(a)", "(b)", "(c)", "(d)", "(e)", "(f)"))
+dev.off()
+
+##########################################################################
+## Figure 3: whole plant plots
+##########################################################################
+png("../working_drafts/figs/NxCO2xI_fig3_wholePlant.png",
+    height = 8, width = 12, units = "in", res = 600)
+ggarrange(tla.plot, tbio.plot, ncost.plot, nodroot.plot,
+          ncol = 2, nrow = 2, align = "hv", legend = "right",
+          labels = c("(a)", "(b)", "(c)", "(d)"), common.legend = TRUE,
+          font.label = list(size = 18))
 dev.off()
 
 ##########################################################################
@@ -1806,16 +1816,6 @@ ggarrange(pnue.plot, chi.plot,
           labels = c("(a)", "(b)"))
 dev.off()
 
-##########################################################################
-## Figure 4: whole plant plots
-##########################################################################
-png("../working_drafts/figs/NxCO2xI_fig5_wholePlant.png",
-    height = 8, width = 12, units = "in", res = 600)
-ggarrange(tla.plot, tbio.plot, ncost.plot, ndfa.plot,
-          ncol = 2, nrow = 2, align = "hv", legend = "right",
-          labels = c("(a)", "(b)", "(c)", "(d)"), common.legend = TRUE,
-          font.label = list(size = 18))
-dev.off()
 
 ##########################################################################
 ## Figure S2: BVR
