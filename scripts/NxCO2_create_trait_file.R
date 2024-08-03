@@ -180,20 +180,7 @@ ndfa <- d15n.merged %>%
          ndfa = ifelse(ndfa > 100, 
                        100, 
                        ifelse(ndfa < 0, 0, ndfa))) %>%
-  dplyr::select(id, leaf.d15n, ndfa)
-  
-  
-  
-  
-  mutate(ndfa = calc_ndfa(ref.15n = ref.15n, 
-                          sample.15n = leaf.d15n, B = B))
-
-
-,
-         ndfa = ifelse(ndfa > 100, 
-                       100, 
-                       ifelse(ndfa < 0, 0, ndfa))) %>%
-  dplyr::select(id, leaf.d15n, ndfa)
+  dplyr::select(id, leaf.d15n, ref.15n, ndfa)
 
 
 ###############################################################################
@@ -291,30 +278,19 @@ compile_df <- id %>%
                                  0, nodule.biomass)) %>%
   arrange(rep) %>%
   dplyr::select(-tla.full, -notes) %>%
-  mutate(across(.cols = c(nmass.focal:chlB.ugml,
-                          marea:ncost),
-         round, digits = 4)) %>%
+  mutate(across(nmass.focal:chlB.ugml, \(x) round(x, digits = 4)),
+         across(marea:ncost, \(x) round(x, digits = 4))) %>%
   mutate(co2 = ifelse(co2 == "a", "amb", "elv"),
          inoc = ifelse(inoc == "n", "no.inoc", "inoc")) %>%
   as.data.frame()
 
-png("/Users/eaperkowski/2022_NxCO2xI_chi_comparison.png",
-    height = 4.5, width = 8, units = "in", res = 600)
-ggplot() +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
-  geom_point(data = compile_df, aes(x = chi.assume, y = chi, color = co2)) +
-  geom_text(aes(label = "Dashed line = 1:1 relationship", x = 0.5, y = 0.8)) +
-  scale_x_continuous(limits = c(0.39, 0.8), breaks = seq(0.4, 0.8, 0.1)) +
-  scale_y_continuous(limits = c(0.39, 0.8), breaks = seq(0.4, 0.8, 0.1)) +
-  scale_color_discrete(labels = c("ambient", "elevated")) +
-  labs(y = expression(chi*" (measured chamber "*delta^"13"*"C"["air"]*")"),
-       x = expression(chi*" (assuming "*delta^"13"*"C"["air"]*" = -8\u2030)"),
-       color = expression(bold("CO"["2"]*" treatment"))) +
-  theme_bw(base_size = 20)
-dev.off()
+lme4::lmer(ndfa ~ ref.15n + (1|rack:co2), data = compile_df)
+
+
 
 
 write_csv(compile_df, "../data_sheets/NxCO2xI_compiled_datasheet.csv")
+
 
 
 

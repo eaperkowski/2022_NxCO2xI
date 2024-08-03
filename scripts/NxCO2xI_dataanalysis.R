@@ -20,7 +20,11 @@ df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv") %>%
          co2 = factor(co2, levels = c("amb", "elv")),
          co2.inoc = str_c(co2, "_", inoc),
          nod.root.ratio = nodule.biomass / root.biomass,
-         pnue.growth = anet.growth / (narea / 14)) %>%
+         pnue.growth = anet.growth / (narea / 14),
+         lar = tla / total.biomass,
+         lmf = leaf.biomass / total.biomass,
+         smf = stem.biomass / total.biomass,
+         rmf = root.biomass / total.biomass) %>%
   filter(inoc == "inoc" | (inoc == "no.inoc" & nod.root.ratio < 0.05))
   ## filter all uninoculated pots that have nod biomass > 0.05 g;
   ## hard code inoc/co2 to make coefficients easier to understand
@@ -360,31 +364,6 @@ test(emtrends(chi, pairwise~co2, "n.trt"))
 test(emtrends(chi, ~1, "n.trt"))
 emmeans(chi, pairwise~inoc)
 emmeans(chi, pairwise~co2)
-
-##########################################################################
-## stomatal limitation
-##########################################################################
-stomlim <- lmer(stomlim ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-
-# Check model assumptions
-plot(stomlim)
-qqnorm(residuals(stomlim))
-qqline(residuals(stomlim))
-densityPlot(residuals(stomlim))
-shapiro.test(residuals(stomlim))
-outlierTest(stomlim)
-
-# Model results
-summary(stomlim)
-Anova(stomlim)
-r.squaredGLMM(stomlim)
-
-# Pairwise comparisons
-emmeans(stomlim, pairwise~co2*inoc)
-
-# Individual effects
-test(emtrends(stomlim, ~1, "n.trt"))
-emmeans(stomlim, pairwise~inoc)
 
 ##########################################################################
 ## Total leaf area
