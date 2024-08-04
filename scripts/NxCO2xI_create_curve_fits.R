@@ -42,6 +42,8 @@ aci.temps <- aci.prep %>%
   group_by(id) %>%
   summarize(Tleaf = mean(Tleaf, na.rm = TRUE))
 
+aci.prep$keep.row[c()] <- "no"
+
 #####################################################################
 # A/Ci curves
 #####################################################################
@@ -58,6 +60,9 @@ e_y_0_1 <- aci.prep %>% filter(keep.row == "yes" & id == "e_y_0_1" &
                          Rd = "rd25"),
          fitTPU = TRUE, Tcorrect = FALSE, useRd = TRUE)
 plot(e_y_0_1)
+
+coef(e_y_0_1)
+
 aci.coefs <- data.frame(id = "e_y_0_1", t(coef(e_y_0_1)))
 
 
