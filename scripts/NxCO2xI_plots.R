@@ -10,8 +10,10 @@ library(ggpubr)
 # Turn off digit rounding in emmean args
 emm_options(opt.digits = FALSE)
 
+setwd("/Users/eaperkowski/git/2022_NxCO2xI/scripts")
+
 # Load compiled datasheet
-df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv", 
+df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv",
                na.strings = "NA") %>%
   mutate(n.trt = as.numeric(n.trt),
          rd25.vcmax25 = rd25 / vcmax25,
@@ -19,11 +21,11 @@ df <- read.csv("../data_sheets/NxCO2xI_compiled_datasheet.csv",
          co2 = factor(co2, levels = c("amb", "elv")),
          nod.root.ratio = nodule.biomass / root.biomass) %>%
   filter(inoc == "inoc" | (inoc == "no.inoc" & nod.root.ratio < 0.05)) %>%
-  unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE) 
+  unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
 
 ## Add colorblind friendly palette
-nfix.cols <- c("#DDAA33", "#555555")
-co2.cols <- c("#004488", "#BB5566")
+nfix_cols <- c("#DDAA33", "#555555")
+co2_cols <- c("#004488", "#BB5566")
 
 full.cols <- c("#DDAA33", "#004488", "#BB5566", "#555555")
 
@@ -38,11 +40,11 @@ blank.plot <- ggplot() +
 ##########################################################################
 ## Narea regression line prep
 ##########################################################################
-narea <- lmer(narea ~ co2 * inoc * n.trt + (1|rack:co2), data = df)
-test(emtrends(narea, ~inoc*co2, "n.trt"))
+narea <- lmer(narea ~ co2 * inoc * n.trt + (1 | rack:co2), data = df)
+test(emtrends(narea, ~inoc * co2, "n.trt"))
 
 ## Emmean fxns for regression lines + error ribbons
-narea.regline <- data.frame(emmeans(narea, ~co2*inoc, "n.trt",
+narea.regline <- data.frame(emmeans(narea, ~co2 * inoc, "n.trt",
                                      at = list(n.trt = seq(0, 630, 5)),
                                      type = "response")) %>%
   mutate(co2.inoc = str_c(co2, "_", inoc))
@@ -50,9 +52,9 @@ narea.regline <- data.frame(emmeans(narea, ~co2*inoc, "n.trt",
 ##########################################################################
 ## Narea plot
 ##########################################################################
-narea.plot <- ggplot(data = df, 
-                     aes(x = n.trt, 
-                         y = narea,    
+narea.plot <- ggplot(data = df,
+                     aes(x = n.trt,
+                         y = narea,
                          fill = co2.inoc)) +
   geom_jitter(size = 3, alpha = 0.75, shape = 21) +
   geom_smooth(data = narea.regline,
@@ -74,7 +76,7 @@ narea.plot <- ggplot(data = df,
                                 "Elevated, uninoculated")) +
   scale_y_continuous(limits = c(0, 3.24), breaks = seq(0, 3.2, 0.8)) +
   labs(x = "Soil N fertilization (ppm)",
-       y = expression(bold(italic("N")["area"]*" (gN m"^"-2"*")")),
+       y = expression(bold(italic("N")["area"] * " (gN m"^"-2" * ")")),
        fill = "Treatment", color = "Treatment") +
   theme_bw(base_size = 18) +
   theme(axis.title = element_text(face = "bold"),
@@ -132,17 +134,17 @@ nmass.inoc.fert <- data.frame(emmeans(nmass, ~inoc, "n.trt",
 ##########################################################################
 ## Nmass plot
 ##########################################################################
-nmass.co2.plot <- ggplot(data = df, 
-                         aes(x = n.trt, 
-                             y = nmass.focal,    
+nmass.co2.plot <- ggplot(data = df,
+                         aes(x = n.trt,
+                             y = nmass.focal,
                              fill = co2)) +
   geom_jitter(size = 3, alpha = 0.75, shape = 21) +
   geom_smooth(data = nmass.co2.fert,
-              aes(color = co2, y = emmean), 
+              aes(color = co2, y = emmean),
               size = 1.5, se = FALSE) +
   geom_ribbon(data = nmass.co2.fert,
-              aes(fill = co2, y = emmean, 
-                  ymin = lower.CL, ymax = upper.CL), 
+              aes(fill = co2, y = emmean,
+                  ymin = lower.CL, ymax = upper.CL),
               size = 1.5, alpha = 0.25) +
   scale_fill_manual(values = co2.cols,
                     labels = c("Ambient",
@@ -152,7 +154,7 @@ nmass.co2.plot <- ggplot(data = df,
                                 "Elevated")) +
   scale_y_continuous(limits = c(0, 0.08), breaks = seq(0, 0.08, 0.02)) +
   labs(x = "Soil N fertilization (ppm)",
-       y = expression(bold(italic("N")["mass"]*" (gN g"^"-1"*")")),
+       y = expression(bold(italic("N")["mass"] * " (gN g"^"-1" * ")")),
        fill = expression(bold("CO"["2"])), color = expression(bold("CO"["2"])),
        shape = "Inoculation") +
   theme_bw(base_size = 18) +

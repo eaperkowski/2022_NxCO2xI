@@ -2,6 +2,7 @@
 library(dplyr)
 library(lubridate)
 library(tidyverse)
+library(ggpubr)
 
 ## Read in chamber climate data
 chamber.data <- list.files(path = "../chamber_climate",
@@ -31,7 +32,7 @@ ggplot(data = subset(df, chamber == "1" & month.day == "7/10"),
   geom_line()
 
 ############ 
-##Read in HOBO sensor temp data 
+## Read in HOBO sensor temp data 
 ############
 hobo.data <- list.files(path = "../hobo_data",
                            pattern = "\\.csv$", recursive = TRUE,
@@ -55,20 +56,70 @@ hobo.clim <- lapply(hobo.data, read.csv) %>%
 
 
 eco2.hobo <- hobo.clim %>% 
+  pivot_longer(cols = air.temp:temp.set, 
+               names_to = "temp_type", 
+               values_to = "temp") %>% 
   filter(date.time > "2022-06-18" & date.time < "2022-08-05")  %>%
   mutate(co2.treat = "elevated")
 
 aco2.hobo <- hobo.clim %>% 
-  filter(date.time > "2022-08-14" & date.time < "2022-10-01")  %>%
+  pivot_longer(cols = air.temp:temp.set, 
+               names_to = "temp_type", 
+               values_to = "temp") %>%
+  filter(date.time > "2022-08-14" & date.time < "2022-10-01") %>%
   mutate(co2.treat = "ambient")
+
+
+eco2.plot <- ggplot(data = subset(eco2.hobo, chamber == 6)) +
+  geom_line(aes(x = date.time, y = temp, color = temp_type), 
+            linewidth = 1) +
+  scale_color_manual(values = c("red", "blue"),
+                     labels = c("HOBO readout",
+                                "Set point")) +
+  scale_y_continuous(limits = c(0, 32), breaks = seq(0, 30, 10)) +
+  theme_bw(base_size = 18) +
+  labs(x = "Date", y = expression("Air temperature ("*degree*"C)"),
+       color = NULL)
+  
+png("../NxCO2xI_sample_chamber_climate.png", 
+    width = 10, height = 4,
+    units = "in", res = 600)
+ggplot(data = subset(aco2.hobo, chamber == 6)) +
+  geom_line(aes(x = date.time, y = temp, color = temp_type), 
+            linewidth = 1) +
+  scale_color_manual(values = c("red", "blue"),
+                     labels = c("HOBO readout",
+                                "Set point")) +
+  scale_y_continuous(limits = c(0, 32), breaks = seq(0, 30, 10)) +
+  theme_bw(base_size = 18) +
+  labs(x = "Date", y = expression("Air temperature ("*degree*"C)"),
+       color = NULL)
+dev.off()
+
+
+png("../NxCO2xI_sample_chamber_climate_7days.png", 
+    width = 10, height = 4,
+    units = "in", res = 600)
+aco2.hobo %>%
+  filter(date.time > "2022-09-01" & date.time < "2022-09-08" & chamber == 6)  %>%
 ggplot() +
-  geom_line(data = eco2.hobo, 
-            aes(x = date.time, y = air.temp),
-            color = "blue") +
-  geom_line(data = eco2.hobo, 
-            aes(x = date.time, y = temp.set),
-            color = "red") +
-  facet_wrap(~chamber)
+  geom_line(aes(x = date.time, y = temp, color = temp_type), 
+            linewidth = 1) +
+  scale_color_manual(values = c("red", "blue"),
+                     labels = c("HOBO readout",
+                                "Set point")) +
+  scale_y_continuous(limits = c(0, 32), breaks = seq(0, 30, 10)) +
+  theme_bw(base_size = 18) +
+  labs(x = "Date", y = expression("Air temperature ("*degree*"C)"),
+       color = NULL)
+dev.off()
+
+
+
+ggarrange(eco2.plot, aco2.plot, ncol = 2, 
+          common.legend = TRUE, legend = "right")
+
+
 
 
 eco2.hobo.all <- eco2.hobo %>%
@@ -92,19 +143,6 @@ ggplot() +
                   ymax = temp.mean + temp.sd))
   
   
-
-hobo_merged <- eco2.hobo.all %>%
-  full_join(aco2.hobo.all) %>%
-  mutate(temp.mean = ifelse(date > ))
-
-temp.plot <- ggplot(data = subset(hobo_merged, temp.mean < 26 & 
-                                    temp.mean > 15)) +
-  geom_line(aes(x = date.time, y = temp.mean), size = 1)
-
-
-
-
-
 eco2.plot <- ggplot() +
   geom_line(data = eco2.hobo, 
             aes(x = date.time, y = air.temp, 

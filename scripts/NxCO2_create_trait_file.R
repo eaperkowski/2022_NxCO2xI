@@ -18,7 +18,6 @@ photo.wk6 <- read.csv("../data_sheets/NxCO2_photo_data_wk6.csv")
 isotopes <- read.csv("../data_sheets/NxCO2xI_isotope_data.csv")
 d13c.air <- read.csv("../data_sheets/NxCO2xI_d13c_air.csv")
 
-
 ###############################################################################
 ## Load propN functions
 ###############################################################################
@@ -36,7 +35,7 @@ d13c_air <- d13c.air %>%
   group_by(co2) %>%
   summarize(d13c.air = mean(d13c_air),
             co2.ppm = mean(co2_ppm)) %>%
-  select(co2_cat = co2, everything()) %>%
+  dplyr::select(co2_cat = co2, everything()) %>%
   data.frame()
 
 ###############################################################################
@@ -181,7 +180,7 @@ ndfa <- d15n.merged %>%
          ndfa = ifelse(ndfa > 100, 
                        100, 
                        ifelse(ndfa < 0, 0, ndfa))) %>%
-  dplyr::select(id, leaf.d15n, ndfa)
+  dplyr::select(id, leaf.d15n, ref.15n, ndfa)
 
 
 ###############################################################################
@@ -201,11 +200,13 @@ beta <- isotopes %>%
          co2_num = ifelse(co2 == "e", 989, 439),
          vpd = RHtoVPD(RH = rh, TdegC = temp)) %>%
   full_join(d13c_air) %>%
-  select(-co2.ppm) %>%
-  mutate(chi = calc_chi_c3(leaf.d13c = leaf.d13c, air = d13c.air)) %>%
+  dplyr::select(-co2.ppm) %>%
+  mutate(chi = calc_chi_c3(leaf.d13c = leaf.d13c, air = d13c.air)[[2]],
+         chi.assume = calc_chi_c3(leaf.d13c = leaf.d13c)[[2]]) %>%
   mutate(beta = calc_beta(chi = chi, temp = temp, vpd = vpd * 1000, 
                           ca = co2_num, z = 976)$beta) %>%
-  dplyr::select(id, chi, beta)
+  dplyr::select(id, chi, chi.assume, beta)
+
 
 ###############################################################################
 ## Compile data files into single file for analyses/figs
@@ -239,9 +240,11 @@ compile_df <- id %>%
          
          ## Nitrogen-water use tradeoffs
          pnue = anet / (narea / 14),
+         pnue.growth = anet.growth / (narea / 14),
+         
          iwue = anet / gsw,
-         narea.gs = narea / gsw,
-         vcmax.gs = vcmax25 / gsw,
+         iwue.growth = anet.growth / gsw.growth,
+         
          narea.chi = narea / chi,
          vcmax.chi = vcmax25 / chi,
          
@@ -275,14 +278,19 @@ compile_df <- id %>%
                                  0, nodule.biomass)) %>%
   arrange(rep) %>%
   dplyr::select(-tla.full, -notes) %>%
-  mutate(across(.cols = c(nmass.focal:chlB.ugml,
-                          marea:ncost),
-         round, digits = 4)) %>%
+  mutate(across(nmass.focal:chlB.ugml, \(x) round(x, digits = 4)),
+         across(marea:ncost, \(x) round(x, digits = 4))) %>%
   mutate(co2 = ifelse(co2 == "a", "amb", "elv"),
          inoc = ifelse(inoc == "n", "no.inoc", "inoc")) %>%
   as.data.frame()
 
+lme4::lmer(ndfa ~ ref.15n + (1|rack:co2), data = compile_df)
+
+
+
+
 write_csv(compile_df, "../data_sheets/NxCO2xI_compiled_datasheet.csv")
+
 
 
 
