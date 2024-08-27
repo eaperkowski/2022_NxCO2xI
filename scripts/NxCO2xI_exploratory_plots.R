@@ -184,10 +184,6 @@ narea.beta.plot <- ggplot(data = df,
         panel.border = element_rect(size = 1.25))
 narea.ncost.plot
 
-
-
-
-
 ##########################################################################
 ## Ncost:Jvmax25 regline prep
 ##########################################################################
@@ -213,7 +209,6 @@ jmax25.vcmax25.ncost.regline <- data.frame(emmeans(jmax25.vcmax25.ncost, ~1, "nc
 ##########################################################################
 ## Ncost: Jvmax25 plot
 ##########################################################################
-
 jmax25.vcmax25.ncost.plot <- ggplot(data = df, 
                            aes(x = ncost, y = jmax25.vcmax25)) +
   geom_jitter(aes(fill = co2.inoc),
@@ -244,7 +239,144 @@ jmax25.vcmax25.ncost.plot <- ggplot(data = df,
         panel.border = element_rect(size = 1.25))
 jmax25.vcmax25.ncost.plot
 
+##########################################################################
+## Ncost:Narea regline prep
+##########################################################################
+ncost.beta <- lmer(ncost ~ log(beta) * co2 * inoc + (1|rack:co2), data = df)
+shapiro.test(residuals(ncost.beta))
+test(emtrends(ncost.beta, ~co2*inoc, "beta"))
 
+## Emmean fxns for regression lines + error ribbons
+ncost.beta.full <- data.frame(emmeans(ncost.beta, ~inoc*co2, "beta",
+                                      at = list(beta = seq(0, 400, 1)),
+                                      type = "response")) %>%
+  unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
+
+ncost.beta.elv_inoc <- subset(ncost.beta.full, co2.inoc == "elv_inoc" & beta < 150)
+ncost.beta.elv_no.inoc <- subset(ncost.beta.full, co2.inoc == "elv_no.inoc" & beta < 100)
+ncost.beta.amb_inoc <- subset(ncost.beta.full, co2.inoc == "amb_inoc" & beta < 225)
+ncost.beta.amb_no.inoc <- subset(ncost.beta.full, co2.inoc == "amb_no.inoc" & beta > 100)
+
+ncost.beta.cleaned <- ncost.beta.elv_inoc %>% full_join(ncost.beta.elv_no.inoc) %>%
+  full_join(ncost.beta.amb_inoc) %>% full_join(ncost.beta.amb_no.inoc)
+
+
+ncost.beta.regline <- data.frame(emmeans(ncost.beta, ~1, "beta",
+                                         at = list(beta = seq(0, 400, 1)),
+                                         type = "response")) %>%
+  mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
+  full_join(ncost.beta.cleaned) %>%
+  dplyr::select(beta, co2, inoc, co2.inoc, everything(), -X1) %>%
+  mutate(linetype = ifelse(co2.inoc == "elv_inoc" | co2.inoc == "amb_inoc",
+                           "dashed", "solid"))
+
+##########################################################################
+## Ncost:Narea plot
+##########################################################################
+ncost.beta.plot <- ggplot(data = df, 
+                          aes(x = beta, y = ncost)) +
+  geom_jitter(aes(fill = co2.inoc),
+              size = 3, shape = 21, alpha = 0.75) +
+  geom_smooth(data = subset(ncost.beta.regline, co2.inoc != "overall"),
+              aes(x = beta, y = response, color = co2.inoc, linetype = linetype),
+              size = 1.5, se = FALSE) +
+  geom_ribbon(data = subset(ncost.beta.regline, co2.inoc != "overall"),
+              aes(y = response, ymin = lower.CL, ymax = upper.CL, fill = co2.inoc), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = cbbPalette3,
+                    labels = c("Ambient, inoculated",
+                               "Ambient, uninoculated",
+                               "Elevated, inoculated",
+                               "Elevated, uninoculated")) +
+  scale_color_manual(values = cbbPalette3,
+                     labels = c("Ambient, inoculated",
+                                "Ambient, uninoculated",
+                                "Elevated, inoculated",
+                                "Elevated, uninoculated")) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_y_continuous(limits = c(0, 24), breaks = seq(0, 24, 8)) +
+  labs(x = expression(beta),
+       y = expression(bold(italic("N")["cost"]*" (gC gN"^"-1"*")")),
+       fill = "Treatment", color = "Treatment") +
+  guides(linetype = "none") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25))
+
+png("../working_drafts/figs/NxCO2xI_beta_ncost.png",
+    width = 8, height = 5, units = "in", res = 600)
+ncost.beta.plot
+dev.off()
+
+##########################################################################
+## beta:Vcmax25 regline prep
+##########################################################################
+vcmax.beta <- lmer(vcmax25 ~ beta * co2 * inoc + (1|rack:co2), data = df)
+shapiro.test(residuals(vcmax.beta))
+test(emtrends(vcmax.beta, ~co2*inoc, "beta"))
+
+## Emmean fxns for regression lines + error ribbons
+vcmax.beta.full <- data.frame(emmeans(vcmax.beta, ~inoc*co2, "beta",
+                                       at = list(beta = seq(0, 400, 1)),
+                                       type = "response")) %>%
+  unite(col = "co2.inoc", co2:inoc, sep = "_", remove = FALSE)
+
+vcmax.beta.regline <- data.frame(emmeans(vcmax.beta, ~1, "beta",
+                                          at = list(beta = seq(0, 400, 1)),
+                                          type = "response")) %>%
+  mutate(co2 = X1,inoc = X1, co2.inoc = X1) %>%
+  full_join(vcmax.beta.full) %>%
+  dplyr::select(beta, co2, inoc, co2.inoc, everything(), -X1) %>%
+  mutate(linetype = ifelse(co2.inoc == "amb_no.inoc", 
+                           "solid", "dashed"))
+
+##########################################################################
+## Ncost:Vcmax25 plot
+##########################################################################
+vcmax.ncost.plot <- ggplot(data = df, 
+                           aes(x = beta, y = vcmax25)) +
+  geom_jitter(aes(fill = co2.inoc),
+              size = 3, shape = 21, alpha = 0.75) +
+  geom_smooth(data = subset(vcmax.beta.regline, co2.inoc == "overall"),
+              aes(y = emmean), size = 1.5, se = FALSE, color = "black") +
+  geom_ribbon(data = subset(vcmax.beta.regline, co2.inoc == "overall"),
+              aes(y = emmean, ymin = lower.CL, ymax = upper.CL), 
+              size = 1.5, alpha = 0.25) +
+  scale_fill_manual(values = cbbPalette3,
+                    labels = c("Ambient, inoculated",
+                               "Ambient, uninoculated",
+                               "Elevated, inoculated",
+                               "Elevated, uninoculated")) +
+  scale_color_manual(values = cbbPalette3,
+                     labels = c("Ambient, inoculated",
+                                "Ambient, uninoculated",
+                                "Elevated, inoculated",
+                                "Elevated, uninoculated")) +
+  scale_y_continuous(limits = c(-30, 150), breaks = seq(-30, 150, 30)) +
+  labs(x = expression(bold(italic("N")["cost"]*" (gC gN"^"-1"*")")),
+       y = expression(bold(italic("V")["cmax25"]*" (μmol m"^"-2"*"s"^"-1"*")")),
+       fill = "Treatment", color = "Treatment") +
+  guides(linetype = "none") +
+  theme_bw(base_size = 18) +
+  theme(axis.title = element_text(face = "bold"),
+        legend.title = element_text(face = "bold"),
+        panel.border = element_rect(size = 1.25))
+vcmax.ncost.plot
+
+
+##########################################################################
+## Leaf N:total leaf N plot
+##########################################################################
+nmass.totalleafN <- lmer()
+
+nmass.per.totalleafN <- emmeans()
+
+
+ggplot(data = df, 
+       aes(x = pnue, y = wpn)) +
+  geom_jitter(aes(fill = co2.inoc),
+              size = 3, shape = 21, alpha = 0.75)
 
 
 

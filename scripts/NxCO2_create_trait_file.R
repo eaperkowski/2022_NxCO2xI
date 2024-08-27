@@ -96,7 +96,7 @@ chlorophyll <- chlor.df %>%
   full_join(chl.leaf.area, by = "id") %>%
   full_join(biomass_area) %>%
   dplyr::select(id, abs.649, abs.665, chl.biomass = chlor.biomass, disk.area, chl.leaf.area) %>%
-  mutate(chlA.ugml = (12.19 * abs.665) - (3.56 * abs.649),
+  mutate(chlA.ugml = (12.19 * abs.665) - (3.45 * abs.649),
          chlB.ugml = (21.99 * abs.649) - (5.32 * abs.665),
          chlA.ugml = ifelse(chlA.ugml < 0, 0, chlA.ugml),
          chlB.ugml = ifelse(chlB.ugml < 0, 0 , chlB.ugml),
@@ -249,7 +249,7 @@ compile_df <- id %>%
          vcmax.chi = vcmax25 / chi,
          
          ## stomatal limitation
-         stomlim = stomatal_limitation(A_net = anet, Vcmax = vcmax25, leaf.temp = tleaf,
+         stomlim = stomatal_limitation(Anet = anet, Vcmax = vcmax25, leaf.temp = tleaf,
                                        Rd.meas = TRUE, Rd = rd25, temp = "C")[[5]],
          
          ## Tissue C and N biomass. Note that chlorophyll biomass is multiplied
@@ -284,14 +284,4 @@ compile_df <- id %>%
          inoc = ifelse(inoc == "n", "no.inoc", "inoc")) %>%
   as.data.frame()
 
-lme4::lmer(ndfa ~ ref.15n + (1|rack:co2), data = compile_df)
-
-
-
-
 write_csv(compile_df, "../data_sheets/NxCO2xI_compiled_datasheet.csv")
-
-
-
-
-
