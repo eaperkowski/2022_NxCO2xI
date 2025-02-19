@@ -30,6 +30,8 @@ blank.plot <- ggplot() +
                                         fill = "white"),
         panel.border = element_rect(color = "white"))
 
+
+
 ######################################################################
 ## Are week 6 Vcmax25 and Jmax values different from week 7?
 ######################################################################
